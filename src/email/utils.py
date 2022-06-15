@@ -1,6 +1,7 @@
 import re # You may need this
 from typing import List
 
+
 # Good to take a look at this: https://help.returnpath.com/hc/en-us/articles/220560587-What-are-the-rules-for-email-address-syntax-
 def extract_emails_from_string(string: str) -> List[str]:
     """Extracts all emails from a string.
@@ -20,4 +21,5 @@ def extract_emails_from_string(string: str) -> List[str]:
             print(no_emails) # []
         ```
     """
-    pass # to remove
+
+    return re.findall(r"[a-zA-z0-9!#$%&*+-/=?^_`}{|]+@[a-zA-z0-9.-]+\.[a-zA-z0-9-]+", string)
