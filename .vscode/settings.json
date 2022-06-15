@@ -5,7 +5,7 @@
   "python.linting.pylintEnabled": true,
   "python.envFile": "${workspaceFolder}/.vscode/.env",
   "files.watcherExclude": {
-    "**/lox-env/**": true
+    "**/venv/**": true
   },
   "python.testing.unittestArgs": [
     "-v",
