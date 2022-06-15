@@ -1,0 +1,19 @@
+{
+  // "python.autoComplete.extraPaths": ["./Algorithms"],
+  // "python.analysis.extraPaths": ["./Algorithms"],
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.envFile": "${workspaceFolder}/.vscode/.env",
+  "files.watcherExclude": {
+    "**/lox-env/**": true
+  },
+  "python.testing.unittestArgs": [
+    "-v",
+    "-s",
+    "./tests",
+    "-p",
+    "test_*.py"
+  ],
+  "python.testing.pytestEnabled": false,
+  "python.testing.unittestEnabled": true
+}
