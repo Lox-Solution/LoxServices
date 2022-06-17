@@ -21,12 +21,12 @@ def extract_emails_from_string(string: str) -> List[str]:
             print(no_emails) # []
         ```
         ## Exceptions
-        '''
-            emails = extract_emails_from_string("email@domain.com--")   -> double special character after email
+        ```
+            emails = extract_emails_from_string("email@domain.com--")   # double special character after email
             print(emails) # []
-        '''
+        ```
 
 
     """
 
-    return re.findall(r"[a-zA-Z0-9](?!.*[!#$%&*+-/=?^_`}{|]{2})[a-zA-Z0-9!#$%&*+-/=?^_`}{|]{0,62}[a-zA-Z0-9]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]+", string)
+    return re.findall(r"[a-z0-9](?!.*[!#$%&*+-/=?^_`}{|]{2})[a-z0-9!#$%&*+-/=?^_`}{|]{0,62}[a-z0-9]+@[a-z0-9.-]+\.[a-z0-9]+", string.lower())
