@@ -16,5 +16,5 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/Lox-Solution/LoxServices/issues"
     },
     license='MIT',
-    packages=['src'],
+    packages=['src', 'email'],
 )
