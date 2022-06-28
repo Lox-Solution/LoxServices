@@ -17,5 +17,4 @@ setuptools.setup(
     },
     license='MIT',
     packages=['src'],
-    install_requires=['importlib.metadata'],
 )
