@@ -3,9 +3,8 @@
 import os
 from typing import Dict, Literal
 
-from Algorithms.Configs.paths import TRANSLATIONS_FOLDER
-from Algorithms.Services.translation.enums import TranslationModules
-from Algorithms.Utils.formats import json_file_to_python_dictionary
+from lox_services.translation.enums import TranslationModules
+from lox_services.utils import json_file_to_python_dictionary
 
 AvailableLanguages = Literal['EN','FR','NL']
 
@@ -21,7 +20,7 @@ def get_translations(language: AvailableLanguages, module: TranslationModules = 
         ## Returns
         - A dictionnary of translations for one language
     """
-    translations_module_folder = os.path.join(TRANSLATIONS_FOLDER, module.value)
+    translations_module_folder = os.path.join(os.path.dirname(__file__), "languages", module.value)
     if language == 'NL':
         language = 'EN'
     
