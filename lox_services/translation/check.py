@@ -2,10 +2,9 @@
 
 import os
 
-from Algorithms.Configs.paths import TRANSLATIONS_FOLDER
-from Algorithms.Utils.formats import json_file_to_python_dictionary
-from Algorithms.Utils.general_python import print_error, print_success
+from lox_services.utils import json_file_to_python_dictionary, print_error, print_success
 
+TRANSLATIONS_FOLDER = os.path.join(os.path.dirname(__file__), "languages")
 
 def check_all_translations_keys():
     """Checks that no key is missing from any translations."""
