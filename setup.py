@@ -17,4 +17,5 @@ setuptools.setup(
     },
     license='MIT',
     packages=['lox_services', 'lox_services/email', 'lox_services/translation'],
+    include_package_data = True,
 )
