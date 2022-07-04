@@ -4,4 +4,4 @@ include lox_services/translation/languages/NL.json
 include lox_services/translation/languages/billing/email/EN.json
 include lox_services/translation/languages/billing/email/FR.json
 include lox_services/translation/languages/billing/invoice/FR.json
-include lox_services/translation/languages/billing/invoice/FR.json
+include lox_services/translation/languages/billing/invoice/EN.json
