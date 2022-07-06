@@ -1,0 +1,14 @@
+{
+  "client_reference": "?",
+  "description": "beschrijving",
+  "quantity": "hoeveelheid",
+  "online_order": "?",
+  "order_date": "?",
+  "reference": "?",
+  "subtotal": "?",
+  "total": "?",
+  "total_price": "?",
+  "tracking_number": "?",
+  "unit_price": "?",
+  "vat": "?"
+}

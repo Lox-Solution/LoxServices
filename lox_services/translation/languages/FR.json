@@ -1,0 +1,14 @@
+{
+  "client_reference": "référence client",
+  "description": "description",
+  "quantity": "quantité",
+  "online_order": "commande en ligne",
+  "order_date": "date de commande",
+  "reference": "référence",
+  "subtotal": "sous-total",
+  "total": "total",
+  "total_price": "prix total",
+  "tracking_number": "numéro de suivi",
+  "unit_price": "prix unitaire",
+  "vat": "TVA"
+}

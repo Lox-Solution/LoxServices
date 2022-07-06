@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name='lox_services',
-    version='0.0.1',
+    version='0.0.5',
     author='Lox Solution',
     author_email='natasa.zekic@loxsolution.com',
     description='A package with Lox services',
@@ -16,5 +16,6 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/Lox-Solution/LoxServices/issues"
     },
     license='MIT',
-    packages=['lox_services', 'lox_services/email'],
+    packages=['lox_services', 'lox_services/email', 'lox_services/translation'],
+    include_package_data = True,
 )

@@ -1,0 +1,22 @@
+{
+    "t_invoice_number": "Numéro de facture",
+    "t_customer_bill_number": "Numéro de commande",
+    "t_siret": "SIRET",
+    "t_invoice_reason": "Facture mensuelle Lox",
+    "t_title": "Facture Lox Solution - {invoice_date}",
+    "t_vat_number": "Numéro de TVA",
+    "t_invoice_date": "Date de facture",
+    "t_invoice_due_date": "Date limite de paiement",      
+    "t_reason": "Produit",
+    "t_quantity": "Quantité",
+    "t_due_amount": "Montant dû",
+    "t_vat_details":"La TVA (VAT) est auto-liquidée.",
+    "t_recap_sentence": "Veuillez transférer le montant <strong>{total_with_vat}</strong> avant le: <strong>{invoice_due_date}</strong> au nom de LOX SOLUTION B.V.  sur le compte bancaire: <strong>NL35 BUNQ 2045 1979 72</strong> avec la référence de facture: {invoice_number}",
+    "t_reason_refund": "Raison du remboursement",
+    "t_tracking_number": "Numéro de suivi",
+    "t_credit_date": "Date du crédit",
+    "t_carrier": "Transporteur",
+    "t_saved_amount": "Montant remboursé",
+    "t_fee": "Frais",
+    "t_credited_by": "Credité par"
+}
