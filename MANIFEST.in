@@ -1,0 +1,3 @@
+include lox_services/translation/*.json
+include lox_services/translation/languages/billing/email/*.json
+include lox_services/translation/languages/billing/invoice/*.json

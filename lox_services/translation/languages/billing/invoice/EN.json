@@ -1,0 +1,22 @@
+{
+    "t_invoice_number": "Invoice number",
+    "t_customer_bill_number": "Order number",
+    "t_siret": "SIRET",
+    "t_invoice_reason": "Lox monthly invoice",
+    "t_title": "Lox Solution invoice - {invoice_date}",
+    "t_vat_number": "VAT number",
+    "t_invoice_date": "Invoice date",
+    "t_invoice_due_date": "Invoice due date",      
+    "t_reason": "Product",
+    "t_quantity": "Quantity",
+    "t_due_amount": "Due amount",
+    "t_vat_details":"",
+    "t_recap_sentence": "Please transfer the requested amount of <strong>{total_with_vat}</strong> by: <strong>{invoice_due_date}</strong> to account number: <strong>NL35 BUNQ 2045 1979 72</strong> in the name of LOX SOLUTION B.V. with the invoice reference: {invoice_number}",
+    "t_reason_refund": "Reason refund",
+    "t_tracking_number": "Tracking number",
+    "t_credit_date": "Credit date",
+    "t_carrier": "Carrier",
+    "t_saved_amount": "Saved amount",
+    "t_fee": "Fee",
+    "t_credited_by": "Credited by"
+}
