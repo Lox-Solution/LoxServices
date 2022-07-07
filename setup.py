@@ -1,9 +1,9 @@
-import setuptools
+from setuptools import setup, find_packages
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-setuptools.setup(
+setup(
     name='lox_services',
     version='0.0.5',
     author='Lox Solution',
@@ -16,6 +16,6 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/Lox-Solution/LoxServices/issues"
     },
     license='MIT',
-    packages=['lox_services', 'lox_services/email', 'lox_services/translation'],
+    packages=find_packages(),
     include_package_data = True,
 )
