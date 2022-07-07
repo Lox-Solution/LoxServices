@@ -1,7 +1,7 @@
 #pylint: disable=missing-class-docstring missing-function-docstring
 import unittest
 
-from src.email.utils import extract_emails_from_string
+from lox_services.email.utils import extract_emails_from_string
 
 class Test_extract_emails_from_string(unittest.TestCase):
     
