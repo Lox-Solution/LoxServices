@@ -28,7 +28,6 @@ jobs:
     - name: Install unittest
       run: |
         python -m pip install --upgrade pip
-        pip install unittest
     - name: Test with unittest
       run: |
         python -m unittest tests/*
