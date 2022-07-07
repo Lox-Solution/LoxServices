@@ -9,7 +9,7 @@ class Test_extract_emails_from_string(unittest.TestCase):
         self.assertEqual(extract_emails_from_string("I am an email email@domain.com."), ["email@domain.com"]) 
 
     def test_string_empty(self):
-        self.assertEqual(extract_emails_from_string(""), [])
+        self.assertEqual(extract_emails_from_string(""), ["email@domain.com"])
 
     def test_extract_no_email(self):
         self.assertEqual(extract_emails_from_string("This is not an email: [email@gmsa^il.com]."), [])
