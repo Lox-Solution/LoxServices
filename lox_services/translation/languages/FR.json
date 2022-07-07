@@ -10,5 +10,5 @@
   "total_price": "prix total",
   "tracking_number": "numéro de suivi",
   "unit_price": "prix unitaire",
-  "vatWHAT": "TVA"
+  "vat": "TVA"
 }
