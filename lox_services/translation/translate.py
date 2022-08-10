@@ -4,7 +4,7 @@ import os
 from typing import Dict, Literal
 
 from lox_services.translation.enums import TranslationModules
-from lox_services.utils import json_file_to_python_dictionary
+from lox_services.utils.formats import json_file_to_python_dictionary
 
 AvailableLanguages = Literal['EN','FR','NL']
 

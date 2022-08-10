@@ -3,7 +3,7 @@ import unittest
 
 from lox_services.translation.translate import get_translations
 from lox_services.translation.templates import insert_variables
-from lox_services.utils import json_file_to_python_dictionary
+from lox_services.utils.formats import json_file_to_python_dictionary
 
 
 SERVICE_PATH = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, "lox_services", "translation", "languages")
