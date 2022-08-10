@@ -1,3 +1,4 @@
+import base64
 from json import loads
 from typing import Dict
 
@@ -11,3 +12,9 @@ def json_file_to_python_dictionary(file_path: str) -> Dict[str, str] :
         dictionnary = loads(json_file.read())
     
     return dictionnary
+
+def image_to_base64(image_path: str) -> str:
+    """Convert an image to base64 string."""
+    with open(image_path, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+    return encoded_string.decode("utf-8")
