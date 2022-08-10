@@ -4,3 +4,4 @@
 0.0.4 data files added
 0.0.5 tests for translation service added
 0.0.6 fix MANIFEST.in content
+0.0.7 add conf
