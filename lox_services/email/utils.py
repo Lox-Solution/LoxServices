@@ -14,7 +14,7 @@ import re
 from typing import List
 import base64
 import json
-import urllib.request
+from urllib import request, parse
 
 from lox_services.config.env_variables import get_env_variable
 
@@ -30,7 +30,7 @@ def _command_to_url(command):
 
 
 def url_escape(text):
-    return urllib.parse.quote(text, safe='~-._')
+    return parse.quote(text, safe='~-._')
 
 
 def url_format_params(params):
@@ -57,7 +57,7 @@ def call_authorize_tokens(client_id, client_secret, authorization_code):
     params['redirect_uri'] = REDIRECT_URI
     params['grant_type'] = 'authorization_code'
     request_url = _command_to_url('o/oauth2/token')
-    response = urllib.request.urlopen(request_url, urllib.parse.urlencode(params).encode('UTF-8')).read().decode('UTF-8')
+    response = request.urlopen(request_url, parse.urlencode(params).encode('UTF-8')).read().decode('UTF-8')
     return json.loads(response)
 
 
@@ -68,7 +68,7 @@ def call_refresh_token(client_id, client_secret, refresh_token):
     params['refresh_token'] = refresh_token
     params['grant_type'] = 'refresh_token'
     request_url = _command_to_url('o/oauth2/token')
-    response = urllib.request.urlopen(request_url, urllib.parse.urlencode(params).encode('UTF-8')).read().decode('UTF-8')
+    response = request.urlopen(request_url, parse.urlencode(params).encode('UTF-8')).read().decode('UTF-8')
     return json.loads(response)
 
 
