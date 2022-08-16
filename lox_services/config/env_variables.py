@@ -1,8 +1,8 @@
 import os
 from typing import Dict
 
-# from Algorithms.Utils.general_python import print_error
 from lox_services.config.paths import ROOT_PATH
+from lox_services.utils.general_python import print_error
 
 def _get_key_and_value(string: str):
     splited = string.split("=",maxsplit=1)
@@ -50,10 +50,5 @@ def get_env_variable(key: str):
         value = all_variables[key]
         return value
     except KeyError as exception:
-        print(f"'{key}' key does not exist in .env file or in environment variables.")
+        print_error(f"'{key}' key does not exist in .env file or in environment variables.")
         raise exception
-
-
-
-if __name__ == "__main__":
-    print(get_env_variable("FINANCE_REFRESH_TOKEN"))
