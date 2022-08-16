@@ -14,7 +14,8 @@ import re
 from typing import List
 import base64
 import json
-from urllib import request, parse
+from urllib import request
+from urllib import parse
 
 from lox_services.config.env_variables import get_env_variable
 
