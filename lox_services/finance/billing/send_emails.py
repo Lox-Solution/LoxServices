@@ -5,10 +5,10 @@ import locale
 from typing import List
 
 import pandas as pd
-
+from lox_services.constants import ACCOUNTANT_EMAIL, LOX_CC_EMAIL, LOX_FR_CC_EMAIL
 from lox_services.config.paths import OUTPUT_FOLDER
 from lox_services.email.send import send_emails_from_loxsolution_account
-from lox_services.finance.billing.constants import BILLING_ASSETS_FOLDER, ACCOUNTANT_EMAIL, LOX_CC_EMAIL, LOX_FR_CC_EMAIL
+from lox_services.finance.billing.constants import BILLING_ASSETS_FOLDER
 from lox_services.persistence.database.queries.billing import get_not_paid_invoices, update_invoice_to_sent
 from lox_services.persistence.database.queries.invoicing import get_invoicing_details
 from lox_services.translation.enums import TranslationModules

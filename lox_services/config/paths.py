@@ -9,3 +9,7 @@ ROOT_PATH: str = getenv("PYTHONPATH")
 OUTPUT_FOLDER: str = path.join(ROOT_PATH, "output_folder")
 
 ASSETS_FOLDER: str = path.join(ROOT_PATH, "Algorithms", "Assets")
+
+# Folder where Algorithms configuration is stored.
+
+CONFIGS_FOLDER: str = path.join(ROOT_PATH, "Algorithms", "Configs")
