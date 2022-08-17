@@ -5,7 +5,6 @@ import re
 import os
 import pandas as pd
 from weasyprint import HTML, CSS
-# from weasyprint.text.fonts import FontConfiguration
 
 from lox_services.config.paths import ASSETS_FOLDER
 from lox_services.utils.general_python import print_success
@@ -40,14 +39,12 @@ def generate_pdf_file_from_dataframe(dataframe: pd.DataFrame, path_to_pdf:str, i
         dataframe = dataframe.to_frame()
     
     html_string = dataframe_to_html_without_pandas_style(dataframe)
-    # font_config = FontConfiguration()
     html = HTML(string=html_string)
     css = CSS(os.path.join(ASSETS_FOLDER, "pdf_tables.css"))
     
     html.write_pdf(
         path_to_pdf,
         stylesheets=[css],
-        # font_config=font_config
     )
     print_success("Pdf created successfuly.")
 
@@ -70,13 +67,11 @@ def generate_pdf_file_from_html_css(base_url:str, html_string: str, path_to_css:
         ## Returns:
         Nothing
     """
-    # font_config = FontConfiguration()
     html = HTML(string=html_string, base_url=base_url)
     css = CSS(path_to_css)
     html.write_pdf(
         path_to_pdf,
         stylesheets=[css],
-        # font_config=font_config
     )
     print_success("Pdf created successfuly.")
 
