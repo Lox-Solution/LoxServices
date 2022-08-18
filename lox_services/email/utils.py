@@ -23,8 +23,11 @@ GOOGLE_ACCOUNTS_BASE_URL = 'https://accounts.google.com'
 # REDIRECT_URI = 'https://loxsolution.com'
 REDIRECT_URI = 'http://localhost'
 
-GOOGLE_CLIENT_ID = get_env_variable("EMAILSENDER_GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = get_env_variable("EMAILSENDER_GOOGLE_CLIENT_SECRET")
+def get_google_client_id():
+    return get_env_variable("EMAILSENDER_GOOGLE_CLIENT_ID")
+
+def get_google_client_secret():
+    return get_env_variable("EMAILSENDER_GOOGLE_CLIENT_SECRET")
 
 def _command_to_url(command):
     return '%s/%s' % (GOOGLE_ACCOUNTS_BASE_URL, command)
@@ -89,7 +92,7 @@ def get_authorization(google_client_id, google_client_secret):
 
 
 def refresh_authorization(refresh_token: str) -> str:
-    response = call_refresh_token(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, refresh_token)
+    response = call_refresh_token(get_google_client_id(), get_google_client_secret(), refresh_token)
     return response['access_token']
 
 

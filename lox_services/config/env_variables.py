@@ -14,9 +14,13 @@ def _get_key_and_value(string: str):
 
 
 def _get_env_variables_from_file() -> Dict[str,str]:
-    with open(os.path.join(ROOT_PATH, ".env"), "r") as txt_file:
-        pairs = list(set(map(_get_key_and_value,txt_file.readlines())))
-        return pairs
+    try: 
+        with open(os.path.join(ROOT_PATH, ".env"), "r", encoding='utf8') as txt_file:
+            pairs = list(set(map(_get_key_and_value,txt_file.readlines())))
+            return pairs
+    except FileNotFoundError:
+        print_error(f".env file not found in {ROOT_PATH}.")
+        return {}
 
 
 def _get_env_variables_as_dict():
