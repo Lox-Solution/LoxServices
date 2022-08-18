@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{t_title}</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="invoice_content">
+      <div class="invoice_head">
+        <div class="logo">
+          <img id="lox-logo" src="lox-logo.png" />
+        </div>
+        <div id="lox-details">
+          <ul>
+            <li id="lox-name">Lox Solution B.V.</li>
+            <li>Stationsplein 45.A4004</li>
+            <li>3013 AK Rotterdam</li>
+          </ul>
+          <ul class="details">
+            <li>Tel.: +31 (0) 6 11 61 62 44</li>
+            <li>BTW: NL861347948B01</li>
+            <li>COC/KVK: 78325862</li>
+            <li>IBAN: NL35 BUNQ 2045 1979 72</li>
+            <li>BIC/SWIFT: BUNQNL2A</li>
+          </ul>
+        </div>
+      </div>
+      <div class="customer_address">
+        <p id="customer_name">{customer_name}</p>
+        <p id="customer_street">{customer_street}</p>
+        <p id="customer_city">{customer_zip_code} {customer_city}</p>
+        <p id="customer_country">{customer_country}</p>
+        <p id="customer_department">{customer_department}</p>
+      </div>
+      <div class="invoice_descriptions_dates">
+        <div class="invoice_descriptions">
+          <p id="invoice_reason">{t_invoice_reason}</p>
+          <p id="invoice_number">{t_invoice_number}: {invoice_number}</p>
+          <p id="customer_bill_number">{customer_bill_number}</p>
+          <p id="customer_vat_number">{t_vat_number}: {customer_vat_number}</p>
+          <p id="customer_siret">{siret}</p>
+        </div>
+        <div class="invoice_dates">
+          <p id="invoice_date">{t_invoice_date}: {invoice_date}</p>
+          <p id="invoice_due_date">{t_invoice_due_date}: {invoice_due_date}</p>
+        </div>
+      </div>
+      <div class="invoice_summary">{invoice_summary_table}</div>
+      <div class="recap">
+        <p id="vat_details">{t_vat_details}</p>
+      </br>
+        <p id="recap_sentence">{t_recap_sentence}</p>
+      </div>
+    </div>
+    <div class="invoice_details">{invoice_details_table}</div>
+  </body>
+</html>

@@ -1,0 +1,146 @@
+html {
+  font-family: "open_sansregular";
+  color: black;
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 1.4;
+}
+
+body {
+  margin: 0;
+  z-index: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.invoice_content {
+  padding: 0;
+}
+
+.invoice_head {
+  display: flex;
+  justify-content: space-between;
+}
+.logo {
+  display: flex;
+  align-items: center;
+}
+#lox-logo {
+  height: 7rem;
+}
+#lox-details ul {
+  list-style-type: none;
+  text-align: right;
+}
+#lox-name {
+  font-weight: bolder;
+}
+.details {
+  font-size: smaller;
+}
+
+.customer_address {
+  margin-top: 2rem;
+  margin-left: 3rem;
+  margin-bottom: 2rem;
+}
+
+#customer_name {
+  font-weight: bolder;
+  margin-bottom: 1rem;
+}
+
+.invoice_descriptions_dates {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+#invoice_number {
+  font-weight: bolder;
+}
+#customer_bill_number{
+  font-weight: bolder;
+}
+.invoice_dates {
+  text-align: right;
+}
+
+/* Table for invoice summary */
+.invoice_summary {
+  margin-bottom: 3rem;
+}
+
+.invoice_summary table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.invoice_summary th,
+.invoice_summary tr,
+.invoice_summary td {
+  padding: 0.3rem;
+  text-align: left;
+  border-top: 1px solid rgb(221, 221, 221);
+}
+
+.invoice_summary tr td:not(:first-child),
+th:not(:first-child) {
+  width: 16.66%;
+}
+
+.invoice_summary table tbody tr:nth-last-child(1) {
+  font-weight: bolder;
+}
+
+/* Table for refund details*/
+.invoice_details {
+  page-break-before: always;
+}
+.invoice_details * {
+  font-size: 10px;
+}
+.invoice_details table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.invoice_details th,
+.invoice_details tr,
+.invoice_details td {
+  padding: 0.35rem;
+  text-align: center;
+  /* white-space: nowrap; */
+}
+
+.invoice_details tbody > tr:nth-child(even) {
+  background: #fff;
+}
+.invoice_details tbody > tr:nth-child(odd) {
+  background: #ccc;
+}
+
+.invoice_details tr:nth-child(even) > td {
+  border-right: solid 1px #ccc;
+  border-left: solid 1px #ccc;
+}
+
+.invoice_details tr:nth-child(odd) > td {
+  border-right: solid 1px #fff;
+  border-left: solid 1px #fff;
+}
+
+.invoice_details tr > td:first-child {
+  border-left: solid 1px #fff;
+}
+
+.invoice_details tr > td:last-child {
+  border-right: solid 1px #fff;
+}
