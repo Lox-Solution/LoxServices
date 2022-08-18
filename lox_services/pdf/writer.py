@@ -6,7 +6,6 @@ import os
 import pandas as pd
 from weasyprint import HTML, CSS
 
-from lox_services.config.paths import ASSETS_FOLDER
 from lox_services.utils.general_python import print_success
 
 
@@ -40,7 +39,7 @@ def generate_pdf_file_from_dataframe(dataframe: pd.DataFrame, path_to_pdf:str, i
     
     html_string = dataframe_to_html_without_pandas_style(dataframe)
     html = HTML(string=html_string)
-    css = CSS(os.path.join(ASSETS_FOLDER, "pdf_tables.css"))
+    css = CSS(os.path.join(os.path.dirname(__file__), "assets", "pdf_tables.css"))
     
     html.write_pdf(
         path_to_pdf,
