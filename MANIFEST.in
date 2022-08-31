@@ -1,0 +1,8 @@
+include lox_services/translation/languages/*.json
+include lox_services/translation/languages/billing/email/*.json
+include lox_services/translation/languages/billing/invoice/*.json
+include lox_services/finance/billing/assets/*
+include lox_services/persistence/database/schemas/Content/*.sql
+include lox_services/persistence/database/schemas/InvoicesData/*.sql
+include lox_services/persistence/database/schemas/LoxData/*.sql
+include lox_services/persistence/database/schemas/UserData/*.sql

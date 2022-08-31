@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Facture Lox Solution - 2021-09-01</title>
+    <link rel="stylesheet" href="invoice_style.css" />
+  </head>
+  <body>
+    <div class="invoice_content">
+      <div class="invoice_head">
+        <div class="logo">
+          <img id="lox-logo" src="lox-logo.png" />
+        </div>
+        <div id="lox-details">
+          <ul>
+            <li id="lox-name">Lox Solution B.V.</li>
+            <li>Stationsplein 45.A4004</li>
+            <li>3013 AK Rotterdam</li>
+          </ul>
+          <ul class="details">
+            <li>Tel.: +31 (0) 6 11 61 62 44</li>
+            <li>BTW: NL861347948B01</li>
+            <li>COC/KVK: 861347948</li>
+            <li>IBAN: NL35 BUNQ 2045 1979 72</li>
+            <li>BIC/SWIFT: BUNQNL2A</li>
+          </ul>
+        </div>
+      </div>
+      <div class="customer_address">
+        <p id="customer_name">Test customer name</p>
+        <p id="customer_street">24-32 rue Jean Goujon</p>
+        <p id="customer_city">75008 Paris</p>
+        <p id="customer_country"></p>
+        <p id="customer_department"></p>
+      </div>
+      <div class="invoice_descriptions_dates">
+        <div class="invoice_descriptions">
+          <p id="invoice_number">Numéro de facture: 0000-0272</p>
+          <p id="invoice_reason">Facture mensuelle Lox</p>
+        </div>
+        <div class="invoice_dates">
+          <p id="invoice_date">Date de facture: 2021-09-01</p>
+          <p id="invoice_due_date">Date limite de paiement: 2021-10-01</p>
+        </div>
+      </div>
+      <div class="invoice_summary"><table class="dataframe">
+  <thead>
+    <tr>
+      <th>Produit</th>
+      <th>Quantité</th>
+      <th>Montant remboursé</th>
+      <th>Montant dû</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Refunds: Chronopost - Label Not Used</td>
+      <td>17</td>
+      <td>126.17 €</td>
+      <td>44.16 €</td>
+    </tr>
+    <tr>
+      <td>Sub-total</td>
+      <td></td>
+      <td></td>
+      <td>44.16 €</td>
+    </tr>
+    <tr>
+      <td>VAT</td>
+      <td></td>
+      <td></td>
+      <td>0 %</td>
+    </tr>
+    <tr>
+      <td>Total</td>
+      <td></td>
+      <td>126.17 €</td>
+      <td>44.16 €</td>
+    </tr>
+  </tbody>
+</table></div>
+      <div class="recap">
+        <p id="vat_details">La TVA (VAT) est auto-liquidée.</p>
+      </br>
+        <p id="recap_sentence">Veuillez transférer le montant <strong>44.16 €</strong> avant le: <strong>2021-10-01</strong> au nom de LOX SOLUTION B.V.  sur le compte bancaire: <strong>NL35 BUNQ 2045 1979 72</strong> avec la référence de facture: 0000-0272</p>
+      </div>
+    </div>
+    <div class="invoice_details">{invoice_details_table}</div>
+  </body>
+</html>

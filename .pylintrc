@@ -1,0 +1,29 @@
+# Here are some config examples:
+# https://chromium.googlesource.com/chromiumos/chromite/+/master/pylintrc
+
+# Example to lint the erros of a folder: pylint --errors-only Algorithms/Utils/
+[MASTER]
+init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.dirname(find_pylintrc()));sys.setrecursionlimit(3 * sys.getrecursionlimit())"
+jobs=2
+
+[MESSAGES CONTROL]
+disable=
+    broad-except, # for default Exception handling
+    dangerous-default-value, # We are supposed to know what we are doing with default values
+    wrong-import-order, # vscode auto-order import doe not have the same syntax
+    trailing-whitespace,
+    unsubscriptable-object, # for pandas df like df['something'] = 'something_else'
+    unused-argument, # for args and kwargs managment
+    no-member, # for pandas Instance of 'TextFileReader' has no 'to_csv' member and other errors
+    unnecessary-pass, # used to pass exceptions (happens a lot with selenium)
+    pointless-statement, # for Airflow tasks
+    invalid-name, # for file names
+    no-else-return, #for if else return statements
+    missing-module-docstring, #module name and path should be clear enough
+    
+[FORMAT]
+max-line-length=140
+ignore-long-lines=f\"|f\'|\"\"\"|#|(^\s*\w*(\s)?((:|=)\s)?('|").*('|"|(('|"),))$)
+
+[C]
+extension-pkg-whitelist=lxml
