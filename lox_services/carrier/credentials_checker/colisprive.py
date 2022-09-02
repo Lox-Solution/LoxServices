@@ -2,11 +2,11 @@ from typing import Dict
 
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 from xvfbwrapper import Xvfb
 
 from lox_services.carrier.classes import CredentialsChecker, WrongCredentialsException
+from lox_services.carrier.constants import CHROME_OPTIONS
 from lox_services.config.paths import CHROMEDRIVER_PATH
 from lox_services.scraping.selenium_util import safe_find_element
 from lox_services.utils.decorators import Perf
@@ -36,11 +36,9 @@ class ColispriveCredentialsChecker(CredentialsChecker):
         company = credentials["company"]
         username = credentials['username']
         password = credentials['password']
-        options = Options()
-        options.add_argument("--start-maximized")
         driver = Chrome(
             service=Service(executable_path=CHROMEDRIVER_PATH),
-            options=options
+            options=CHROME_OPTIONS
         )
         with driver:
             # driver.get('https://www.colisprive.fr')
