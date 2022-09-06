@@ -3,6 +3,7 @@ from selenium.webdriver.chrome.options import Options
 def get_chromedriver_options():
     """Returns the options for the chromedriver"""
     _options = Options()
+    _options.add_argument("--headless")
     _options.add_argument("--no-sandbox")
     _options.add_argument("--disable-dev-shm-usage")
     _options.add_argument("--start-maximized")
