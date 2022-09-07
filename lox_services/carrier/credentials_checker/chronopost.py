@@ -3,7 +3,6 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from xvfbwrapper import Xvfb
 
 from lox_services.carrier.classes import CredentialsChecker, WrongCredentialsException
 from lox_services.carrier.constants import CHROME_OPTIONS
