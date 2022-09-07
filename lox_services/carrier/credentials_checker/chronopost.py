@@ -20,14 +20,12 @@ class ChronopostCredentialsChecker(CredentialsChecker):
     @Perf
     def check_credentials(self, credentials):
         """Useses Selenium and Xvfb to check credentials."""
-        xvfb = Xvfb(width=1280, height=1024, colordepth=16)
-        with xvfb:
-            try:
-                self.__login(credentials)
-            except WrongCredentialsException:
-                return False
-            
-            return True
+        try:
+            self.__login(credentials)
+        except WrongCredentialsException:
+            return False
+        
+        return True
     
     def get_average_compute_time(self):
         return 10
