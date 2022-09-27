@@ -38,5 +38,6 @@ setup(
         "pytz >= 2021.1",
         "lxml >= 4.9.1",
         "cryptography >= 37.0.2",
+        "mollie-api-python >= 2.13.0",
     ]
 )
