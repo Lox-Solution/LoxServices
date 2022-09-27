@@ -183,6 +183,8 @@ def generate_and_store_bill_documents(company: str, bill_number: str, customer_b
     paths_to_pdfs = []
     languages = ['EN']
     country = customer_details.iloc[0]["country"].upper()
+    payment_link = f"https://app.loxsolution.com/api/public/bills/pay?billNumber={bill_number}"
+
     if country != "EN":
         languages.append(country)
     
@@ -197,6 +199,7 @@ def generate_and_store_bill_documents(company: str, bill_number: str, customer_b
             ("invoice_reason", "Lox monthly invoice"),
             ("total_saved_amount", format_amount_to_human_string_with_language(total_saved_amount)),
             ("total_with_vat", format_amount_to_human_string_with_language(total_with_vat)),
+            ("payment_link", payment_link),
         ]
         
         translations = get_translations(language, TranslationModules.BILLING_INVOICE)
@@ -310,4 +313,3 @@ def main(*,
     
     print("Generating the billing documents, and saving them to Google Cloude Storage...")
     return generate_and_store_bill_documents(company, bill_number)
-
