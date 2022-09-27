@@ -11,7 +11,7 @@
     "t_quantity": "Quantity",
     "t_due_amount": "Due amount",
     "t_vat_details":"",
-    "t_recap_sentence": "Please transfer the requested amount of <strong>{total_with_vat}</strong> by: <strong>{invoice_due_date}</strong> to account number: <strong>NL35 BUNQ 2045 1979 72</strong> in the name of LOX SOLUTION B.V. with the invoice reference: {invoice_number}",
+    "t_recap_sentence": "Please transfer the requested amount of <strong>{total_with_vat}</strong> by: <strong>{invoice_due_date}</strong> to account number: <strong>NL35 BUNQ 2045 1979 72</strong> in the name of LOX SOLUTION B.V. with the invoice reference: {invoice_number}. To use another payment method, you can use this link: <a href=\"{payment_link}\">{payment_link}</a>.",
     "t_reason_refund": "Reason refund",
     "t_tracking_number": "Tracking number",
     "t_credit_date": "Credit date",
