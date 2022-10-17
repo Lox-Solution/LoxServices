@@ -9,3 +9,4 @@
 0.0.9 email, encryption, finance, pdf, persistence, proxy, scraping and slack service added
 0.1.0 carrier service: Chronopost, Colissimo, Colisprive available with selenium xvfb
 0.1.1 Add translations for billing
+0.1.2 Update translation key order number
