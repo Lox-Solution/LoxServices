@@ -61,7 +61,7 @@ p {
 #invoice_number {
   font-weight: bolder;
 }
-#customer_bill_number{
+#order_number{
   font-weight: bolder;
 }
 .invoice_dates {
