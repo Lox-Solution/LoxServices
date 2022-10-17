@@ -1,6 +1,6 @@
 {
     "t_invoice_number": "Invoice number",
-    "t_customer_bill_number": "Order number",
+    "t_order_number": "Order number",
     "t_siret": "SIRET",
     "t_invoice_reason": "Lox monthly invoice",
     "t_title": "Lox Solution invoice - {invoice_date}",
