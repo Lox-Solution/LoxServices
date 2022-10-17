@@ -1,6 +1,6 @@
 {
     "t_invoice_number": "Numéro de facture",
-    "t_customer_bill_number": "Numéro de commande",
+    "t_order_number": "Numéro de commande",
     "t_siret": "SIRET",
     "t_invoice_reason": "Facture mensuelle Lox",
     "t_title": "Facture Lox Solution - {invoice_date}",
