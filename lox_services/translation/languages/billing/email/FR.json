@@ -1,5 +1,5 @@
 {
-    "local_language": "fr_FR.utf8",
+    "local_language": "fr_FR",
     "subject": "Facture Lox - {company}: {month} {year}",
     "title": "Facture Lox - {month} {year}",
     "entrance_greetings": "Hello l'équipe {company}",

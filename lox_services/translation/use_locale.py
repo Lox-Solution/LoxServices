@@ -13,8 +13,8 @@ def get_all_locales():
 def download_locale(language_code: str, encoding: str):
     """Downloads the locale for the given language.
         ## Example
-        >>> download_locale('fr_FR.utf8')
-    """    
+        >>> download_locale('fr_FR', 'utf8')
+    """
     if language_code.lower() not in get_all_locales():
         raise Exception(f"Locale '{language_code}' is not installable.")
     
