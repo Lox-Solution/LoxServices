@@ -11,3 +11,4 @@
 0.1.1 Add translations for billing
 0.1.2 Update translation key order number
 0.1.3 Fix assets in billing service
+0.1.4 Add local language download feature

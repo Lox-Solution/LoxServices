@@ -1,5 +1,5 @@
 {
-    "local_language": "en_US.utf8",
+    "local_language": "en_US",
     "subject": "Lox Invoice - {company}: {month} {year}",
     "title": "Lox Invoice - {month} {year}",
     "entrance_greetings": "Dear {company},",
