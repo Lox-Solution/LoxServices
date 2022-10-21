@@ -8,6 +8,7 @@ UserData.CustomerData
   sales_cycle STRING,
   first_invoice_date DATE,
   onboarding_time INT64,
+  beta_testing STRING OPTIONS(description="JSON object stored as a string. It contains features that a certain customer can test in a beta environment."),
   insert_datetime DATETIME NOT NULL, --REQUIRED
   update_datetime DATETIME
 )

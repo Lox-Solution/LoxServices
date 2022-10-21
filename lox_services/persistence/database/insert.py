@@ -55,6 +55,7 @@ def insert_dataframe_into_database(dataframe: pd.DataFrame, table: DatasetTypeAl
                 dataframe = remove_duplicate_refunds(dataframe)
             if table.name == "ClientInvoicesData":
                 dataframe = remove_duplicate_client_invoice_data(dataframe)
+                dataframe = client_invoice_data_quality_check(dataframe)
         elif isinstance(table, LoxData_dataset):
             dataset = "LoxData"
             if table.name == "DueInvoices":
@@ -67,6 +68,8 @@ def insert_dataframe_into_database(dataframe: pd.DataFrame, table: DatasetTypeAl
             dataset = "InvoicesDataLake"
         elif isinstance(table, UserData_dataset):
             dataset = "UserData"
+            if table.name == "InvoicesFromClientToCarrier":
+                remove_duplicate_invoices_from_client_to_carrier(dataframe)            
         elif isinstance(table, TestEnvironment_dataset):
             dataset="TestEnvironment"
             if table.name == "Refunds":
@@ -263,6 +266,35 @@ def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFram
     already_saved_tracking_numbers = select(sql_query, False)["tracking_number"].to_list()
     if len(already_saved_tracking_numbers) > 0:
         dataframe = dataframe.loc[~dataframe["tracking_number"].isin(already_saved_tracking_numbers)]
+    return dataframe
+
+def remove_duplicate_invoices_from_client_to_carrier(dataframe: pd.DataFrame) -> pd.DataFrame:
+    """Removes duplicates from InvoicesFromClientToCarrier dataframe"""
+    carrier = dataframe.iloc[0]['carrier']
+    company = dataframe.iloc[0]['company']
+    tracking_numbers = dataframe["tracking_number"].to_list()
+    sql_query = f"""
+        SELECT 
+            tracking_number
+        
+        FROM UserData.InvoicesFromClientToCarrier
+        
+        WHERE company = "{company}"
+            AND carrier = "{carrier}"
+            AND tracking_number IN UNNEST({tracking_numbers})
+    """
+    already_saved_tracking_numbers = select(sql_query, False)["tracking_number"].to_list()
+    if len(already_saved_tracking_numbers) > 0:
+        dataframe = dataframe.loc[~dataframe["tracking_number"].isin(already_saved_tracking_numbers)]
+    return dataframe
+
+def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
+    """Performs data quality check on client invoices dataframe"""
+    dataframe["quantity"] = pd.to_numeric(dataframe["quantity"])
+    dataframe["net_amount"] = pd.to_numeric(dataframe["net_amount"])
+    dataframe = dataframe.loc[~(dataframe["quantity"] < 0)]
+    dataframe.loc[dataframe["quantity"] == 0, "quantity"] = 1
+    dataframe.loc[dataframe["net_amount"] == 0, "net_amount"] = 1
     return dataframe
 
 

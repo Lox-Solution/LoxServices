@@ -398,7 +398,7 @@ def update_invoice_date_to_today(company: str, bill_number: str) -> None:
 def update_due_amount_with_fee(bill_number: str, new_fee: float) -> None:
     """Updates the due amount with the given fee for the given invoice number."""
     sql_query = f"""
-        UPDATE mainproject-269810.LoxData.InvoicesDetails
+        UPDATE LoxData.InvoicesDetails
         
         SET 
             update_datetime = CURRENT_DATETIME('Europe/Amsterdam'),

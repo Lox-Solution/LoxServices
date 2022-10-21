@@ -12,6 +12,9 @@ dtypes_invoices = {
     'description': str,
     'quantity': int,
     'amount': float,
+    'original_currency_code': str,
+    'original_amount': float,
+    'original_net_amount':float,
     'incentive_amount': float,
     'net_amount': float,
     'discount': float,
@@ -23,11 +26,7 @@ dtypes_invoices = {
     'length': float,
     'width': float,
     'height': float,
-    'zone': str,
-    # 'type_weight': str,
-    # missing in the csv
-    # 'lead_tracking_number': str,
-    # 'is_return': bool
+    'zone': str
 }
 
 na_invoices = {
@@ -108,13 +107,7 @@ dtypes_refunds = {
     'declined_date': str,
     'reminder_date_01': str,
     'reminder_date_02': str,
-    'last_contact_date': str,
-    # missing in the csv
-    # 'credit_invoice_number': str,
-    # 'lox_invoice_number': str,
-    # 'claim_number': str,
-    # 'is_lox_claim': bool,
-    # 'dispute_date': str
+    'last_contact_date': str
 }
 
 na_refunds = {
@@ -138,7 +131,6 @@ na_refunds = {
     'credit_invoice_number': '',
     'lox_invoice_number': '',
     'claim_number': '',
-    'is_lox_claim': False,
     'request_date': '',
     'confirm_date': '',
     'credit_date': '',
@@ -158,5 +150,4 @@ dates_refunds = [
     'reminder_date_01',
     'reminder_date_02',
     'last_contact_date',
-    # 'dispute_date',
 ]
