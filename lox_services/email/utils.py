@@ -7,7 +7,7 @@ https://developers.google.com/identity/protocols/OAuth2
 2. Generate a new access tokens using a refresh token(refresh_token)
 3. Generate an OAuth2 string to use for login (access_token)
 
-This setup is for loxteam@loxsolution.com
+This setup is for *LOX_TEAM_EMAIL*
 """
 
 import re
@@ -20,7 +20,6 @@ from urllib import parse
 from lox_services.config.env_variables import get_env_variable
 
 GOOGLE_ACCOUNTS_BASE_URL = 'https://accounts.google.com'
-# REDIRECT_URI = 'https://loxsolution.com'
 REDIRECT_URI = 'http://localhost'
 
 def get_google_client_id():

@@ -37,18 +37,18 @@ mock_email_en_with_variables = {
 
 mock_invoice_fr = {
     "t_title": "Facture Lox Solution - {invoice_date}",
-    "t_recap_sentence": "Veuillez transférer le montant <strong>{total_with_vat}</strong> avant le: <strong>{invoice_due_date}</strong> au nom de LOX SOLUTION B.V.  sur le compte bancaire: <strong>NL35 BUNQ 2045 1979 72</strong> avec la référence de facture: {invoice_number}",
+    "t_recap_sentence": "Veuillez transférer le montant <strong>{total_with_vat}</strong> avant le: <strong>{invoice_due_date}</strong> au nom de LOX SOLUTION B.V.  sur le compte bancaire: <strong>{IBAN}</strong> avec la référence de facture: {invoice_number}",
 }
 
 mock_invoice_fr_with_variables = {
     "t_title": "Facture Lox Solution - 22/06/2022",
-    "t_recap_sentence": "Veuillez transférer le montant <strong>7300€</strong> avant le: <strong>15/07/2022</strong> au nom de LOX SOLUTION B.V.  sur le compte bancaire: <strong>NL35 BUNQ 2045 1979 72</strong> avec la référence de facture: 1234567890",
+    "t_recap_sentence": "Veuillez transférer le montant <strong>7300€</strong> avant le: <strong>15/07/2022</strong> au nom de LOX SOLUTION B.V.  sur le compte bancaire: <strong>NL12 3456 7890 12</strong> avec la référence de facture: 1234567890",
 }
     
 class Test_insert_variables(unittest.TestCase):
     
     def test_translations_with_variables(self):
         self.assertDictEqual(insert_variables(mock_email_en, company = 'Helloprint', month = 'September', year = '2022'), mock_email_en_with_variables)
-        self.assertDictEqual(insert_variables(mock_invoice_fr, invoice_date = '22/06/2022', total_with_vat = '7300€', invoice_due_date = '15/07/2022', invoice_number = '1234567890'), mock_invoice_fr_with_variables)
+        self.assertDictEqual(insert_variables(mock_invoice_fr, invoice_date = '22/06/2022', total_with_vat = '7300€', invoice_due_date = '15/07/2022', IBAN = 'NL12 3456 7890 12', invoice_number = '1234567890'), mock_invoice_fr_with_variables)
 
 
