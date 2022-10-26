@@ -1,10 +1,11 @@
 import random
-import time
+from ssl import SSLError
 from concurrent.futures import ThreadPoolExecutor
 from itertools import repeat
 from typing import Callable, List
 
 import requests
+import urllib3
 
 from lox_services.utils.decorators import DataUsage, Perf
 from lox_services.utils.general_python import print_error, print_success
@@ -28,19 +29,42 @@ class BrightDataProxyManager:
             return response.text
         else:
             error_message = f"{response_status} - {response.text}"
+            if error_message == '401 - Customer not found':
+                error_message = 'Your BrightData API token is not up to date. Create or refresh it via https://brightdata.com/cp/setting. Then add the token to your .env file.'
             print_error(error_message)
             raise Exception(f"Bright Data returned an error: {error_message}")
     
         
     @staticmethod
-    def _excecute_request_with_retry(request_method: Callable, options: dict, retries: int = 2):
-        result: requests.Response = request_method(**options)
+    def _excecute_request_with_retry(request_method: Callable, options: dict, retries: int = 3):
+        
         tries = 0
+        result = requests.Response
+        result.status_code = 300
+        
         while result.status_code >= 300 and tries < retries:
+            
+            try:
+                result = request_method(**options)
+            except requests.exceptions.ProxyError or urllib3.exceptions.SSLError or urllib3.HTTPSConnectionPool or requests.exceptions.SSLError:
+                result =  requests.Response
+                result.status_code = 407
+            
+            ip = options["proxies"]["http"].split("ip-")[1].split(":")[0]
+            
+            if result.status_code == 403:
+                print_error(f"403 Forbidden with ip: {ip}.")
+            elif result.status_code == 407:
+                print_error(f"407 Proxy connection error with ip: {ip}.")
+            elif result.status_code == 443:
+                print_error(f"443 blocked with ip: {ip}.")
+            elif result.status_code >= 300:
+                print_error(f"{result.status_code} status code with ip: {ip}.")
+                
+            if tries > 0:
+                print_error(f"{ip}: {tries} error(s) occured (status code {result.status_code}), trying one more time.")
+            
             tries += 1
-            print_error(f"{tries} error occured, trying one more time.")
-            time.sleep(1)
-            result = request_method(**options)
         
         return result
     
@@ -108,8 +132,8 @@ class BrightDataProxyManager:
         request_method: Callable,
         request_options: List[dict],
         countries: List[str] = ['NL'],
-        max_use_per_proxy: int = 1,
-        number_of_threads: int = 20,
+        number_of_threads: int = 25,
+        max_use_per_proxy: int = 10,
     ) -> List[requests.Response]:
         """Executes many requests using proxies and multithreading for multiple countries.
             ## Arguments
@@ -117,6 +141,7 @@ class BrightDataProxyManager:
             - `request_options`: The list of options to used by the request_method.
             - `countries`: A list of countries where the proxies should be.
             - `number_of_threads`: The number of threads to use.
+            - `max_use_per_proxy`: The maximum number of use per ip for this call.
 
             ## Returns
             - A list of requests.Response objects
@@ -131,8 +156,8 @@ class BrightDataProxyManager:
                 number_of_threads=20
             )
             ```
-        
         """
+        number_of_threads = min(50, number_of_threads)
         proxies = self._get_available_ips_per_countries(countries) 
         options_with_proxies = self._populate_proxies_into_request_options(request_options, proxies, max_use_per_proxy)
         # options_with_proxies = request_options
@@ -141,11 +166,9 @@ class BrightDataProxyManager:
         results = []
         with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
             for result in executor.map(self._excecute_request_with_retry, repeat(request_method), options_with_proxies):
-                if result.status_code == 200:
-                    results.append(result)
-                    if len(results) % int(options_len / 10) == 0:
-                        print(f"{len(results)} / {options_len}")
-                else:
-                    print_error(result.status_code)
-            
+                if len(results) % max(1, int(options_len / 10)) == 0:
+                    print(f"{len(results)} / {options_len}")
+                
+                results.append(result)
+        
         return results
