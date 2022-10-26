@@ -1,5 +1,3 @@
-from typing import List
-
 import pandas as pd
 
 from lox_services.persistence.database import query_handlers

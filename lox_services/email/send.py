@@ -9,21 +9,20 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from enum import Enum
-from typing import List, Literal
+from typing import List
 import lxml.html
 import pandas as pd
+from lox_services.config.constants import LOX_TEAM_EMAIL, LOX_FINANCE_EMAIL
 
 from lox_services.config.env_variables import get_env_variable
 from lox_services.email.utils import generate_oauth2_string,refresh_authorization, get_google_client_id
 from lox_services.utils.general_python import get_file_size, print_success
 
 REFRESH_KEYS_LOX_ACCOUNTS = {
-    "loxteam@loxsolution.com": "LOXTEAM_REFRESH_TOKEN",
-    "finance@loxsolution.com": "FINANCE_REFRESH_TOKEN",
-    "cheerz@loxsolution.com": "CHEERZ_REFRESH_TOKEN",
-    "lebeurre@loxsolution.com":"LEBEURRE_REFRESH_TOKEN"
+    LOX_TEAM_EMAIL: "LOXTEAM_REFRESH_TOKEN",
+    LOX_FINANCE_EMAIL: "FINANCE_REFRESH_TOKEN"
 }
-LOX_ACCOUNTS = Literal["loxteam@loxsolution.com","finance@loxsolution.com", "cheerz@loxsolution.com","lebeurre@loxsolution.com"]
+LOX_ACCOUNTS = [LOX_TEAM_EMAIL, LOX_FINANCE_EMAIL]
 
 class ContentTypes(Enum):
     """Enumeration of all email content types"""
@@ -35,6 +34,8 @@ def send_email(*,
     sender_smtp_server: str = 'smtp.gmail.com:587', #Default is google
     sender_password: str,
     receiver_email_address: str, 
+    cc_email_addresses: List[str] = [],
+    bcc_email_addresses: List[str] = [], 
     subject: str, content: str, 
     content_type: ContentTypes = ContentTypes.STRING, 
     attachments: List[str] = []
@@ -45,6 +46,8 @@ def send_email(*,
         - `sender_smtp_server`: The server of the email sender. Look on the internet to get it.
         - `sender_password`: The password of the email address.
         - `receiver_email_address`: Email address of the receiver.
+        - `cc_email_addresses`: List of the emails added to copy of this email
+        - `bcc_email_addresses`: List of the emails added to hidden copy of this email
         - `subject`: Subject of the email.
         - `content`: Message content of the email. Can be a string representing HTML.
         - `content_type`: Type of the content. Used to differ html from string email.
@@ -67,6 +70,14 @@ def send_email(*,
     email_object['From'] = sender_email_address
     email_object['To'] = receiver_email_address
     email_object['Subject'] = subject
+    # CC
+    cc_email_addresses = list(filter(lambda element: element is not None, cc_email_addresses))
+    if len(cc_email_addresses) > 0:
+        email_object['Cc'] = ", ".join(cc_email_addresses)
+    # BCC
+    bcc_email_addresses = list(filter(lambda element: element is not None, bcc_email_addresses))
+    if len(bcc_email_addresses) > 0:
+        email_object['Bcc'] = ", ".join(bcc_email_addresses)
     
     if content_type == ContentTypes.HTML: 
         part_html = MIMEText(content.encode('utf-8'), 'html', _charset='utf-8')
@@ -104,7 +115,7 @@ def send_email(*,
 
 def send_emails_from_loxsolution_account(
     *,
-    sender_email_address: LOX_ACCOUNTS = "loxteam@loxsolution.com",
+    sender_email_address: str = LOX_TEAM_EMAIL,
     receiver_email_addresses: List[str],
     cc_email_addresses: List[str] = [],
     bcc_email_addresses: List[str] = [],
@@ -135,6 +146,8 @@ def send_emails_from_loxsolution_account(
         - Nothing if no exception is raised.
         - Raises an exception otherwise.
     """
+    if sender_email_address not in LOX_ACCOUNTS:
+        raise ValueError("Sender's email address is invalid. Valid emails at the moment are team and finance emails.")
     print(f"{sender_email_address} is sending an email to {receiver_email_addresses} ...")
     print(f"Subject: {subject}\nccs: {cc_email_addresses}\nbccs: {bcc_email_addresses} ...")
     refresh_key = REFRESH_KEYS_LOX_ACCOUNTS[sender_email_address]

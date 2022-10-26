@@ -6,7 +6,7 @@ from functools import reduce
 
 from selenium import webdriver
 import undetected_chromedriver as undetected_webdriver
-
+from lox_services.config.env_variables import get_env_variable
 from lox_services.config.paths import OUTPUT_FOLDER
 
 class ChromeWithPrefs(undetected_webdriver.Chrome):
@@ -61,10 +61,12 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
         pass
 
 
-def init_chromedriver(download_directory:str) -> webdriver.Chrome:
+def init_chromedriver(download_directory:str, size_length: int, size_width: int) -> webdriver.Chrome:
     """Generates default chrome options for the given download directory.
     ## Arguments
         - `download_folder`: Folder where we want to download the invoices
+        - `size_length`: Length of the chrome window 
+        - `size_width`: Width of the chrome window
     
     ## Returns
     - The well setup driver 
@@ -81,9 +83,9 @@ def init_chromedriver(download_directory:str) -> webdriver.Chrome:
     options.add_argument('--no-first-run --no-service-autorun --password-store=basic')
     options.add_argument("--disable-popup-blocking")
     options.add_argument("--incognito")
-    options.add_argument("--window-size=960,960")
+    options.add_argument(f"--window-size={size_length},{size_width}")
 
-    return ChromeWithPrefs(options=options)
+    return ChromeWithPrefs(version_main=105, options=options)
 
 
 def shutdown_current_instances():
@@ -94,13 +96,16 @@ def shutdown_current_instances():
     os.system("pkill chrome")
 
 
-def run_chromedriver(download_folder:str = OUTPUT_FOLDER):
+def run_chromedriver(download_folder:str = OUTPUT_FOLDER, size_length: int = 960, size_width: int = 960):
     """ Creates an undetected chromedriver with the wanted download folder.
         ## Arguments
         - `download_folder`: Folder where we want to download the invoices
+        - `size_length`: Length of the chrome window 
+        - `size_width`: Width of the chrome window
         
         ## Return
         - A well setup chrome driver
     """
-    shutdown_current_instances()
-    return init_chromedriver(download_folder)
+    if get_env_variable("ENVIRONMENT")=="production":
+        shutdown_current_instances()
+    return init_chromedriver(download_folder, size_length, size_width)

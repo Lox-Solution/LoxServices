@@ -1,4 +1,5 @@
 import base64
+import gzip
 from json import loads
 from typing import Dict
 
@@ -18,3 +19,8 @@ def image_to_base64(image_path: str) -> str:
     with open(image_path, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read())
     return encoded_string.decode("utf-8")
+
+def gzip_to_csv(infile, tofile):
+    with open(infile, 'rb') as inf, open(tofile, 'w', encoding='utf8') as tof:
+        decom_str = gzip.decompress(inf.read()).decode('utf-8')
+        tof.write(decom_str)

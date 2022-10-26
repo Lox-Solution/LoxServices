@@ -19,5 +19,7 @@ UserData.Credentials
     contact_phone STRING,
     is_receiving_invoices BOOL,
     insert_datetime DATETIME NOT NULL, --REQUIRED
-    update_datetime DATETIME
+    update_datetime DATETIME,
+    contacted BOOL,
+    no_claim_by_reasons ARRAY<STRING> OPTIONS(description = "An array of reasons that should not be claimed") 
 )

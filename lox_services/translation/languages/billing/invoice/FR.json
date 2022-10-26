@@ -11,7 +11,7 @@
     "t_quantity": "Quantité",
     "t_due_amount": "Montant dû",
     "t_vat_details":"La TVA (VAT) est auto-liquidée.",
-    "t_recap_sentence": "Veuillez transférer le montant <strong>{total_with_vat}</strong> avant le: <strong>{invoice_due_date}</strong> au nom de LOX SOLUTION B.V. sur le compte bancaire: <strong>NL35 BUNQ 2045 1979 72</strong> avec la référence de facture: {invoice_number}. Pour régler avec un autre moyen de payment, vous pouvez utiliser le lien suivant: <a href=\"{payment_link}\">{payment_link}</a>.",
+    "t_recap_sentence": "Veuillez transférer le montant <strong>{total_with_vat}</strong> avant le: <strong>{invoice_due_date}</strong> au nom de LOX SOLUTION B.V. sur le compte bancaire: <strong>{lox_iban}</strong> avec la référence de facture: {invoice_number}. Pour régler avec un autre moyen de payment, vous pouvez utiliser le lien suivant: <a href=\"{payment_link}\">{payment_link}</a>.",
     "t_reason_refund": "Raison du remboursement",
     "t_tracking_number": "Numéro de suivi",
     "t_credit_date": "Date du crédit",
