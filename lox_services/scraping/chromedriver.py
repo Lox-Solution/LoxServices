@@ -85,7 +85,7 @@ def init_chromedriver(download_directory:str, size_length: int, size_width: int)
     options.add_argument("--incognito")
     options.add_argument(f"--window-size={size_length},{size_width}")
 
-    return ChromeWithPrefs(options=options)
+    return ChromeWithPrefs(version_main=105, options=options)
 
 
 def shutdown_current_instances():
