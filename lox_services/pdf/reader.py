@@ -65,12 +65,12 @@ def PDFtoCSV(path_to_pdf: str, first_page_to_read: int, area: List[str], columns
     ## Arguments
         - `path_to_pdf`: The location of the PDF file
         - `first_page_to_read`: The first page to take into account 
-        - `area`: Array borders in a list:[top, left, bottom ,right]
-        - `columns`: Column distances in a list of floats
+        - `area`: Array borders in a list:[top, left, bottom ,right] - can be left [] if the full PDF is needed
+        - `columns`: Column distances in a list of floats - can be left [] if the full PDF is needed
         - `guess`: True if the script guesses the columns
     
     ## Returns
-    - The number of pages of the PDF file
+    - The CSV file created from the PDF
     """
     last_page = countNumberOfPagesOfPdf(path_to_pdf)
     
@@ -95,15 +95,15 @@ def PDFtoDf(path_to_pdf: str, first_page_to_read: int, last_page_to_read: int, a
         - `path_to_pdf`: The location of the PDF file
         - `first_page_to_read`: The first page to take into account 
         - `last_page_to_read`: The last page to take into account 
-        - `area`: Array borders in a list:[top, left, bottom ,right]
-        - `columns`: Column distances in a list of floats
+        - `area`: Array borders in a list:[top, left, bottom ,right] - can be left [] if the full PDF is needed
+        - `columns`: Column distances in a list of floats - can be left [] if the full PDF is needed
         - `guess`: True if the script guesses the columns
         
     ## Example
         >>> PDFtoDf("/Users/me/Downloads/XXXXX.pdf")
     
     ## Returns
-    - A dataframe containing the PDF information
+    - A list of DataFrames or dict containing the PDF information
     """
     if last_page_to_read is None:
         last_page_to_read = countNumberOfPagesOfPdf(path_to_pdf)
