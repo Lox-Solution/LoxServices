@@ -125,3 +125,22 @@ def PDFtoDf(path_to_pdf: str, first_page_to_read: int, last_page_to_read: int, a
         pandas_options=pandas_options
     )
     return df
+
+
+def is_word_in_pdf(pdf_path: str, first_page_to_read: int, last_page_to_read: int, text_to_search: str) -> bool:
+    """Returns True if the text_to_search is found in the pdf file, False otherwise
+    
+    ##Arguments:
+    - `pdf_path`: path to the pdf file
+    - `first_page_to_read`: first page to read for the search
+    - `last_page_to_read`: last page to read for the search
+    - `text_to_search`: text to search in the pdf file
+        
+    """
+
+    df = PDFtoDf( pdf_path, first_page_to_read,  last_page_to_read,  [],  [],  False)[0]
+    
+    for column in df.columns:
+        if df[column].str.contains(text_to_search).any():
+            return True
+        return False

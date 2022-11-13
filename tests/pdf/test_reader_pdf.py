@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import unittest
 
-from lox_services.pdf.reader import PDFtoCSV, PDFtoDf, convertListOfInchesToListOfPdfUnits, countNumberOfPagesOfPdf, inchesToPDFUnits
+from lox_services.pdf.reader import PDFtoCSV, PDFtoDf, convertListOfInchesToListOfPdfUnits, countNumberOfPagesOfPdf, inchesToPDFUnits, is_word_in_pdf
 
 PDF_PATH = "lox_services/pdf/assets/XXXXXDXXXXXXXX.pdf"
 
@@ -49,3 +49,14 @@ class Test_encrypt_functions(unittest.TestCase):
         list_dataframe_created = PDFtoDf(PDF_PATH, first_page_to_read, last_page_to_read, area, columns, guess)
 
         self.assertEqual(isinstance(list_dataframe_created[0], pd.DataFrame), True)
+        
+        
+        
+    def test_is_word_in_pdf(self):
+        'True must be returned when the word is present in the dataframe, False otherwise'
+        
+        word_existing_in_pdf = "Invoice 71344294"
+        word_non_existing_in_pdf = "Hello world"
+        
+        self.assertEqual(is_word_in_pdf(PDF_PATH, 1, 1,  word_existing_in_pdf) , True)
+        self.assertEqual(is_word_in_pdf(PDF_PATH, 1, 1,  word_non_existing_in_pdf) , False)
