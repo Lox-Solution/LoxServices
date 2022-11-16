@@ -13,3 +13,4 @@
 0.1.3 Fix assets in billing service
 0.1.4 Add local language download feature
 0.1.5 Remove finance service and update all services
+0.1.6 Add Postmark function in email.static sub-service

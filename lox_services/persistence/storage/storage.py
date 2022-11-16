@@ -7,6 +7,7 @@ from typing import List
 
 import pandas as pd
 from google.api_core.page_iterator import HTTPIterator
+from google.api_core import exceptions
 from google.cloud.storage import Client, Blob
 
 from lox_services.persistence.database.queries.user_data import select_all_carrier_invoices_information
@@ -92,7 +93,16 @@ def download_file(bucket_name: str, blob_name: str, target_file_path: str):
     storage_client = Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(blob_name)
-    blob.download_to_filename(target_file_path)
+    
+    try: 
+        blob.download_to_filename(target_file_path)
+    except exceptions.NotFound as e:
+        print(f"file {blob_name} not found")
+        os.remove(target_file_path)
+        raise e
+    
+
+    
     print_success(f"Successfuly downloaded at {target_file_path}")
 
 

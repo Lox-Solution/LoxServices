@@ -73,22 +73,3 @@ def decrypt_message(encrypted_message):
     
     return decrypted_message.decode()
 
-
-# encrypt df with a password column
-def encrypt_df(df: pd.DataFrame):
-    df['password'] = df['password'].apply(encrypt_message)
-    return df
-
-
-# encrypt csv with a password column
-def encrypt_csv(file):
-    df = pd.read_csv(file)
-    df['password'] = df['password'].apply(encrypt_message)  
-    df.to_csv('encrypt.csv', index=False)
-
-
-# encrypt csv with a password column
-def decrypt_csv(file):
-    df = pd.read_csv(file)
-    df['password'] = df['password'].apply(decrypt_message)
-    df.to_csv('decrypt.csv', index=False)
