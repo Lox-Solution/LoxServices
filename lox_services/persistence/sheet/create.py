@@ -1,8 +1,9 @@
 import pandas as pd
 from gspread.client import Client
 from gspread.models import Spreadsheet
+from lox_services.config.env_variables import get_env_variable
 
-from lox_services.config.constants import LOX_TEAM_EMAIL
+LOX_TEAM_EMAIL = get_env_variable('LOX_TEAM_EMAIL')
 
 
 def create_spreadsheet(gc: Client, *, name: str) -> Spreadsheet:
