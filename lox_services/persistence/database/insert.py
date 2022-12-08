@@ -1,6 +1,7 @@
 """Contains the function to insert dataframes into the database."""
 from datetime import datetime
 from pprint import pprint
+import re
 from pytz import timezone
 import os
 from sys import path
@@ -10,6 +11,7 @@ import pandas as pd
 from google.cloud.bigquery import Client
 
 from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
+from lox_services.persistence.database.exceptions import MissingColumnsException, InvalidDataException
 from lox_services.persistence.database.datasets import (
     InvoicesData_dataset,
     InvoicesDataLake_dataset,
@@ -19,8 +21,8 @@ from lox_services.persistence.database.datasets import (
     UserData_dataset)
 from lox_services.persistence.database.query_handlers import select
 from lox_services.persistence.database.utils import generate_id
+from lox_services.persistence.storage.constants import INVOICE_BASE_URL
 from lox_services.utils.general_python import print_error, print_success
-from lox_services.persistence.database.exceptions import InvalidDataException
 # pylint: disable=line-too-long
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(SERVICE_ACCOUNT_PATH)
@@ -69,7 +71,7 @@ def insert_dataframe_into_database(dataframe: pd.DataFrame, table: DatasetTypeAl
         elif isinstance(table, UserData_dataset):
             dataset = "UserData"
             if table.name == "InvoicesFromClientToCarrier":
-                remove_duplicate_invoices_from_client_to_carrier(dataframe)            
+                dataframe = remove_duplicate_InvoicesFromClientToCarrier(dataframe)
         elif isinstance(table, TestEnvironment_dataset):
             dataset="TestEnvironment"
             if table.name == "Refunds":
@@ -268,7 +270,7 @@ def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFram
         dataframe = dataframe.loc[~dataframe["tracking_number"].isin(already_saved_tracking_numbers)]
     return dataframe
 
-def remove_duplicate_invoices_from_client_to_carrier(dataframe: pd.DataFrame) -> pd.DataFrame:
+def remove_duplicate_InvoicesFromClientToCarrier(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes duplicates from InvoicesFromClientToCarrier dataframe"""
     carrier = dataframe.iloc[0]['carrier']
     company = dataframe.iloc[0]['company']
@@ -290,6 +292,25 @@ def remove_duplicate_invoices_from_client_to_carrier(dataframe: pd.DataFrame) ->
 
 def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Performs data quality check on client invoices dataframe"""
+    missing_columns = []
+    for column in ["company", "carrier", "tracking_number", "data_source", "is_original_invoice"]:
+        if column not in dataframe.columns:
+            missing_columns.append(column)
+    if len(missing_columns)>0:
+        raise MissingColumnsException(", ".join(missing_columns))
+    #Check value invoice_url
+    for invoice_url in dataframe["invoice_url"].to_list():
+        if pd.isna(invoice_url):
+            raise ValueError("invoice_url should be defined for each row")
+        if not re.match(r"(https://storage.cloud.google.com).*", invoice_url):
+            raise ValueError(f"invoice_url has to start by {INVOICE_BASE_URL}")
+        
+    #Check value is_original_invoice
+    is_original_invoice_wrong_values = dataframe[~dataframe["is_original_invoice"].isin([True, False])]
+    if not is_original_invoice_wrong_values.empty:
+        wrong_values  = is_original_invoice_wrong_values["is_original_invoice"].unique().tolist()
+        raise ValueError(f"Incorrect values {wrong_values} for field is_original_invoice. Only True or False are authorized")
+    
     dataframe["quantity"] = pd.to_numeric(dataframe["quantity"])
     dataframe["net_amount"] = pd.to_numeric(dataframe["net_amount"])
     dataframe = dataframe.loc[~(dataframe["quantity"] < 0)]
@@ -383,25 +404,3 @@ def remove_duplicate_headers_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
             dataframe.drop(index, inplace=True)
             
     return dataframe
-
-
-def remove_duplicate_headers_csv_file(csv_path: path) -> None:
-    """Removes rows from the file if they are similar to the header and are not the header
-        ## Arguments
-        - `file`: path to the file csv that needs to be checked
-        
-        ## Example
-            >>> remove_duplicate_headers_csv_file(csv_path)
-    """
-    # Save the header values
-    header = open(csv_path,'r').readlines()[0]
-    # Get all lines that are after the header
-    all_lines = open(csv_path,'r').readlines()[1:]
-    # Open the file in write mode ( delete the content )
-    f = open(csv_path,'w')
-    # Write the header in the empty file
-    f.write(header)
-    # Write all the following rows if they are diferent than the header
-    for line in all_lines:
-        if header != line:
-            f.write(line)

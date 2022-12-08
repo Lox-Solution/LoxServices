@@ -1,1 +1,7 @@
 INTERNAL_COMPANIES = ["Test", "test", "Lox", "lox"]
+
+ORIGINAL_INVOICES_BUCKET = "invoices_email"
+
+CLIENT_INVOICES_BUCKET = "invoices_client"
+
+INVOICE_BASE_URL = f"https://storage.cloud.google.com/{CLIENT_INVOICES_BUCKET}"

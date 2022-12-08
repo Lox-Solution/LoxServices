@@ -77,8 +77,9 @@ def push_run_to_database(run_output_folder, carrier, company, account_number_inp
                     df_deliveries.loc[:,column] = None
             
             #Format time
-            df_deliveries.loc[:,'time'] = df_deliveries['time'].apply(format_time)
-            df_deliveries.loc[:,'date_time'] = df_deliveries.apply(lambda x: format_datetime(x['date'], x['time']), axis=1)
+            if "date_time" not in df_deliveries.columns:
+                df_deliveries.loc[:,'time'] = df_deliveries['time'].apply(format_time)
+                df_deliveries.loc[:,'date_time'] = df_deliveries.apply(lambda x: format_datetime(x['date'], x['time']), axis=1)
             df_deliveries = df_deliveries.fillna(value=na_deliveries).astype(dtypes_deliveries)
             
             

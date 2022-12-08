@@ -97,7 +97,7 @@ def update(query: str, print_query: bool = True) -> DataFrame:
         try:
             result=raw_query(query, print_query)
             print("Rows affected:", result.num_dml_affected_rows)
-            result=result.result().to_dataframe()
+            result_returned = result.num_dml_affected_rows
             query_success=True
         except Exception as error:
             error_msg = error.__dict__["_errors"][0]["message"]
@@ -109,8 +109,8 @@ def update(query: str, print_query: bool = True) -> DataFrame:
                     raise error
             else:
                 raise error
-    if result is not None:
-        return result
+    if result_returned is not None:
+        return result_returned
     else:
         raise Exception("Error processing update: ", query)
 
