@@ -62,19 +62,6 @@ class TestEnvironment_dataset(Enum):
     Refunds = "Refunds"
     Refunds_copy = "Refunds_copy"
 
-def get_big_query_datasets():
-    "Function that fetches all the datasets present in BigQuery"
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(SERVICE_ACCOUNT_PATH)
-    client = Client()
-    return list(client.list_datasets())
-
-
-def get_data_lake_table_with_carrier(carrier : str) -> str:
-    """Returns the table corresponding to the specified carrier."""
-    for table in InvoicesDataLake_dataset:
-        if carrier + "_DataLake" == table.value:
-            return table
-
 
 DatasetTypeAlias = Union[
     InvoicesData_dataset,
