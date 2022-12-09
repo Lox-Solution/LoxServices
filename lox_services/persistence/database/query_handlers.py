@@ -70,7 +70,7 @@ def select(query: str, print_query: bool = True) -> DataFrame:
     return raw_query(query, print_query).result().to_dataframe()
 
 
-def update(query: str, print_query: bool = True) -> DataFrame:
+def update(query: str, print_query: bool = True) -> int:
     """Checks if the query begings with a UPDATE statement. If so the query is being executed.
         ## Arguments
         - `query`: String representation of the query to be executed.
@@ -80,7 +80,7 @@ def update(query: str, print_query: bool = True) -> DataFrame:
             >>> update("UPDATE InvoicesData.Refunds SET state='Test' WHERE company='Test'")
 
         ## Return
-        The result of the update query as a dataframe.
+        The result of the update query is a number of affected rows.
     """
     if not query.lstrip().startswith("UPDATE"):
         raise BadQueryTypeException('UPDATE')
