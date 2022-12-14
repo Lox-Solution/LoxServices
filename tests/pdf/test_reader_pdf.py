@@ -2,13 +2,11 @@ import os
 import pandas as pd
 import unittest
 
-from lox_services.pdf.reader import PDFtoCSV, PDFtoDf, convertListOfInchesToListOfPdfUnits, countNumberOfPagesOfPdf, inchesToPDFUnits, is_word_in_pdf
+from lox_services.pdf.reader import PDFtoDf, convertListOfInchesToListOfPdfUnits, countNumberOfPagesOfPdf, inchesToPDFUnits, is_word_in_pdf
 
-PDF_PATH = "lox_services/pdf/assets/XXXXXDXXXXXXXX.pdf"
+PDF_PATH = os.path.join(os.path.dirname(__file__), 'XXXXXDXXXXXXXX.pdf')
 
-
-
-class Test_encrypt_functions(unittest.TestCase):
+class Test_pdf_functions(unittest.TestCase):
     
     
     def test_convertListOfInchesToListOfPdfUnits(self):
@@ -17,7 +15,7 @@ class Test_encrypt_functions(unittest.TestCase):
         final_list_of_inches = [72,108,144]
         self.assertEqual(convertListOfInchesToListOfPdfUnits(list_of_inches), final_list_of_inches)
     
-    def test_load_key(self):
+    def test_number_of_pages(self):
         'The number of page returned should be 1'
         number_of_page_in_the_pdf = 1
         self.assertEqual(countNumberOfPagesOfPdf(PDF_PATH),number_of_page_in_the_pdf)
@@ -28,16 +26,7 @@ class Test_encrypt_functions(unittest.TestCase):
         initial_tuple = (1,1.5,2)
         final_tuple = (72,108,144) 
         self.assertEqual(inchesToPDFUnits(initial_tuple), final_tuple)
-        
-    def test_PDFtoCSV(self):
-        'A CSV must be created in the same folder as the PDF file'
-        first_page_to_read = 1
-        area = [0, 10, 15, 20]
-        columns = [0, 10, 15, 20]
-        guess = True
-        csv_file_created = PDFtoCSV(PDF_PATH, first_page_to_read, area, columns, guess)
-        
-        self.assertEqual(os.path.isfile(csv_file_created), True)
+
         
     def test_PDFtoDf(self):
         'A dataframe must be returned from the PDF file'
