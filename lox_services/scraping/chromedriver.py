@@ -61,7 +61,7 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
         pass
 
 
-def init_chromedriver(download_directory:str, size_length: int, size_width: int) -> webdriver.Chrome:
+def init_chromedriver(download_directory:str, size_length: int, size_width: int, version: int = 107) -> webdriver.Chrome:
     """Generates default chrome options for the given download directory.
     ## Arguments
         - `download_folder`: Folder where we want to download the invoices
@@ -86,7 +86,7 @@ def init_chromedriver(download_directory:str, size_length: int, size_width: int)
     options.add_argument(f"--window-size={size_length},{size_width}")
     
     # Chnage the the version here to match version on main VM
-    return ChromeWithPrefs(version_main=107, options=options)
+    return ChromeWithPrefs(version_main=version, options=options)
 
 
 def shutdown_current_instances():
