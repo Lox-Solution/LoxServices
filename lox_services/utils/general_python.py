@@ -3,9 +3,12 @@ Defines some utils functions for the project.
 """
 import os
 import re
+import time
 import unicodedata
 from datetime import datetime
 from typing import Iterator, List, Literal, Tuple
+
+import pandas as pd
 
 from lox_services.utils.enums import SIZE_UNIT, Colors
 
@@ -28,6 +31,19 @@ def print_error(string: str):
 def print_success(string: str):
     """Format a string to a success style."""
     print(colorize(string, Colors.Green))
+
+
+def print_step(step):
+    """Format the log message for the begining of a step."""
+    # pylint: disable=anomalous-backslash-in-string
+    print(colorize(
+f"""
+     _
+    | |    _____  __
+    | |   / _ \ \/ /
+    | |__| (_) >  <      STEP {step}
+    |_____\___/_/\_\\
+""",Colors.Blue))
 
 
 FileOrFolder = Literal["file","folder"]
@@ -85,6 +101,55 @@ def safe_to_csv(df, path) -> None:
     df.to_csv(path)
 
 
+StringSearchMode = Literal["left","right","union"]
+def string_search(string: str, list_of_strings: List[str], *, mode: StringSearchMode = "left", case_sensitive=False)-> bool:
+    """Searches if a string is in a list of strings. 
+        Or if any element in a list of strings is in a string.
+        Or both.
+        
+        ## Arguments
+        - `string`: The single string affected by the search.
+        - `list_of_strings`: The list of strings affected by the search.
+        - `mode`: 
+            - "left": Looks for at least one occurence of the string parameter in the list parameter.
+            - "right": Looks for at least one occurence of every string in the list into the string parameter.
+            - "union": Checks if one of the two previous mode is valid.
+        - `case_sensitive`: Checks the case if set to True
+        
+        ## Example
+            >>> string_search("alpha", ["I am alpha", "You are beta"], mode= "left")
+            # True, "alpha" is in "I am alpha"
+            >>> string_search("I am alpha", ["alpha", "beta"], mode= "right")
+            # True, "alpha" is in "I am alpha"
+            >>> string_search("I am gamma", ["I am gamma and I love epsilon", "gamma"], mode= "union")
+            # True, "gamma" is in "I am gamma" or "I am gamma" is in "I am gamma and I love epsilon" 
+        
+        ## Returns
+        - True if the match is correct
+        - False otherwise    
+    """
+    if not case_sensitive : 
+        string = string.lower()
+        list_of_strings = list(map(str.lower, list_of_strings))
+    left: bool = any(str(string) in str(str_element) for str_element in list_of_strings)
+    right: bool = any(str(str_element) in str(string) for str_element in list_of_strings)
+    if mode == "left": 
+        return left
+    elif mode == "right": 
+        return right
+    elif mode == "union": 
+        return left or right
+    else: 
+        raise Exception("Wrong mode. Please refer to function documentation.")
+
+
+def string_search_from_series(serie: pd.Series, strings: List[str]) -> List[bool]:
+    """Does a string search from a pandas Series and returns a list of booleans.
+        This is mainly used for filtering dataframes.
+    """
+    return [string_search(value, strings, mode="right") for value in serie.values]
+
+
 def convert_bytes_to_human_readable_size_unit(size: int) -> Tuple[float, str]:
     formated_size = 0
     size_unit = SIZE_UNIT.BYTES
@@ -100,6 +165,15 @@ def get_file_size(file_path: str) -> Tuple[float,str]:
     """Gets file in size in given unit like KB, MB or GB"""
     size = os.path.getsize(file_path)
     return convert_bytes_to_human_readable_size_unit(size)
+
+
+def safe_remove(file_path: str):
+    "Remove a file if existing"
+    try:
+        os.remove(file_path)
+    except FileNotFoundError:
+        print("File does not exist")
+        pass
 
 
 def get_folder_size(folder_path: str, _human_readable = True):
@@ -259,5 +333,82 @@ def rreplace(s: str, old: str, new: str, occurrence: int)->str:
     return new.join(s.rsplit(old, occurrence))
 
 
+def remove_all_file_with_format_from_folder(
+    *, 
+    file_format:  str, 
+    folder_path: str, 
+    ignored_files : List[str] = [], 
+    recursive: bool = False) -> List[str]:
+    """Remove all file of a given format that are in a folder.
+    ## Arguments
+    - 'file_format' : kind of file you want to remove, either "csv", "xlsx", "pdf" (to avoid deleting everything in one run)
+    - 'folder_path' : Path of the folder to clean.
+    - 'ignored_files' : list of file NAME to not delete. default value : []
+    - 'recursive' : make the function recursive on subfolder if true. default value : False
+    
+    ## Returns
+    List of deleted files;
+    
+    ## Example
+    >>> remove_all_file_with_type_from_folder(
+        file_format = "csv", 
+        folder_path = "/home/output_folder", 
+        ignored_file = ["to_keep.csv","hello_world.csv"])
+    """
+    if file_format not in ["csv", "xlsx", "pdf"]:
+        raise ValueError(f"file_format has to be in ['csv', 'xlsx', 'pdf'] and it's '{file_format}'")
+    extension = "."+file_format
+    
+    deleted_files = []
+    if not os.path.exists(folder_path):
+        print("Folder path does not exists.")
+        return deleted_files
+    
+    
+    for obj in os.listdir(folder_path):
+        obj_path = os.path.join(folder_path, obj)
+        
+        if os.path.isdir(obj_path):
+            if recursive:
+                deleted_files = deleted_files + remove_all_file_with_format_from_folder(
+                    file_format = file_format, 
+                    folder_path= obj_path,
+                    ignored_files= ignored_files, 
+                    recursive= True)
+        
+        elif obj.endswith(extension) and obj not in ignored_files:
+            os.remove(obj_path)
+            deleted_files.append(obj_path)
+            
+    return deleted_files
+        
 
 
+def remove_extra_comma_dot_from_float(float_string: str) -> float:
+    """remove any useless comma or thousands separators from a float and return the associated float value
+    ##Examples
+    >>> remove_extra_comma_dot_from_float("1.789.423,45") #returns 1789423.45
+    >>> remove_extra_comma_dot_from_float("1,789,423.45") #returns 1789423.45
+    """
+    try:
+        return float(float_string)
+    except ValueError:
+        pass
+    float_string = str(float_string)
+    
+    try :
+        last_dot = float_string.rindex(".") 
+    except ValueError:
+        last_dot = -1
+    
+    try :
+        last_comma = float_string.rindex(",") 
+    except ValueError:
+        last_comma = -1
+        
+    if last_comma > last_dot:
+        float_formated_number = float_string[:last_comma].replace(",","").replace(".","")+float_string[last_comma:].replace(",",".")
+    else:
+        float_formated_number = float_string[:last_dot].replace(",","").replace(".","")+float_string[last_dot:]
+    
+    return float(float_formated_number)

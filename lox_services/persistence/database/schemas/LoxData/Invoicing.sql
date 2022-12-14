@@ -35,6 +35,7 @@ LoxData.Invoicing
     siret STRING OPTIONS(description="SIRET of the company"),
     to_run BOOL OPTIONS(description="True: The scripts are running with the company's credentials. False: Nothing runs"),
     is_churned BOOL,
+    order_number STRING(description="The customer's order number for Lox services."),
     insert_datetime DATETIME NOT NULL, --REQUIRED
     update_datetime DATETIME
 )

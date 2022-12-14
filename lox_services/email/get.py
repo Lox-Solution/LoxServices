@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from email import policy
 from email.message import Message
 from typing import List, TypedDict
-from lox_services.config.constants import LOX_TEAM_EMAIL
 from lox_services.config.env_variables import get_env_variable
 from lox_services.email.utils import (
     generate_oauth2_string,
@@ -45,7 +44,7 @@ def get_emails(
     imap_ssl_client.debug = 4
     
     access_token = refresh_authorization(get_env_variable("LOXTEAM_REFRESH_TOKEN"))
-    auth_string = generate_oauth2_string(LOX_TEAM_EMAIL, access_token)
+    auth_string = generate_oauth2_string(get_env_variable('LOX_TEAM_EMAIL'), access_token)
     
     imap_ssl_client.authenticate('XOAUTH2', lambda x: auth_string)
     labeled_status, labeled_emails = imap_ssl_client.select(mailbox)
