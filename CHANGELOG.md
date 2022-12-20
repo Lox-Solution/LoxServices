@@ -15,3 +15,4 @@
 0.1.5 Remove finance service and update all services
 0.1.6 Add Postmark function in email.static sub-service
 0.1.7 Cleaned and updated all the files (ready for launch)
+0.1.8 Add protocol service
