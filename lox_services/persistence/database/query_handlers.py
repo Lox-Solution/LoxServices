@@ -70,7 +70,7 @@ def select(query: str, print_query: bool = True) -> DataFrame:
     return raw_query(query, print_query).result().to_dataframe()
 
 
-def update(query: str, print_query: bool = True) -> DataFrame:
+def update(query: str, print_query: bool = True) -> int:
     """Checks if the query begings with a UPDATE statement. If so the query is being executed.
         ## Arguments
         - `query`: String representation of the query to be executed.
@@ -80,7 +80,7 @@ def update(query: str, print_query: bool = True) -> DataFrame:
             >>> update("UPDATE InvoicesData.Refunds SET state='Test' WHERE company='Test'")
 
         ## Return
-        The result of the update query as a dataframe.
+        The result of the update query is a number of affected rows.
     """
     if not query.lstrip().startswith("UPDATE"):
         raise BadQueryTypeException('UPDATE')
@@ -97,7 +97,7 @@ def update(query: str, print_query: bool = True) -> DataFrame:
         try:
             result=raw_query(query, print_query)
             print("Rows affected:", result.num_dml_affected_rows)
-            result=result.result().to_dataframe()
+            result_returned = result.num_dml_affected_rows
             query_success=True
         except Exception as error:
             error_msg = error.__dict__["_errors"][0]["message"]
@@ -109,8 +109,8 @@ def update(query: str, print_query: bool = True) -> DataFrame:
                     raise error
             else:
                 raise error
-    if result is not None:
-        return result
+    if result_returned is not None:
+        return result_returned
     else:
         raise Exception("Error processing update: ", query)
 

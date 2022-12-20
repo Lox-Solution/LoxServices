@@ -12,11 +12,13 @@ from enum import Enum
 from typing import List
 import lxml.html
 import pandas as pd
-from lox_services.config.constants import LOX_TEAM_EMAIL, LOX_FINANCE_EMAIL
 
 from lox_services.config.env_variables import get_env_variable
 from lox_services.email.utils import generate_oauth2_string,refresh_authorization, get_google_client_id
 from lox_services.utils.general_python import get_file_size, print_success
+
+LOX_TEAM_EMAIL = get_env_variable('LOX_TEAM_EMAIL')
+LOX_FINANCE_EMAIL = get_env_variable('LOX_FINANCE_EMAIL')
 
 REFRESH_KEYS_LOX_ACCOUNTS = {
     LOX_TEAM_EMAIL: "LOXTEAM_REFRESH_TOKEN",

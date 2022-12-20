@@ -1,7 +1,7 @@
 {
   "client_reference": "référence client",
-  "description": "description",
-  "quantity": "quantité",
+  "description": "Produit",
+  "quantity": "Quantité",
   "online_order": "commande en ligne",
   "order_date": "date de commande",
   "reference": "référence",
