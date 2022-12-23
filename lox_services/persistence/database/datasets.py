@@ -42,6 +42,7 @@ class UserData_dataset(Enum):
     ChronopostAccounts = "ChronopostAccounts"
     InvoicesFromClientToCarrier = "InvoicesFromClientToCarrier"
     Logos = "Logos"
+    ClientApiAccess  ="ClientApiAccess"
 
 
 class Mapping_dataset(Enum):
