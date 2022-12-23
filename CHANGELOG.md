@@ -17,3 +17,4 @@
 0.1.7 Cleaned and updated all the files (ready for launch)
 0.1.8 Add protocol service
 0.1.9 Add VirtualDisplay decorator
+0.1.10 Add Chrome options for cloud usage with selenium
