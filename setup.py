@@ -39,5 +39,6 @@ setup(
         "lxml >= 4.9.1",
         "cryptography >= 37.0.2",
         "paramiko >= 2.11.0",
+        "PyVirtualDisplay >= 3.0",
     ]
 )
