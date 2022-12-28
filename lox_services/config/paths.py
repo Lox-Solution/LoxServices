@@ -1,16 +1,13 @@
 """All global configuration variables"""
 from os import getenv, path
 
-from lox_services.config.env_variables import get_env_variable
 
 # To find easily the root of the project. 
 # Should be like this: "local_absolute_path/Main-Algorithms/Algorithms" 
 ROOT_PATH: str = getenv("PYTHONPATH", "/")
 
-try:
-    CLOUD_ROOT_PATH = get_env_variable("CLOUD_ROOT_PATH")
-except KeyError:
-    CLOUD_ROOT_PATH = ROOT_PATH
+_cloud_root_path = getenv("CLOUD_ROOT_PATH")
+CLOUD_ROOT_PATH = _cloud_root_path if _cloud_root_path is not None else ROOT_PATH
 
 # Folder where results will be stored. This folder is ignored by git.
 OUTPUT_FOLDER: str = path.join(CLOUD_ROOT_PATH, "output_folder")
