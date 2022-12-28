@@ -19,3 +19,4 @@
 0.1.9 Add VirtualDisplay decorator
 0.1.10 Add Chrome options for cloud usage with selenium
 0.1.11 Use CLOUD_ROOT_PATH instead of ROOT_PATH
+0.1.12 Fix circular dependency
