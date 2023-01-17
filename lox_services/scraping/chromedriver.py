@@ -57,9 +57,8 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
     def __enter__(self):
         pass
     
-    def __exit__(self, *_):
-        pass
-
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.quit()
 
 def init_chromedriver(download_directory:str, size_length: int, size_width: int, version: int = 107) -> webdriver.Chrome:
     """Generates default chrome options for the given download directory.
