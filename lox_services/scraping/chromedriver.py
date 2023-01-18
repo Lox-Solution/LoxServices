@@ -60,7 +60,7 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.quit()
 
-def init_chromedriver(download_directory:str, size_length: int, size_width: int, version: int = 107) -> webdriver.Chrome:
+def init_chromedriver(download_directory:str, size_length: int, size_width: int, version: int) -> webdriver.Chrome:
     """Generates default chrome options for the given download directory.
     ## Arguments
         - `download_folder`: Folder where we want to download the invoices
