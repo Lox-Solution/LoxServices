@@ -57,11 +57,10 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
     def __enter__(self):
         pass
     
-    def __exit__(self, *_):
-        pass
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.quit()
 
-
-def init_chromedriver(download_directory:str, size_length: int, size_width: int, version: int = 107) -> webdriver.Chrome:
+def init_chromedriver(download_directory:str, size_length: int, size_width: int, version: int) -> webdriver.Chrome:
     """Generates default chrome options for the given download directory.
     ## Arguments
         - `download_folder`: Folder where we want to download the invoices
@@ -99,7 +98,7 @@ def shutdown_current_instances():
     os.system("pkill chrome")
 
 
-def run_chromedriver(download_folder:str = OUTPUT_FOLDER, size_length: int = 960, size_width: int = 960):
+def run_chromedriver(download_folder:str = OUTPUT_FOLDER, size_length: int = 960, size_width: int = 960, version: int = 107):
     """ Creates an undetected chromedriver with the wanted download folder.
         ## Arguments
         - `download_folder`: Folder where we want to download the invoices
@@ -111,4 +110,4 @@ def run_chromedriver(download_folder:str = OUTPUT_FOLDER, size_length: int = 960
     """
     if get_env_variable("ENVIRONMENT")=="production":
         shutdown_current_instances()
-    return init_chromedriver(download_folder, size_length, size_width)
+    return init_chromedriver(download_folder, size_length, size_width, version)
