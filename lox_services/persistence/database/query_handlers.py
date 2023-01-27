@@ -2,8 +2,9 @@
 import os
 import re
 import time
+from typing import Optional
 
-from google.cloud.bigquery import Client
+from google.cloud.bigquery import Client, QueryJobConfig
 from google.cloud.bigquery.job import QueryJob
 from pandas import DataFrame
 
@@ -13,7 +14,8 @@ import lox_services.utils.general_python as gpy
 from lox_services.utils.enums import Colors
 from lox_services.utils.metadata import get_function_callers
 
-def raw_query(query: str, print_query: bool = True) -> QueryJob:
+
+def raw_query(query: str, print_query: bool = True, job_config: Optional[QueryJobConfig] = None) -> QueryJob:
     """Excecutes a query with Google BigQuery, without any checks.
         Adds some metadata at the beginning of the query.
         ## Arguments
@@ -24,7 +26,8 @@ def raw_query(query: str, print_query: bool = True) -> QueryJob:
             >>> raw_query("SELECT * FROM InvoicesData.Refunds LIMIT 10")
 
         ## Return
-        The the query job from Google BigQuery. It needs some actions to be rendered as a dataframe (.result().to_dataframe()).
+        The the query job from Google BigQuery. It needs some actions to be rendered
+        as a dataframe (.result().to_dataframe()).
     """
     meta_data = None
     meta_parents = get_function_callers()
@@ -32,8 +35,8 @@ def raw_query(query: str, print_query: bool = True) -> QueryJob:
         meta_data = meta_parents[2]
 
     elif len(meta_parents) > 1:
-        if meta_parents[1] not in ["select", "update"]:
-        # if raw_query is being called directly, which should be avoided
+        if meta_parents[1] not in {"select", "update"}:
+            # if raw_query is being called directly, which should be avoided
             meta_data = meta_parents[1]
 
     if meta_data is not None:
@@ -47,12 +50,12 @@ def raw_query(query: str, print_query: bool = True) -> QueryJob:
         ))
 
     bigquery_client = Client()
-    query_job = bigquery_client.query(query)
+    query_job = bigquery_client.query(query, job_config=job_config)
     query_job.result()
     return query_job
 
 
-def select(query: str, print_query: bool = True) -> DataFrame:
+def select(query: str, print_query: bool = True, job_config: Optional[QueryJobConfig] = None) -> DataFrame:
     """Checks if the query begings with a SELECT statement. If so the query is being executed.
         ## Arguments
         - `query`: String representation of the query to be executed.
@@ -64,10 +67,10 @@ def select(query: str, print_query: bool = True) -> DataFrame:
         ## Return
         The result of the select query as a dataframe.
     """
-    if not (query.lstrip().startswith("SELECT") or query.lstrip().startswith("WITH")) :
+    if not (query.lstrip().startswith("SELECT") or query.lstrip().startswith("WITH")):
         raise BadQueryTypeException('SELECT or WITH')
 
-    return raw_query(query, print_query).result().to_dataframe()
+    return raw_query(query, print_query, job_config).result().to_dataframe()
 
 
 def update(query: str, print_query: bool = True) -> int:
@@ -85,27 +88,26 @@ def update(query: str, print_query: bool = True) -> int:
     if not query.lstrip().startswith("UPDATE"):
         raise BadQueryTypeException('UPDATE')
 
-
-    if not re.match("(\n| )*(UPDATE).*(\n| )(SET)(\n| ).*(update_datetime)( )?(=).*(\n| )(WHERE)(\n| ).*",query, re.DOTALL):
+    if not re.match("(\n| )*(UPDATE).*(\n| )(SET)(\n| ).*(update_datetime)( )?(=).*(\n| )(WHERE)(\n| ).*", query,
+                    re.DOTALL):
         raise MissingUpdateDatetimeException(query)
-
 
     count = 0
     query_success = False
-    result=None
+    result = None
     while not query_success:
         try:
-            result=raw_query(query, print_query)
+            result = raw_query(query, print_query)
             print("Rows affected:", result.num_dml_affected_rows)
             result_returned = result.num_dml_affected_rows
-            query_success=True
+            query_success = True
         except Exception as error:
             error_msg = error.__dict__["_errors"][0]["message"]
             if "concurrent update" in error_msg:
-                count+=1
+                count += 1
                 time.sleep(5)
                 print("error concurent update attempt ", count)
-                if count>4:
+                if count > 4:
                     raise error
             else:
                 raise error
@@ -117,23 +119,24 @@ def update(query: str, print_query: bool = True) -> int:
 
 def delete(query: str, print_query: bool = True) -> DataFrame:
     """Checks if the query begings with a DELETE statement. If so the query is being executed.
-    
+
         ## Arguments
-        
+
         - `query`: String representation of the query to be executed.
-        
+
         - `print_query`: Tells whether or not to print the query before executing it.
-        
+
         ## Example
-        
+
             >>> select("DELETE InvoicesData.Refunds WHERE tracking_number = '1467BDYV'")
 
         ## Return
-        
+
         The result of the select query as a dataframe.
     """
     if not query.lstrip().startswith("DELETE"):
         raise BadQueryTypeException('DELETE')
-    
-    result = raw_query(query, print_query)                
+
+    result = raw_query(query, print_query)
     print("Rows deleted:", result.num_dml_affected_rows)
+
