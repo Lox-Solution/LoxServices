@@ -2,8 +2,9 @@
 import os
 import re
 import time
+from typing import Any, List, Tuple, Union
 
-from google.cloud.bigquery import Client
+from google.cloud.bigquery import Client, QueryJobConfig, ScalarQueryParameter
 from google.cloud.bigquery.job import QueryJob
 from pandas import DataFrame
 
@@ -13,15 +14,23 @@ import lox_services.utils.general_python as gpy
 from lox_services.utils.enums import Colors
 from lox_services.utils.metadata import get_function_callers
 
-def raw_query(query: str, print_query: bool = True) -> QueryJob:
+def raw_query(
+    query: str, 
+    *, 
+    parameters:  Union[None, List[Tuple[str, str, Any]]] = None,
+    print_query: bool = True
+    ) -> QueryJob:
+
     """Excecutes a query with Google BigQuery, without any checks.
         Adds some metadata at the beginning of the query.
         ## Arguments
         - `query`: String representation of the query to be executed.
         - `print_query`: Tells whether or not to print the query before executing it.
+        - `parameters`: list of parameter #used to avoid sql injection
 
         ## Example
             >>> raw_query("SELECT * FROM InvoicesData.Refunds LIMIT 10")
+            >>> select ("SELECT * FROM InvoicesData.Refunds where carrier=@carrier LIMIT 10", parameters = [("carrier", "STRING", "UPS")])
 
         ## Return
         The the query job from Google BigQuery. It needs some actions to be rendered as a dataframe (.result().to_dataframe()).
@@ -47,19 +56,31 @@ def raw_query(query: str, print_query: bool = True) -> QueryJob:
         ))
 
     bigquery_client = Client()
-    query_job = bigquery_client.query(query)
+    
+    if parameters: 
+        job_config = QueryJobConfig(
+        query_parameters=[
+            ScalarQueryParameter(*parameter) for parameter in parameters
+        ])
+    else:
+        job_config = None
+        
+    
+    query_job = bigquery_client.query(query, job_config=job_config)
     query_job.result()
     return query_job
 
 
-def select(query: str, print_query: bool = True) -> DataFrame:
+def select(query: str, print_query: bool = True, *, parameters:  Union[None, List[Tuple[str, str, Any]]] = None) -> DataFrame:
     """Checks if the query begings with a SELECT statement. If so the query is being executed.
         ## Arguments
         - `query`: String representation of the query to be executed.
         - `print_query`: Tells whether or not to print the query before executing it.
+        - `parameters`: list of parameter #used to avoid sql injection
 
         ## Example
-            >>> select("SELECT * FROM InvoicesData.Refunds LIMIT 10")
+            >>> select("SELECT * FROM InvoicesData.Refunds where carrier="UPS" LIMIT 10")
+            >>> select ("SELECT * FROM InvoicesData.Refunds where carrier=@carrier LIMIT 10", parameters = [("carrier", "STRING", "UPS")])
 
         ## Return
         The result of the select query as a dataframe.
@@ -67,20 +88,23 @@ def select(query: str, print_query: bool = True) -> DataFrame:
     if not (query.lstrip().startswith("SELECT") or query.lstrip().startswith("WITH")) :
         raise BadQueryTypeException('SELECT or WITH')
 
-    return raw_query(query, print_query).result().to_dataframe()
+    return raw_query(query, print_query = print_query, parameters = parameters).result().to_dataframe()
 
 
-def update(query: str, print_query: bool = True) -> int:
+def update(query: str, print_query: bool = True, *, parameters:  Union[None, List[Tuple[str, str, Any]]] = None) -> DataFrame:
     """Checks if the query begings with a UPDATE statement. If so the query is being executed.
         ## Arguments
         - `query`: String representation of the query to be executed.
         - `print_query`: Tells whether or not to print the query before executing it.
+        - `parameters`: list of parameter #used to avoid sql injection
 
         ## Example
             >>> update("UPDATE InvoicesData.Refunds SET state='Test' WHERE company='Test'")
+            >>> update("UPDATE InvoicesData.Refunds SET state='Test' where company=@company", parameters = [("company", "STRING", "Test")])
+
 
         ## Return
-        The result of the update query is a number of affected rows.
+        The result of the update query as a dataframe.
     """
     if not query.lstrip().startswith("UPDATE"):
         raise BadQueryTypeException('UPDATE')
@@ -95,7 +119,7 @@ def update(query: str, print_query: bool = True) -> int:
     result=None
     while not query_success:
         try:
-            result=raw_query(query, print_query)
+            result=raw_query(query, print_query = print_query, parameters=parameters)
             print("Rows affected:", result.num_dml_affected_rows)
             result_returned = result.num_dml_affected_rows
             query_success=True
@@ -115,19 +139,19 @@ def update(query: str, print_query: bool = True) -> int:
         raise Exception("Error processing update: ", query)
 
 
-def delete(query: str, print_query: bool = True) -> DataFrame:
+def delete(query: str, print_query: bool = True, *, parameters:  Union[None, List[Tuple[str, str, Any]]] = None) -> DataFrame:
     """Checks if the query begings with a DELETE statement. If so the query is being executed.
     
         ## Arguments
         
         - `query`: String representation of the query to be executed.
-        
         - `print_query`: Tells whether or not to print the query before executing it.
+        - `parameters`: list of parameter #used to avoid sql injection
         
         ## Example
         
-            >>> select("DELETE InvoicesData.Refunds WHERE tracking_number = '1467BDYV'")
-
+            >>> delete("DELETE FROM InvoicesData.Refunds WHERE tracking_number = '1467BDYV'")
+            >>> delete("DELETE FROM InvoicesData.Refunds WHERE tracking_number=@tracking_number", ("tracking_number", "STRING", "1467BDYV"))
         ## Return
         
         The result of the select query as a dataframe.
@@ -135,5 +159,5 @@ def delete(query: str, print_query: bool = True) -> DataFrame:
     if not query.lstrip().startswith("DELETE"):
         raise BadQueryTypeException('DELETE')
     
-    result = raw_query(query, print_query)                
+    result = raw_query(query, print_query = print_query, parameters = parameters)                
     print("Rows deleted:", result.num_dml_affected_rows)
