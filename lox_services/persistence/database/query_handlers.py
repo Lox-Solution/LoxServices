@@ -2,9 +2,10 @@
 import os
 import re
 import time
-from typing import Any, List, Tuple, Union
+from typing import Any, Optional, Tuple
+from collections.abc import Sequence
 
-from google.cloud.bigquery import Client, QueryJobConfig, ScalarQueryParameter
+from google.cloud.bigquery import Client, QueryJobConfig, ScalarQueryParameter, ArrayQueryParameter
 from google.cloud.bigquery.job import QueryJob
 from pandas import DataFrame
 
@@ -17,7 +18,7 @@ from lox_services.utils.metadata import get_function_callers
 def raw_query(
     query: str, 
     *, 
-    parameters:  Union[None, List[Tuple[str, str, Any]]] = None,
+    parameters:  Optional[Sequence[Tuple[str, str, Any]]] = None,
     print_query: bool = True
     ) -> QueryJob:
 
@@ -58,20 +59,19 @@ def raw_query(
     bigquery_client = Client()
     
     if parameters: 
-        job_config = QueryJobConfig(
+        parameters = QueryJobConfig(
         query_parameters=[
-            ScalarQueryParameter(*parameter) for parameter in parameters
+            ArrayQueryParameter(*parameter) 
+            if (isinstance(parameter[2], Sequence) and not isinstance(parameter[2], str)) 
+            else ScalarQueryParameter(*parameter)  for parameter in parameters
         ])
-    else:
-        job_config = None
-        
     
-    query_job = bigquery_client.query(query, job_config=job_config)
+    query_job = bigquery_client.query(query, job_config=parameters)
     query_job.result()
     return query_job
 
 
-def select(query: str, print_query: bool = True, *, parameters:  Union[None, List[Tuple[str, str, Any]]] = None) -> DataFrame:
+def select(query: str, print_query: bool = True, *, parameters:  Optional[Sequence[Tuple[str, str, Any]]] = None) -> DataFrame:
     """Checks if the query begings with a SELECT statement. If so the query is being executed.
         ## Arguments
         - `query`: String representation of the query to be executed.
@@ -91,7 +91,7 @@ def select(query: str, print_query: bool = True, *, parameters:  Union[None, Lis
     return raw_query(query, print_query = print_query, parameters = parameters).result().to_dataframe()
 
 
-def update(query: str, print_query: bool = True, *, parameters:  Union[None, List[Tuple[str, str, Any]]] = None) -> DataFrame:
+def update(query: str, print_query: bool = True, *, parameters:  Optional[Sequence[Tuple[str, str, Any]]] = None) -> DataFrame:
     """Checks if the query begings with a UPDATE statement. If so the query is being executed.
         ## Arguments
         - `query`: String representation of the query to be executed.
@@ -139,7 +139,7 @@ def update(query: str, print_query: bool = True, *, parameters:  Union[None, Lis
         raise Exception("Error processing update: ", query)
 
 
-def delete(query: str, print_query: bool = True, *, parameters:  Union[None, List[Tuple[str, str, Any]]] = None) -> DataFrame:
+def delete(query: str, print_query: bool = True, *, parameters:  Optional[Sequence[Tuple[str, str, Any]]] = None) -> DataFrame:
     """Checks if the query begings with a DELETE statement. If so the query is being executed.
     
         ## Arguments
