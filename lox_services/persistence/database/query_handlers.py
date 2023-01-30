@@ -61,9 +61,9 @@ def raw_query(
     if parameters: 
         parameters = QueryJobConfig(
         query_parameters=[
-            ArrayQueryParameter(*parameter) 
+            ArrayQueryParameter(parameter[0], parameter[1].value, parameter[2]) 
             if (isinstance(parameter[2], Sequence) and not isinstance(parameter[2], str)) 
-            else ScalarQueryParameter(*parameter)  for parameter in parameters
+            else ScalarQueryParameter(parameter[0], parameter[1].value, parameter[2])  for parameter in parameters
         ])
     
     query_job = bigquery_client.query(query, job_config=parameters)
