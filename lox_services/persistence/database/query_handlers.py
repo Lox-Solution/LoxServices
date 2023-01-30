@@ -12,13 +12,13 @@ from pandas import DataFrame
 from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
 from lox_services.persistence.database.exceptions import BadQueryTypeException, MissingUpdateDatetimeException
 import lox_services.utils.general_python as gpy
-from lox_services.utils.enums import Colors
+from lox_services.utils.enums import BQParameterType, Colors
 from lox_services.utils.metadata import get_function_callers
 
 def raw_query(
     query: str, 
     *, 
-    parameters:  Optional[Sequence[Tuple[str, str, Any]]] = None,
+    parameters:  Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
     print_query: bool = True
     ) -> QueryJob:
 
@@ -71,7 +71,7 @@ def raw_query(
     return query_job
 
 
-def select(query: str, print_query: bool = True, *, parameters:  Optional[Sequence[Tuple[str, str, Any]]] = None) -> DataFrame:
+def select(query: str, print_query: bool = True, *, parameters:  Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None) -> DataFrame:
     """Checks if the query begings with a SELECT statement. If so the query is being executed.
         ## Arguments
         - `query`: String representation of the query to be executed.
@@ -91,7 +91,7 @@ def select(query: str, print_query: bool = True, *, parameters:  Optional[Sequen
     return raw_query(query, print_query = print_query, parameters = parameters).result().to_dataframe()
 
 
-def update(query: str, print_query: bool = True, *, parameters:  Optional[Sequence[Tuple[str, str, Any]]] = None) -> DataFrame:
+def update(query: str, print_query: bool = True, *, parameters:  Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None) -> DataFrame:
     """Checks if the query begings with a UPDATE statement. If so the query is being executed.
         ## Arguments
         - `query`: String representation of the query to be executed.
@@ -139,7 +139,7 @@ def update(query: str, print_query: bool = True, *, parameters:  Optional[Sequen
         raise Exception("Error processing update: ", query)
 
 
-def delete(query: str, print_query: bool = True, *, parameters:  Optional[Sequence[Tuple[str, str, Any]]] = None) -> DataFrame:
+def delete(query: str, print_query: bool = True, *, parameters:  Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None) -> DataFrame:
     """Checks if the query begings with a DELETE statement. If so the query is being executed.
     
         ## Arguments

@@ -32,3 +32,28 @@ class Files(Enum):
     contract = "contract.csv"
     refunds_label_not_used = 'refunds_label_not_used.csv'
 
+
+
+class BQParameterType(str, Enum):
+    """
+    types of parameter which can be used in parameterized query.
+    """
+    #Sequence types
+    ARRAY="ARRAY"
+    STRUCT="STRUCT"
+    GEOGRAPHY="GEOGRAPHY"
+    JSON="JSON"
+    
+    #Scalar types
+    BIGNUMERIC = "BIGNUMERIC"
+    BOOL = "BOOL"
+    BYTES = "BYTES"
+    DATE = "DATE"	
+    DATETIME = "DATETIME"	
+    FLOAT64 = "FLOAT64"
+    INT64 = "INT64"
+    INTERVAL = "INTERVAL"
+    NUMERIC = "NUMERIC"	
+    STRING = "STRING"
+    TIME = "TIME"
+    TIMESTAMP = "TIMESTAMP"
