@@ -36,15 +36,15 @@ class Files(Enum):
 
 class BQParameterType(str, Enum):
     """
-    types of parameter which can be used in parameterized query.
+    Types of parameter which can be used in parameterized query.
     """
-    #Sequence types
-    ARRAY="ARRAY"
-    STRUCT="STRUCT"
-    GEOGRAPHY="GEOGRAPHY"
-    JSON="JSON"
+    # Sequence types
+    ARRAY = "ARRAY"
+    STRUCT = "STRUCT"
+    GEOGRAPHY = "GEOGRAPHY"
+    JSON = "JSON"
     
-    #Scalar types
+    # Scalar types
     BIGNUMERIC = "BIGNUMERIC"
     BOOL = "BOOL"
     BYTES = "BYTES"

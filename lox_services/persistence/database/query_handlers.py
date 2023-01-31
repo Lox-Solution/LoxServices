@@ -27,11 +27,11 @@ def raw_query(
         ## Arguments
         - `query`: String representation of the query to be executed.
         - `print_query`: Tells whether or not to print the query before executing it.
-        - `parameters`: list of parameter #used to avoid sql injection
+        - `parameters`: List of parameter used to avoid sql injection
 
         ## Example
             >>> raw_query("SELECT * FROM InvoicesData.Refunds LIMIT 10")
-            >>> select ("SELECT * FROM InvoicesData.Refunds where carrier=@carrier LIMIT 10", parameters = [("carrier", "STRING", "UPS")])
+            >>> select ("SELECT * FROM InvoicesData.Refunds where carrier=@carrier LIMIT 10", parameters = [("carrier", BQParameterType.STRING, "UPS")])
 
         ## Return
         The the query job from Google BigQuery. It needs some actions to be rendered as a dataframe (.result().to_dataframe()).
@@ -63,7 +63,7 @@ def raw_query(
         query_parameters=[
             ArrayQueryParameter(parameter[0], parameter[1].value, parameter[2]) 
             if (isinstance(parameter[2], Sequence) and not isinstance(parameter[2], str)) 
-            else ScalarQueryParameter(parameter[0], parameter[1].value, parameter[2])  for parameter in parameters
+            else ScalarQueryParameter(parameter[0], parameter[1].value, parameter[2]) for parameter in parameters
         ])
     
     query_job = bigquery_client.query(query, job_config=parameters)
@@ -76,11 +76,11 @@ def select(query: str, print_query: bool = True, *, parameters:  Optional[Sequen
         ## Arguments
         - `query`: String representation of the query to be executed.
         - `print_query`: Tells whether or not to print the query before executing it.
-        - `parameters`: list of parameter #used to avoid sql injection
+        - `parameters`: List of parameter used to avoid sql injection
 
         ## Example
             >>> select("SELECT * FROM InvoicesData.Refunds where carrier="UPS" LIMIT 10")
-            >>> select ("SELECT * FROM InvoicesData.Refunds where carrier=@carrier LIMIT 10", parameters = [("carrier", "STRING", "UPS")])
+            >>> select ("SELECT * FROM InvoicesData.Refunds where carrier=@carrier LIMIT 10", parameters = [("carrier", BQParameterType.STRING, "UPS")])
 
         ## Return
         The result of the select query as a dataframe.
@@ -96,11 +96,11 @@ def update(query: str, print_query: bool = True, *, parameters:  Optional[Sequen
         ## Arguments
         - `query`: String representation of the query to be executed.
         - `print_query`: Tells whether or not to print the query before executing it.
-        - `parameters`: list of parameter #used to avoid sql injection
+        - `parameters`: List of parameter used to avoid sql injection
 
         ## Example
             >>> update("UPDATE InvoicesData.Refunds SET state='Test' WHERE company='Test'")
-            >>> update("UPDATE InvoicesData.Refunds SET state='Test' where company=@company", parameters = [("company", "STRING", "Test")])
+            >>> update("UPDATE InvoicesData.Refunds SET state='Test' where company=@company", parameters = [("company", BQParameterType.STRING, "Test")])
 
 
         ## Return
@@ -146,12 +146,12 @@ def delete(query: str, print_query: bool = True, *, parameters:  Optional[Sequen
         
         - `query`: String representation of the query to be executed.
         - `print_query`: Tells whether or not to print the query before executing it.
-        - `parameters`: list of parameter #used to avoid sql injection
+        - `parameters`: List of parameter used to avoid sql injection
         
         ## Example
         
             >>> delete("DELETE FROM InvoicesData.Refunds WHERE tracking_number = '1467BDYV'")
-            >>> delete("DELETE FROM InvoicesData.Refunds WHERE tracking_number=@tracking_number", ("tracking_number", "STRING", "1467BDYV"))
+            >>> delete("DELETE FROM InvoicesData.Refunds WHERE tracking_number=@tracking_number", parameters = [("tracking_number", BQParameterType.STRING, "1467BDYV")])
         ## Return
         
         The result of the select query as a dataframe.
