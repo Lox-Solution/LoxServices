@@ -76,7 +76,7 @@ def select(query: str, print_query: bool = True, *, parameters:  Optional[Sequen
         ## Arguments
         - `query`: String representation of the query to be executed.
         - `print_query`: Tells whether or not to print the query before executing it.
-        - `parameters`: List of parameter used to avoid sql injection
+        - `parameters`: List of parameters used to avoid SQL injection
 
         ## Example
             >>> select("SELECT * FROM InvoicesData.Refunds where carrier="UPS" LIMIT 10")
