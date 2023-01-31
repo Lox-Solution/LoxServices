@@ -27,7 +27,7 @@ def raw_query(
         ## Arguments
         - `query`: String representation of the query to be executed.
         - `print_query`: Tells whether or not to print the query before executing it.
-        - `parameters`: List of parameter used to avoid sql injection
+        - `parameters`: List of parameters used to avoid SQL injection
 
         ## Example
             >>> raw_query("SELECT * FROM InvoicesData.Refunds LIMIT 10")
