@@ -132,10 +132,7 @@ def push_and_delete_run_output_folder(run_folder: str, destination_folder: str):
         return
     
     archives_path = shutil.make_archive(os.path.basename(run_folder), "zip",run_folder)
-    print(archives_path)
-    
     destination_path = os.path.join(destination_folder, os.path.basename(archives_path))
-    print(destination_path)
     upload_file(OUTPUT_FOLDER_BUCKET, archives_path, destination_path)
     
     os.remove(archives_path)
