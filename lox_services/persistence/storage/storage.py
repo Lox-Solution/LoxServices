@@ -1,8 +1,7 @@
 """All functions related to Google Cloud Storage"""
-import datetime
 import os
+import shutil
 import urllib
-from typing import List
 
 from google.api_core.page_iterator import HTTPIterator
 from google.api_core import exceptions
@@ -10,6 +9,7 @@ from google.cloud.storage import Client, Blob
 
 
 from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
+from lox_services.persistence.storage.constants import OUTPUT_FOLDER_BUCKET
 from lox_services.persistence.storage.utils import use_environment_bucket
 from lox_services.utils.general_python import print_info, print_success, safe_mkdir
 
@@ -111,3 +111,27 @@ def download_file_from_url(url: str, output_folder: str):
     
     download_file(bucket, blob, os.path.join(output_folder, file_name))
 
+
+def push_and_delete_run_output_folder(run_folder: str, destination_folder: str):
+    "Zip run output folder, upload it to google cloud and delete both the archive and the folder from local storage."
+    
+    # make few checks before processing
+    if not os.path.exists(run_folder):
+        print(f"{run_folder} does not exist.")
+        return
+    if not os.path.isdir(run_folder):
+        raise ValueError(f"{run_folder} needs to be a directory.")
+    
+    if "/output_folder/" not in run_folder:
+        raise Exception("Function use is limited to only output folder, since it uploads to output bucket!")
+    
+    if not os.listdir(run_folder):
+        print("Not any file to push to storage.")
+        return
+    
+    archives_path = shutil.make_archive(os.path.basename(run_folder), "zip",run_folder)
+    destination_path = os.path.join(destination_folder, os.path.basename(archives_path))
+    upload_file(OUTPUT_FOLDER_BUCKET, archives_path, destination_path)
+    
+    os.remove(archives_path)
+    os.remove(run_folder)
