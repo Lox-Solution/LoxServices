@@ -123,7 +123,7 @@ def push_and_delete_run_output_folder(run_folder: str, destination_folder: str):
         raise ValueError(f"{run_folder} needs to be a directory.")
     
     if "/output_folder/" not in run_folder:
-        raise Exception("this function should only be used to clean the output folder")
+        raise Exception("Function use is limited to only output folder, since it uploads to output bucket!")
     
     if not os.listdir(run_folder):
         print("Not any file to push to storage.")
