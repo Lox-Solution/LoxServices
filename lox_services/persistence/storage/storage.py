@@ -1,9 +1,7 @@
 """All functions related to Google Cloud Storage"""
-import datetime
 import os
 import shutil
 import urllib
-from typing import List
 
 from google.api_core.page_iterator import HTTPIterator
 from google.api_core import exceptions
