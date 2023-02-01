@@ -120,7 +120,7 @@ def push_and_delete_run_output_folder(run_folder: str, destination_folder: str):
         print("Not any file to push to storage.")
         return
     if not os.path.isdir(run_folder):
-        raise ValueError("run_folder needs to be a directory")
+        raise ValueError(f"{run_folder} needs to be a directory.")
     
     if "/output_folder/" not in run_folder:
         raise Exception("this function should only be used to clean the output folder")
