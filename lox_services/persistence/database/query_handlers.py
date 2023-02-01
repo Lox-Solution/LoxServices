@@ -104,7 +104,7 @@ def update(query: str, print_query: bool = True, *, parameters:  Optional[Sequen
 
 
         ## Return
-        The result of the update query as a dataframe.
+        The result of the update query is a number of affected rows.
     """
     if not query.lstrip().startswith("UPDATE"):
         raise BadQueryTypeException('UPDATE')
@@ -154,7 +154,7 @@ def delete(query: str, print_query: bool = True, *, parameters:  Optional[Sequen
             >>> delete("DELETE FROM InvoicesData.Refunds WHERE tracking_number=@tracking_number", parameters = [("tracking_number", BQParameterType.STRING, "1467BDYV")])
         ## Return
         
-        The result of the select query as a dataframe.
+        The result of the query is the number of affected rows.
     """
     if not query.lstrip().startswith("DELETE"):
         raise BadQueryTypeException('DELETE')
