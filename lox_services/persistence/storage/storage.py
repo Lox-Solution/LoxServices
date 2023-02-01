@@ -117,7 +117,7 @@ def push_and_delete_run_output_folder(run_folder: str, destination_folder: str):
     
     # make few checks before processing
     if not os.path.exists(run_folder):
-        print("Not any file to push to storage.")
+        print(f"{run_folder} does not exist.")
         return
     if not os.path.isdir(run_folder):
         raise ValueError(f"{run_folder} needs to be a directory.")
