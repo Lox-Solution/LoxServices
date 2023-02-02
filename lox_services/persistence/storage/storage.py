@@ -2,6 +2,7 @@
 import os
 import shutil
 import urllib
+from typing import Union
 
 from google.api_core.page_iterator import HTTPIterator
 from google.api_core import exceptions
@@ -77,11 +78,11 @@ def download_file(bucket_name: str, blob_name: str, target_file_path: str):
     print_success(f"Successfuly downloaded at {target_file_path}")
 
 
-def upload_file(bucket_name: str, source_file_path: str, destination_file_path: str):
+def upload_file(bucket_name: str, source_file: Union[str, bytes], destination_file_path: str):
     """Uploads a local file to the path specified in the given bucket in Google Cloud Storage.
         ## Arguments
         - `bucket_name`: The name of the bucket to upload the file to.
-        - `source_file_path`: The absolute path of the file to upload.
+        - `source_file`: The absolute path of the file or bytes composing the file to upload.
         - `destination_file_path`: The full path where the file will be uploaded (after bucket name).
         
         ## Example
@@ -94,9 +95,13 @@ def upload_file(bucket_name: str, source_file_path: str, destination_file_path: 
     storage_client = Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_file_path)
-    blob.upload_from_filename(source_file_path)
     
-    print_success(f"File {source_file_path.split('/')[-1]} uploaded to bucket '{bucket_name}': {destination_file_path}.")
+    if isinstance(source_file, bytes):
+        blob.upload_from_file(source_file)
+        print_success(f"File uploaded to bucket '{bucket_name}': {destination_file_path}.")
+    else: 
+        blob.upload_from_filename(source_file)
+        print_success(f"File {source_file.split('/')[-1]} uploaded to bucket '{bucket_name}': {destination_file_path}.")
 
 
 def download_file_from_url(url: str, output_folder: str):

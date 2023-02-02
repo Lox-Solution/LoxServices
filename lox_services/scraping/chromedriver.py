@@ -1,13 +1,18 @@
 
+from datetime import datetime
 import os
 import json
 import tempfile
 from functools import reduce
 
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 import undetected_chromedriver as undetected_webdriver
+
 from lox_services.config.env_variables import get_env_variable
 from lox_services.config.paths import OUTPUT_FOLDER
+from lox_services.persistence.storage.constants import SELENIUM_CRASHES_BUCKET
+from lox_services.persistence.storage.storage import upload_file
 
 class ChromeWithPrefs(undetected_webdriver.Chrome):
     """Creates a ChromeDriver instance with the specified options."""
@@ -58,6 +63,20 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
         pass
     
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if isinstance(exc_val, WebDriverException):
+            if get_env_variable("ENVIRONMENT")=="production":
+                screenshot = None
+                print("Exception Raised, try to save window screenshot.")
+                try:
+                    timestamp = datetime.now().timestamp()
+                    file_name = str(timestamp).replace(".", "_")+".png"
+                    upload_file(SELENIUM_CRASHES_BUCKET, self.get_screenshot_as_png(), file_name)
+                    screenshot = f"https://storage.cloud.google.com/{SELENIUM_CRASHES_BUCKET}/{file_name}?authuser=0"
+                except Exception: 
+                    print("Can't take screenshot.")
+                    pass
+                if screenshot:
+                    exc_val.msg += f"\n Screenshot : {screenshot}"
         self.quit()
 
 def init_chromedriver(download_directory:str, size_length: int, size_width: int, version: int) -> webdriver.Chrome:
