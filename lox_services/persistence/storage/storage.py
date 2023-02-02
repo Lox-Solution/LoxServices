@@ -98,7 +98,7 @@ def upload_file(bucket_name: str, source_file: Union[str, bytes], destination_fi
     
     if isinstance(source_file, bytes):
         blob.upload_from_file(source_file)
-        print_success(print_success(f"File uploaded to bucket '{bucket_name}': {destination_file_path}."))
+        print_success(f"File uploaded to bucket '{bucket_name}': {destination_file_path}.")
     else: 
         blob.upload_from_filename(source_file)
         print_success(f"File {source_file.split('/')[-1]} uploaded to bucket '{bucket_name}': {destination_file_path}.")
