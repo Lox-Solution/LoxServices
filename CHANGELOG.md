@@ -21,3 +21,4 @@
 0.1.11 Use CLOUD_ROOT_PATH instead of ROOT_PATH
 0.1.12 Fix circular dependency
 0.1.13 Added a fake name generator
+0.1.14 Added parameterized query, screenshoting in selenium exceptions, uploading of output folder to GCS
