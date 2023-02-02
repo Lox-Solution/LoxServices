@@ -1,8 +1,9 @@
 INTERNAL_COMPANIES = ["Test", "test", "Lox", "lox"]
 
-ORIGINAL_INVOICES_BUCKET = "invoices_email"
-
+# Buckets used to store data
 CLIENT_INVOICES_BUCKET = "invoices_clients"
+ORIGINAL_INVOICES_BUCKET = "invoices_email"
+SELENIUM_CRASHES_BUCKET = "selenium_crashes"
 
 OUTPUT_FOLDER_BUCKET = "lox_output_folder"
 
