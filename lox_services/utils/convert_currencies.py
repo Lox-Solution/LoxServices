@@ -20,16 +20,16 @@ def column_to_euro(
     """
     Given relevant columns, convert local currency values to euro row-wise.
 
-    ## Arguments
-    - `amount_col`: A pandas Series/column containing information about the quantity
-    of currency.
-    - `currency_col`: A pandas Series/column containing information about the kind
-    of currency in ISO 4217 format.
-    - `date_col`: A pandas Series/column containing information about the reference
-    time period.
+        ## Arguments
+        - `amount_col`: A pandas Series/column containing information about the quantity
+        of currency.
+        - `currency_col`: A pandas Series/column containing information about the kind
+        of currency in ISO 4217 format.
+        - `date_col`: A pandas Series/column containing information about the reference
+        time period.
 
-    ## Returns
-    - A numpy array where local currency values are converted euro row-wise.
+        ## Returns
+        - A numpy array where local currency values are converted euro row-wise.
     """
 
     arr = np.array(
