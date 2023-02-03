@@ -2,8 +2,7 @@
 import os
 import re
 import time
-from collections.abc import Sequence
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Sequence
 
 from google.cloud.bigquery import (
     Client,
@@ -27,7 +26,7 @@ from lox_services.utils.metadata import get_function_callers
 def raw_query(
     query: str,
     *,
-    parameters: Optional[Tuple[str, BQParameterType, Any]] = None,
+    parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
     print_query: bool = True,
 ) -> QueryJob:
 
@@ -35,7 +34,7 @@ def raw_query(
     Adds some metadata at the beginning of the query.
     ## Arguments
     - `query`: String representation of the query to be executed.
-    - `print_query`: Tells whether or not to print the query before executing it.
+    - `print_query`: Tells whether to print the query before executing it.
     - `parameters`: List of parameters used to avoid SQL injection
 
     ## Example
@@ -88,7 +87,7 @@ def select(
     query: str,
     print_query: bool = True,
     *,
-    parameters: Optional[Tuple[str, BQParameterType, Any]] = None,
+    parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
 ) -> DataFrame:
     """Checks if the query begings with a SELECT statement. If so the query is being executed.
     ## Arguments
@@ -117,7 +116,7 @@ def update(
     query: str,
     print_query: bool = True,
     *,
-    parameters: Optional[Tuple[str, BQParameterType, Any]] = None,
+    parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
 ) -> DataFrame:
     """Checks if the query begings with a UPDATE statement. If so the query is being executed.
     ## Arguments
@@ -172,7 +171,7 @@ def delete(
     query: str,
     print_query: bool = True,
     *,
-    parameters: Optional[Tuple[str, BQParameterType, Any]] = None,
+    parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
 ) -> DataFrame:
     """Checks if the query begings with a DELETE statement. If so the query is being executed.
 
