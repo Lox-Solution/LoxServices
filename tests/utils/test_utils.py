@@ -90,7 +90,7 @@ class TestDecorators(unittest.TestCase):
 
 
 class TestUtils(unittest.TestCase):
-    def test_convert_currencies(self):
+    def test_column_to_euro(self):
         # https://sdw.ecb.europa.eu/curConverter.do
         df = pd.DataFrame(
             [
