@@ -16,7 +16,21 @@ CURRENCY: Final = CurrencyConverter(
 def column_to_euro(
     amount_col: pd.Series, currency_col: pd.Series, date_col: pd.Series
 ) -> npt.NDArray[np.float32]:
-    """Given relevant columns, convert local currency values to euro row-wise."""
+
+    """
+    Given relevant columns, convert local currency values to euro row-wise.
+
+    ## Arguments
+    - `amount_col`: A pandas Series/column containing information about the quantity
+    of currency.
+    - `currency_col`: A pandas Series/column containing information about the kind
+    of currency in ISO 4217 format.
+    - `date_col`: A pandas Series/column containing information about the reference
+    time period.
+
+    ## Returns
+    - A numpy array where local currency values are converted euro row-wise.
+    """
 
     arr = np.array(
         [
