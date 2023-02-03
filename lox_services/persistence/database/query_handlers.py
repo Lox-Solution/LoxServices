@@ -2,8 +2,8 @@
 import os
 import re
 import time
-from typing import Any, Optional
-from typing import Sequence
+from collections.abc import Sequence
+from typing import Any, Optional, Tuple
 
 from google.cloud.bigquery import (
     Client,
@@ -27,7 +27,7 @@ from lox_services.utils.metadata import get_function_callers
 def raw_query(
     query: str,
     *,
-    parameters: Optional[Sequence[str, BQParameterType, Any]] = None,
+    parameters: Optional[Tuple[str, BQParameterType, Any]] = None,
     print_query: bool = True,
 ) -> QueryJob:
 
@@ -88,7 +88,7 @@ def select(
     query: str,
     print_query: bool = True,
     *,
-    parameters: Optional[Sequence[str, BQParameterType, Any]] = None,
+    parameters: Optional[Tuple[str, BQParameterType, Any]] = None,
 ) -> DataFrame:
     """Checks if the query begings with a SELECT statement. If so the query is being executed.
     ## Arguments
@@ -117,7 +117,7 @@ def update(
     query: str,
     print_query: bool = True,
     *,
-    parameters: Optional[Sequence[str, BQParameterType, Any]] = None,
+    parameters: Optional[Tuple[str, BQParameterType, Any]] = None,
 ) -> DataFrame:
     """Checks if the query begings with a UPDATE statement. If so the query is being executed.
     ## Arguments
@@ -172,7 +172,7 @@ def delete(
     query: str,
     print_query: bool = True,
     *,
-    parameters: Optional[Sequence[str, BQParameterType, Any]] = None,
+    parameters: Optional[Tuple[str, BQParameterType, Any]] = None,
 ) -> DataFrame:
     """Checks if the query begings with a DELETE statement. If so the query is being executed.
 
