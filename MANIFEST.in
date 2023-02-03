@@ -6,4 +6,5 @@ include lox_services/persistence/database/schemas/Content/*.sql
 include lox_services/persistence/database/schemas/InvoicesData/*.sql
 include lox_services/persistence/database/schemas/LoxData/*.sql
 include lox_services/persistence/database/schemas/UserData/*.sql
+include lox_services/pdf/assets/pdf_tables.css
 include tests/pdf/XXXXXDXXXXXXXX.pdf
