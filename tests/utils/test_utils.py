@@ -89,7 +89,7 @@ class TestDecorators(unittest.TestCase):
         self.assertGreater(perf_decor(2), 0)
 
 
-class TestUtils(unittest.TestCase):
+class TestColumnCurrencyConverter(unittest.TestCase):
     def test_column_to_euro(self):
         # https://sdw.ecb.europa.eu/curConverter.do
         df = pd.DataFrame(
