@@ -94,13 +94,16 @@ class TestUtils(unittest.TestCase):
         # https://sdw.ecb.europa.eu/curConverter.do
         df = pd.DataFrame(
             [
-                [100, "RUB", pd.Timestamp("2023-02-01")],
-                [200, "USD", pd.Timestamp("2023-02-01")],
-                [300, "GBP", pd.Timestamp("2023-02-01")],
+                [100, "RUB", pd.Timestamp("2023-02-01"), 0.85],
+                [200, "USD", pd.Timestamp("2023-02-01"), 183.59],
+                [300, "GBP", pd.Timestamp("2023-02-01"), 339.32],
+                [400, "JPY", pd.Timestamp("2020-05-21"), 3.38],
+                [555, "CNY", pd.Timestamp("2021-02-11"), 70.75],
+                [10**8, "CHF", pd.Timestamp("2019-12-31"), 92131932.93],
             ],
-            columns=["amount", "currency", "date"],
+            columns=["amount", "currency", "date", "value_in_eur"],
         )
-        arr = np.array([0.85, 183.59, 339.32])
         np.testing.assert_array_equal(
-            column_to_euro(df["amount"], df["currency"], df["date"]), arr
+            column_to_euro(df["amount"], df["currency"], df["date"]),
+            df["value_in_eur"].values,
         )
