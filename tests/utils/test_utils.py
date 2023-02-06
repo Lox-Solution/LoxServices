@@ -95,8 +95,8 @@ class TestUtils(unittest.TestCase):
         df = pd.DataFrame(
             [
                 [100, "RUB", pd.Timestamp("2023-02-01"), 0.85],
-                [200, "USD", pd.Timestamp("2023-02-01"), 183.59],
-                [300, "GBP", pd.Timestamp("2023-02-01"), 339.32],
+                [200, "USD", pd.Timestamp("2022-02-01"), 177.62],
+                [300, "GBP", pd.Timestamp("2022-09-01"), 346.93],
                 [400, "JPY", pd.Timestamp("2020-05-21"), 3.38],
                 [555, "CNY", pd.Timestamp("2021-02-11"), 70.75],
                 [10**8, "CHF", pd.Timestamp("2019-12-31"), 92_131_932.93],
