@@ -139,4 +139,4 @@ def push_and_delete_run_output_folder(run_folder: str, destination_folder: str):
     upload_file(OUTPUT_FOLDER_BUCKET, archives_path, destination_path)
     
     os.remove(archives_path)
-    os.remove(run_folder)
+    shutil.rmtree(run_folder)
