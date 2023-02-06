@@ -99,7 +99,7 @@ class TestUtils(unittest.TestCase):
                 [300, "GBP", pd.Timestamp("2023-02-01"), 339.32],
                 [400, "JPY", pd.Timestamp("2020-05-21"), 3.38],
                 [555, "CNY", pd.Timestamp("2021-02-11"), 70.75],
-                [10**8, "CHF", pd.Timestamp("2019-12-31"), 92131932.93],
+                [10**8, "CHF", pd.Timestamp("2019-12-31"), 92_131_932.93],
             ],
             columns=["amount", "currency", "date", "value_in_eur"],
         )
