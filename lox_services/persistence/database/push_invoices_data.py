@@ -44,7 +44,7 @@ def push_run_to_database(run_output_folder, carrier, company, account_number_inp
         
     list_files_to_push: List[Tuple[pd.DataFrame, Enum]] = []
     
-    invoice_path = os.path.join(run_output_folder, Files.invoices.value)
+    invoice_path = os.path.join(run_output_folder, Files.INVOICES.value)
     if os.path.exists(invoice_path):
         #Read the invoice file and check the datetime format
         df_invoice: pd.DataFrame = pd.read_csv(invoice_path, infer_datetime_format = date_format, header=0,dtype={"postal_code_reciever" : str})
@@ -62,7 +62,7 @@ def push_run_to_database(run_output_folder, carrier, company, account_number_inp
             )
     
     # Prepare deliveries data
-    deliveries_path = os.path.join(run_output_folder,account_number_input, Files.deliveries.value)
+    deliveries_path = os.path.join(run_output_folder,account_number_input, Files.DELIVERIES.value)
     if os.path.exists(deliveries_path):
         #Read the delivery file and check the datetime format
         df_deliveries: pd.DataFrame = pd.read_csv(
@@ -88,7 +88,7 @@ def push_run_to_database(run_output_folder, carrier, company, account_number_inp
             )
             
         
-    refunds_path = os.path.join(run_output_folder, account_number_input,Files.refunds.value)
+    refunds_path = os.path.join(run_output_folder, account_number_input,Files.REFUNDS.value)
     # Prepare refunds data
     if os.path.exists(refunds_path):
         #Read the refund file and check the datetime format
