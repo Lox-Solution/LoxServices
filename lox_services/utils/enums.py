@@ -59,3 +59,13 @@ class BQParameterType(str, Enum):
     STRING = "STRING"
     TIME = "TIME"
     TIMESTAMP = "TIMESTAMP"
+
+class SlackMemberID(str, Enum):
+    """Slack personal member id. to use to tag someone in message."""
+    MATHIS = "U01Q6FU4VMX"
+    VLADIMIR = "U04GZ6XBMHC"
+    DEV = "U02T69QC1U0"
+    NATASA = "U03HTEE3C10"
+    MELVIL = "U01CX6TREGN"
+    ISIS = "U01PTS9LFEE"
+    DARIAN = "U01L9MHHXUH"
