@@ -20,17 +20,17 @@ def colorize(string: str, color: Colors):
 
 def print_info(string: str):
     """Format a string to error style."""
-    print(colorize(string, Colors.Yellow))
+    print(colorize(string, Colors.YELLOW))
 
 
 def print_error(string: str):
     """Format a string to error style."""
-    print(colorize(string, Colors.Red))
+    print(colorize(string, Colors.RED))
 
 
 def print_success(string: str):
     """Format a string to a success style."""
-    print(colorize(string, Colors.Green))
+    print(colorize(string, Colors.GREEN))
 
 
 def print_step(step):
@@ -43,7 +43,7 @@ f"""
     | |   / _ \ \/ /
     | |__| (_) >  <      STEP {step}
     |_____\___/_/\_\\
-""",Colors.Blue))
+""",Colors.BLUE))
 
 
 FileOrFolder = Literal["file","folder"]

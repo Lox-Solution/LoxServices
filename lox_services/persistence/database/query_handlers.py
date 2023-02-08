@@ -59,7 +59,7 @@ def raw_query(
 
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(SERVICE_ACCOUNT_PATH)
     if print_query:
-        print(gpy.colorize(query, Colors.Magenta))
+        print(gpy.colorize(query, Colors.MAGENTA))
 
     bigquery_client = Client()
 
