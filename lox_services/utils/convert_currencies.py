@@ -1,3 +1,6 @@
+import urllib.request
+from datetime import date
+from pathlib import Path
 from typing import Final
 
 import numpy as np
@@ -5,8 +8,11 @@ import numpy.typing as npt
 import pandas as pd
 from currency_converter import ECB_URL, CurrencyConverter
 
-CURRENCY: Final = CurrencyConverter(
-    ECB_URL,
+_filename = f"ecb_{date.today():%Y%m%d}.zip"
+if not Path(_filename).is_file():
+    urllib.request.urlretrieve(ECB_URL, _filename)
+CURRENCY_CONVERTER: Final = CurrencyConverter(
+    _filename,
     fallback_on_missing_rate=True,
     fallback_on_missing_rate_method="last_known",  # NOQA
     fallback_on_wrong_date=True,
@@ -34,7 +40,7 @@ def column_to_euro(
 
     arr = np.array(
         [
-            CURRENCY.convert(col1, col2, "EUR", date=col3)
+            CURRENCY_CONVERTER.convert(col1, col2, "EUR", date=col3)
             for col1, col2, col3 in zip(
                 amount_col.astype(float),
                 currency_col,
