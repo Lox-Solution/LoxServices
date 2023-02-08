@@ -3,6 +3,7 @@ import sys
 import requests
 
 from lox_services.config.env_variables import get_env_variable
+from lox_services.utils.enums import SlackMemberID
 
 def send_messages(message: str , title : str):
     "Send a slack message to run-report channel  "
@@ -21,3 +22,8 @@ def send_messages(message: str , title : str):
     if response.status_code != 200:
         raise Exception(response.status_code, response.text)
 
+
+
+def tag_someone(to_tag: SlackMemberID) -> str:
+    "Returns value needed to tag someone in a slack message."
+    return f"<@{to_tag.value}>"
