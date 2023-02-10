@@ -17,10 +17,10 @@ def Perf(function: Callable):
     """Prints the performance of the decorated function."""
     def wrapper(*args, **kwargs):
         start_time = perf_counter()
-        print(colorize(f"Start of function '{function.__name__}' : {datetime.now()}",Colors.Yellow))
+        print(colorize(f"Start of function '{function.__name__}' : {datetime.now()}",Colors.YELLOW))
         ret = function(*args, **kwargs)
         end_time = perf_counter()
-        print(colorize(f"Function '{function.__name__}' took {round(end_time-start_time,2)}secs to execute.",Colors.Yellow))
+        print(colorize(f"Function '{function.__name__}' took {round(end_time-start_time,2)}secs to execute.",Colors.YELLOW))
         return ret
     
     return wrapper

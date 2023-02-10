@@ -59,7 +59,7 @@ def raw_query(
 
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(SERVICE_ACCOUNT_PATH)
     if print_query:
-        print(gpy.colorize(query, Colors.Magenta))
+        print(gpy.colorize(query, Colors.MAGENTA))
         if parameters:
             print("parameters:", [f"{parameter[1]} {parameter[0]} : {parameter[2]}" for parameter in parameters])
 
