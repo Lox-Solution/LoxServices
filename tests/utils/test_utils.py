@@ -1,12 +1,15 @@
 import os
 import unittest
 import datetime
+from datetime import datetime, timezone, timedelta
 
+import pandas as pd
 import numpy as np
 
+from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
 from lox_services.utils.decorators import Perf
 from lox_services.utils.convert_currencies import column_to_euro
-
+from lox_services.utils.google_bigquery import make_temporary_table
 from lox_services.utils.general_python import (
     convert_bytes_to_human_readable_size_unit,
     convert_date_with_foreign_month_name,
@@ -19,7 +22,7 @@ from lox_services.utils.general_python import (
     split_array,
     split_date_range,
 )
-import pandas as pd
+from google.cloud.bigquery import Client, DatasetReference
 
 
 PDF_ASSETS_PATH = os.path.join(
@@ -106,4 +109,26 @@ class TestColumnCurrencyConverter(unittest.TestCase):
         np.testing.assert_array_equal(
             column_to_euro(df["amount"], df["currency"], df["date"]),
             df["value_in_eur"].values,
+        )
+
+
+class TestGoogleBigQuery(unittest.TestCase):
+    def test_make_temporary_table(self):
+        os.environ["ENVIRONMENT"] = "development"
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(SERVICE_ACCOUNT_PATH)
+        bigquery_client = Client()
+
+        make_temporary_table(
+            "developmentproject-269810",
+            "Mapping",
+            "UnitTest",
+            pd.util.testing.makeDataFrame(),
+        )
+
+        table_ref = DatasetReference("developmentproject-269810", "Mapping").table(
+            "UnitTest"
+        )
+        table_ref = bigquery_client.get_table(table_ref)
+        self.assertEqual(
+            table_ref.expires, datetime.now(timezone.utc) + timedelta(hours=1)
         )
