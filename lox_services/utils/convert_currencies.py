@@ -24,7 +24,7 @@ def _make_currency_converter() -> CurrencyConverter:
         f"ecb_{date.today():%Y%m%d}.zip",
     )
     if not filename.is_file():
-        urllib.request.urlretrieve(ECB_URL, filename.name)
+        urllib.request.urlretrieve(ECB_URL, filename)
     return CurrencyConverter(
         str(filename),
         fallback_on_missing_rate=True,
