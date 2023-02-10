@@ -1,6 +1,8 @@
+import os
 import urllib.request
 from datetime import date
 from pathlib import Path
+from functools import lru_cache
 from typing import Final
 
 import numpy as np
@@ -8,15 +10,30 @@ import numpy.typing as npt
 import pandas as pd
 from currency_converter import ECB_URL, CurrencyConverter
 
-_filename = f"ecb_{date.today():%Y%m%d}.zip"
-if not Path(_filename).is_file():
-    urllib.request.urlretrieve(ECB_URL, _filename)
-CURRENCY_CONVERTER: Final = CurrencyConverter(
-    _filename,
-    fallback_on_missing_rate=True,
-    fallback_on_missing_rate_method="last_known",  # NOQA
-    fallback_on_wrong_date=True,
-)
+
+@lru_cache(maxsize=1)
+def _make_currency_converter() -> CurrencyConverter:
+    """Make a currency converter from currencyconverter PyPi which is guaranteed
+    to update on a daily basis. To avoid computationally expensive call on each
+    import from the module, this function is cached."""
+    filename = Path(
+        os.getenv("PYTHONPATH"),
+        "lox_services",
+        "utils",
+        "ecb_currency_rates_archive",
+        f"ecb_{date.today():%Y%m%d}.zip",
+    )
+    if not filename.is_file():
+        urllib.request.urlretrieve(ECB_URL, filename.name)
+    return CurrencyConverter(
+        str(filename),
+        fallback_on_missing_rate=True,
+        fallback_on_missing_rate_method="last_known",  # NOQA
+        fallback_on_wrong_date=True,
+    )
+
+
+CURRENCY_CONVERTER: Final = _make_currency_converter()
 
 
 def column_to_euro(
