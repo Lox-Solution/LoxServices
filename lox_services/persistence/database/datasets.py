@@ -48,6 +48,8 @@ class UserData_dataset(Enum):
 class Mapping_dataset(Enum):
     "Class that represents the classes present in Mapping dataset"
     StatusMapping = "StatusMapping"
+    TempAppend = "TempAppend"
+    TempTable = "TempTable"
 
 
 class TestEnvironment_dataset(Enum):
