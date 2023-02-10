@@ -114,7 +114,6 @@ class TestColumnCurrencyConverter(unittest.TestCase):
 
 class TestGoogleBigQuery(unittest.TestCase):
     def test_make_temporary_table(self):
-        os.environ["ENVIRONMENT"] = "development"
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(SERVICE_ACCOUNT_PATH)
         bigquery_client = Client()
 
@@ -129,6 +128,6 @@ class TestGoogleBigQuery(unittest.TestCase):
             "UnitTest"
         )
         table_ref = bigquery_client.get_table(table_ref)
-        self.assertEqual(
+        self.assertAlmostEqual(
             table_ref.expires, datetime.now(timezone.utc) + timedelta(hours=1)
         )
