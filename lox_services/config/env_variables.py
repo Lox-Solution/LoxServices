@@ -22,5 +22,4 @@ def get_env_variable(key: str) -> Any:
     return key
 
 
-if __name__ == "__main__":
     print(get_env_variable("FINANCE_REFRESH_TOKEN"))
