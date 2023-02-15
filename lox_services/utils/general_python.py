@@ -143,6 +143,26 @@ def string_search(string: str, list_of_strings: List[str], *, mode: StringSearch
         raise Exception("Wrong mode. Please refer to function documentation.")
 
 
+def is_one_element_substring(
+    value: str, list_values: List[str], full_string: bool = False
+):
+    """Checks if one element of the list is a substring of the given value.
+    ## Arguments
+    `value` : string value to check
+    `list_values`: list of potential substring
+    `full_string` : if True, look for equal string and not substring, Default False
+    """
+    for el in list_values:
+        if full_string and value == el:
+            print(f"element {el} is equal to value {value}")
+            return True
+        if not full_string and re.search(re.escape(el), value):
+            print(f"element {el} matches value {value}")
+            return True
+
+    return False
+
+
 def string_search_from_series(serie: pd.Series, strings: List[str]) -> List[bool]:
     """Does a string search from a pandas Series and returns a list of booleans.
         This is mainly used for filtering dataframes.
