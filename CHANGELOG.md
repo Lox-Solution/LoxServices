@@ -22,3 +22,4 @@
 0.1.12 Fix circular dependency
 0.1.13 Added a fake name generator
 0.1.14 Added parameterized query, screenshoting in selenium exceptions, uploading of output folder to GCS
+0.1.15 Added tagging members in slack, switched to dotenv package for env variables
