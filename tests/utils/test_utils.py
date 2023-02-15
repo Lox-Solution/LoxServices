@@ -18,6 +18,7 @@ from lox_services.utils.general_python import (
     rreplace,
     split_array,
     split_date_range,
+    is_one_element_substring
 )
 import pandas as pd
 
@@ -107,3 +108,18 @@ class TestColumnCurrencyConverter(unittest.TestCase):
             column_to_euro(df["amount"], df["currency"], df["date"]),
             df["value_in_eur"].values,
         )
+
+
+class TestSubstringFunctions(unittest.TestCase):
+    def test_is_one_element_substring(self):
+        value = "Alex_Mathis_Natasa"
+        li_1 = ["Natasa", "Darian", "Melvil"]
+        li_2 = ["Darian", "Melvil"]
+        li_3 = ["Alex_Mathis_Natasa", "Darian_Melvil"]
+        
+        self.assertIs(is_one_element_substring(value, li_1, False), True)
+        self.assertIs(is_one_element_substring(value, li_1, True), False)
+        self.assertIs(is_one_element_substring(value, li_2), False)
+        self.assertIs(is_one_element_substring(value, li_3, False), True)
+        self.assertIs(is_one_element_substring(value, li_3, True), True)
+        
