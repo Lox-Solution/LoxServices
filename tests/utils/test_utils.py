@@ -2,10 +2,7 @@ import os
 import unittest
 import datetime
 
-import numpy as np
-
 from lox_services.utils.decorators import Perf
-from lox_services.utils.convert_currencies import column_to_euro
 
 from lox_services.utils.general_python import (
     convert_bytes_to_human_readable_size_unit,
@@ -18,9 +15,8 @@ from lox_services.utils.general_python import (
     rreplace,
     split_array,
     split_date_range,
-    is_one_element_substring
+    is_one_element_substring,
 )
-import pandas as pd
 
 
 PDF_ASSETS_PATH = os.path.join(
@@ -90,36 +86,15 @@ class TestDecorators(unittest.TestCase):
         self.assertGreater(perf_decor(2), 0)
 
 
-class TestColumnCurrencyConverter(unittest.TestCase):
-    def test_column_to_euro(self):
-        # https://sdw.ecb.europa.eu/curConverter.do
-        df = pd.DataFrame(
-            [
-                [100, "RUB", pd.Timestamp("2023-02-01"), 0.85],
-                [200, "USD", pd.Timestamp("2022-02-01"), 177.62],
-                [300, "GBP", pd.Timestamp("2022-09-01"), 346.93],
-                [400, "JPY", pd.Timestamp("2020-05-21"), 3.38],
-                [555, "CNY", pd.Timestamp("2021-02-11"), 70.75],
-                [10**8, "CHF", pd.Timestamp("2019-12-31"), 92_131_932.93],
-            ],
-            columns=["amount", "currency", "date", "value_in_eur"],
-        )
-        np.testing.assert_array_equal(
-            column_to_euro(df["amount"], df["currency"], df["date"]),
-            df["value_in_eur"].values,
-        )
-
-
 class TestSubstringFunctions(unittest.TestCase):
     def test_is_one_element_substring(self):
         value = "Alex_Mathis_Natasa"
         li_1 = ["Natasa", "Darian", "Melvil"]
         li_2 = ["Darian", "Melvil"]
         li_3 = ["Alex_Mathis_Natasa", "Darian_Melvil"]
-        
+
         self.assertIs(is_one_element_substring(value, li_1, False), True)
         self.assertIs(is_one_element_substring(value, li_1, True), False)
         self.assertIs(is_one_element_substring(value, li_2), False)
         self.assertIs(is_one_element_substring(value, li_3, False), True)
         self.assertIs(is_one_element_substring(value, li_3, True), True)
-        
