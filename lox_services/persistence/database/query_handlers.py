@@ -26,7 +26,7 @@ from lox_services.utils.metadata import get_function_callers
 def raw_query(
     query: str,
     *,
-    parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
+    parameters: Optional[Sequence[str, BQParameterType, Any]] = None,
     print_query: bool = True,
 ) -> QueryJob:
 
@@ -59,7 +59,9 @@ def raw_query(
 
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(SERVICE_ACCOUNT_PATH)
     if print_query:
-        print(gpy.colorize(query, Colors.Magenta))
+        print(gpy.colorize(query, Colors.MAGENTA))
+        if parameters:
+            print("parameters:", [f"{parameter[1]} {parameter[0]} : {parameter[2]}" for parameter in parameters])
 
     bigquery_client = Client()
 
@@ -87,7 +89,7 @@ def select(
     query: str,
     print_query: bool = True,
     *,
-    parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
+    parameters: Optional[Sequence[str, BQParameterType, Any]] = None,
 ) -> DataFrame:
     """Checks if the query begings with a SELECT statement. If so the query is being executed.
     ## Arguments
@@ -116,7 +118,7 @@ def update(
     query: str,
     print_query: bool = True,
     *,
-    parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
+    parameters: Optional[Sequence[str, BQParameterType, Any]] = None,
 ) -> DataFrame:
     """Checks if the query begings with a UPDATE statement. If so the query is being executed.
     ## Arguments
@@ -171,7 +173,7 @@ def delete(
     query: str,
     print_query: bool = True,
     *,
-    parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
+    parameters: Optional[Sequence[str, BQParameterType, Any]] = None,
 ) -> DataFrame:
     """Checks if the query begings with a DELETE statement. If so the query is being executed.
 

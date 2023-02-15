@@ -1,21 +1,23 @@
-from enum import Enum
+from enum import Enum, IntEnum
 
 
-class Colors(Enum):
+class Colors(IntEnum):
     """Enumeration that stores some colors."""
+
     # pylint: disable=invalid-name
-    Black = 30
-    Red = 31
-    Green = 32
-    Yellow = 33
-    Blue = 34
-    Magenta = 35
-    Cyan = 36
-    White = 37
+    BLACK = 30
+    RED = 31
+    GREEN = 32
+    YELLOW = 33
+    BLUE = 34
+    MAGENTA = 35
+    CYAN = 36
+    WHITE = 37
 
 
-class SIZE_UNIT(Enum):
+class SIZE_UNIT(IntEnum):
     """Enumeration of computer size units."""
+
     BYTES = 1
     KB = 2
     MB = 3
@@ -23,37 +25,47 @@ class SIZE_UNIT(Enum):
     TB = 5
 
 
-class Files(Enum):
-    invoices = "invoices.csv"
-    deliveries = "deliveries.csv"
-    deliveries_not_working = "deliveries_not_working.csv"
-    refunds = "refunds.csv"
-    claims = "claims.csv"
-    contract = "contract.csv"
-    refunds_label_not_used = 'refunds_label_not_used.csv'
-
+class Files(str, Enum):
+    INVOICES = "invoices.csv"
+    DELIVERIES = "deliveries.csv"
+    DELIVERIES_NOT_WORKING = "deliveries_not_working.csv"
+    REFUNDS = "refunds.csv"
+    CLAIMS = "claims.csv"
+    CONTRACT = "contract.csv"
+    REFUNDS_LABEL_NOT_USED = "refunds_label_not_used.csv"
 
 
 class BQParameterType(str, Enum):
     """
     Types of parameter which can be used in parameterized query.
     """
+
     # Sequence types
     ARRAY = "ARRAY"
     STRUCT = "STRUCT"
     GEOGRAPHY = "GEOGRAPHY"
     JSON = "JSON"
-    
+
     # Scalar types
     BIGNUMERIC = "BIGNUMERIC"
     BOOL = "BOOL"
     BYTES = "BYTES"
-    DATE = "DATE"	
-    DATETIME = "DATETIME"	
+    DATE = "DATE"
+    DATETIME = "DATETIME"
     FLOAT64 = "FLOAT64"
     INT64 = "INT64"
     INTERVAL = "INTERVAL"
-    NUMERIC = "NUMERIC"	
+    NUMERIC = "NUMERIC"
     STRING = "STRING"
     TIME = "TIME"
     TIMESTAMP = "TIMESTAMP"
+
+class SlackMemberID(str, Enum):
+    """Slack personal member id. to use to tag someone in message."""
+    MATHIS = "U01Q6FU4VMX"
+    VLADIMIR = "U04GZ6XBMHC"
+    DEV = "U02T69QC1U0"
+    NATASA = "U03HTEE3C10"
+    MELVIL = "U01CX6TREGN"
+    ISIS = "U01PTS9LFEE"
+    DARIAN = "U01L9MHHXUH"
