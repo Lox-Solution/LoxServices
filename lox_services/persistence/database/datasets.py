@@ -39,7 +39,6 @@ class UserData_dataset(Enum):
     CustomerSatisfaction = "CustomerSatisfaction"
     CustomerData = "CustomerData"
     Credentials = "Credentials"
-    ChronopostAccounts = "ChronopostAccounts"
     InvoicesFromClientToCarrier = "InvoicesFromClientToCarrier"
     Logos = "Logos"
     ClientApiAccess  ="ClientApiAccess"    
