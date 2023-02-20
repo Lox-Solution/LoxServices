@@ -14,11 +14,11 @@ def get_env_variable(key: str) -> Any:
     - The value of the environment variable if it exists
     - Raises a ValueError otherwise
     """
-    key = os.getenv(key)
-    if key is None:
+    get_env = os.getenv(key)
+    if get_env is None:
         raise ValueError(
             f"'{key}' key does not exist in .env file or in environment variables."
         )
-    return key
+    return get_env
 
 
