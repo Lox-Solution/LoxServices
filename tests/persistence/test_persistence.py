@@ -1,15 +1,16 @@
+import os
 import unittest
-import pandas as pd
+from datetime import datetime, timedelta, timezone
+
 import numpy as np
+import pandas as pd
+from google.cloud.bigquery import Client, DatasetReference
 from pandas.testing import assert_frame_equal
 
+from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
 from lox_services.persistence.database.utils import (
-    generate_id, 
-    format_datetime, 
-    format_time, 
-    replace_nan_with_none_in_dataframe, 
-    equal_condition_handle_none_value)
-
+    equal_condition_handle_none_value, format_datetime, format_time,
+    generate_id, make_temporary_table, replace_nan_with_none_in_dataframe)
 
 label = None
 account = '123456'
@@ -17,7 +18,7 @@ mock_df = pd.DataFrame(np.array([['1', np.NaN, None], [ '5', '6', np.NaN], [ '8'
 df = replace_nan_with_none_in_dataframe(mock_df)
 mock_df_out = pd.DataFrame(np.array([['1', None, None], [ '5', '6', None], [ '8', '9', None]]), columns=['a', 'b', 'c'])
 
-class Test_database_functions(unittest.TestCase):
+class TestDatabaseFunctions(unittest.TestCase):
     
     def test_utils_functions(self):
         self.assertEqual(generate_id(['invoice', 'date', 'amount']),'invoice_date_amount')
@@ -27,5 +28,25 @@ class Test_database_functions(unittest.TestCase):
         self.assertEqual(equal_condition_handle_none_value("label", label), 'label is null')
         self.assertEqual(equal_condition_handle_none_value("account", account), 'account = "123456"')
         assert_frame_equal(mock_df,mock_df_out)
+
+    def test_make_temporary_table(self):
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_PATH
+        client = Client()
+
+        make_temporary_table(
+            pd.util.testing.makeDataFrame(),
+            "developmentproject-269810",
+            "Mapping",
+            "UnitTest",
+        )
+
+        table_ref = DatasetReference("developmentproject-269810", "Mapping").table(
+            "UnitTest"
+        )
+        table_ref = client.get_table(table_ref)
+        self.assertLess(
+            (datetime.now(timezone.utc) + timedelta(hours=1)) - table_ref.expires,
+            timedelta(seconds=1),
+        )
 
         
