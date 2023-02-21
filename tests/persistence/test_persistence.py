@@ -50,17 +50,17 @@ class TestDatabaseFunctions(unittest.TestCase):
     def test_make_temporary_table(self):
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_PATH
         with open(SERVICE_ACCOUNT_PATH, "r", encoding="utf-8") as file:
-            table_name = json.load(file)["project_id"]
+            project_id = json.load(file)["project_id"]
         client = Client()
 
         make_temporary_table(
             pd.util.testing.makeDataFrame(),
-            table_name,
+            project_id,
             "Mapping",
             "UnitTest",
         )
 
-        table_ref = DatasetReference(table_name, "Mapping").table("UnitTest")
+        table_ref = DatasetReference(project_id, "Mapping").table("UnitTest")
         table_ref = client.get_table(table_ref)
         self.assertLess(
             (datetime.now(timezone.utc) + timedelta(hours=1)) - table_ref.expires,
