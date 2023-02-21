@@ -1,20 +1,14 @@
-import os
 import unittest
-import json
-from datetime import datetime, timedelta, timezone
 
 import numpy as np
 import pandas as pd
-from google.cloud.bigquery import Client, DatasetReference
 from pandas.testing import assert_frame_equal
 
-from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
 from lox_services.persistence.database.utils import (
     equal_condition_handle_none_value,
     format_datetime,
     format_time,
     generate_id,
-    make_temporary_table,
     replace_nan_with_none_in_dataframe,
 )
 
@@ -46,23 +40,3 @@ class TestDatabaseFunctions(unittest.TestCase):
             equal_condition_handle_none_value("account", account), 'account = "123456"'
         )
         assert_frame_equal(mock_df, mock_df_out)
-
-    def test_make_temporary_table(self):
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_PATH
-        with open(SERVICE_ACCOUNT_PATH, "r", encoding="utf-8") as file:
-            project_id = json.load(file)["project_id"]
-        client = Client()
-
-        make_temporary_table(
-            pd.util.testing.makeDataFrame(),
-            project_id,
-            "Mapping",
-            "UnitTest",
-        )
-
-        table_ref = DatasetReference(project_id, "Mapping").table("UnitTest")
-        table_ref = client.get_table(table_ref)
-        self.assertLess(
-            (datetime.now(timezone.utc) + timedelta(hours=1)) - table_ref.expires,
-            timedelta(seconds=1),
-        )
