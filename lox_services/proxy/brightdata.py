@@ -4,6 +4,7 @@ from itertools import repeat
 from typing import Callable, List
 
 import requests
+import urllib3
 
 from lox_services.utils.decorators import DataUsage, Perf
 from lox_services.utils.general_python import print_error, print_success
@@ -46,10 +47,16 @@ class BrightDataProxyManager:
             
             try:
                 result = request_method(**options)
-            except (
-                requests.exceptions.ProxyError,
-                requests.exceptions.SSLError,
-            ):
+            
+            except requests.exceptions.ProxyError as error:
+                for arg in error.args:
+                    if isinstance(arg, urllib3.exceptions.MaxRetryError):
+                        if "407 Auth Failed (code: ip_forbidden)" in str(arg.reason.original_error):
+                            raise Exception("BrightData needs to whitelist your IP address. Please contact Melvil.") from error
+                
+                result.status_code = 407
+            
+            except requests.exceptions.SSLError:
                 result.status_code = 407
             
             ip = options["proxies"]["http"].split("ip-")[1].split(":")[0]
