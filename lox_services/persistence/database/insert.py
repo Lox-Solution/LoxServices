@@ -401,7 +401,7 @@ def check_lox_invoice_not_exists(dataframe: pd.DataFrame) -> None:
         WHERE invoice_number = "{invoice_number}"
     """
     already_saved = select(query,False)
-    if already_saved.shape[0] > 0:
+    if not already_saved.empty:
         print_error(f"The Lox invoice number {invoice_number} has already been attributed!")
         raise Exception("Cannot save in the Database. Lox invoice number has already been attributed.")
     else:
