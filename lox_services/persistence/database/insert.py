@@ -72,46 +72,44 @@ def insert_dataframe_into_database(
         return 0
     
     print(f"Trying to save a dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
-    if not dataframe.empty:
-        if isinstance(table, InvoicesData_dataset):
-            dataset = "InvoicesData"
-            dataframe = remove_duplicate_headers_dataframe(dataframe)
-            if table.name == "Invoices":
-                dataframe = remove_duplicate_invoices(dataframe)
-            if table.name == "Refunds":
-                dataframe = remove_duplicate_refunds(dataframe)
-            if table.name == "ClientInvoicesData":
-                dataframe = remove_duplicate_client_invoice_data(dataframe)
-                dataframe = client_invoice_data_quality_check(dataframe)
-        elif isinstance(table, LoxData_dataset):
-            dataset = "LoxData"
-            if table.name == "DueInvoices":
-                check_lox_invoice_not_exists(dataframe)
-            if table.name == "InvoicesDetails":
-                check_duplicate_invoices_details(dataframe)
-        elif isinstance(table, Mapping_dataset):
-            dataset = "Mapping"
-        elif isinstance(table, InvoicesDataLake_dataset):
-            dataset = "InvoicesDataLake"
-        elif isinstance(table, UserData_dataset):
-            dataset = "UserData"
-            if table.name == "InvoicesFromClientToCarrier":
-                dataframe = remove_duplicate_InvoicesFromClientToCarrier(dataframe)
-                
-            if table.name == "NestedAccountNumbers":
-                dataframe = remove_duplicate_NestedAccountNumbers(dataframe)
-            
-        elif isinstance(table, TestEnvironment_dataset):
-            dataset="TestEnvironment"
-            if table.name == "Refunds":
-                dataframe = prepare_refunds_test_enviromnent(dataframe)
-                dataframe = remove_duplicate_refunds(dataframe, test_environment = True)
-        else :
-            raise TypeError("'table' param must be an instance of one of the tables Enum.")
-    
     if dataframe.empty:
         print("Empty dataframe, insert aborted because unnecessary.")
         return 0
+    if isinstance(table, InvoicesData_dataset):
+        dataset = "InvoicesData"
+        dataframe = remove_duplicate_headers_dataframe(dataframe)
+        if table.name == "Invoices":
+            dataframe = remove_duplicate_invoices(dataframe)
+        if table.name == "Refunds":
+            dataframe = remove_duplicate_refunds(dataframe)
+        if table.name == "ClientInvoicesData":
+            dataframe = remove_duplicate_client_invoice_data(dataframe)
+            dataframe = client_invoice_data_quality_check(dataframe)
+    elif isinstance(table, LoxData_dataset):
+        dataset = "LoxData"
+        if table.name == "DueInvoices":
+            check_lox_invoice_not_exists(dataframe)
+        if table.name == "InvoicesDetails":
+            check_duplicate_invoices_details(dataframe)
+    elif isinstance(table, Mapping_dataset):
+        dataset = "Mapping"
+    elif isinstance(table, InvoicesDataLake_dataset):
+        dataset = "InvoicesDataLake"
+    elif isinstance(table, UserData_dataset):
+        dataset = "UserData"
+        if table.name == "InvoicesFromClientToCarrier":
+            dataframe = remove_duplicate_InvoicesFromClientToCarrier(dataframe)
+
+        if table.name == "NestedAccountNumbers":
+            dataframe = remove_duplicate_NestedAccountNumbers(dataframe)
+
+    elif isinstance(table, TestEnvironment_dataset):
+        dataset="TestEnvironment"
+        if table.name == "Refunds":
+            dataframe = prepare_refunds_test_enviromnent(dataframe)
+            dataframe = remove_duplicate_refunds(dataframe, test_environment = True)
+    else :
+        raise TypeError("'table' param must be an instance of one of the tables Enum.")
 
     print_success(f"Checks done - Saving dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
     bigquery_client = Client()
