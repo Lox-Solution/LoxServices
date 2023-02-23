@@ -1,6 +1,6 @@
 """Contains the function to insert dataframes into the database."""
 from datetime import datetime
-from pprint import pprint
+from pprint import pformat
 import re
 from pytz import timezone
 from typing import Literal
@@ -135,8 +135,9 @@ def insert_dataframe_into_database(
         )[0]
 
         if errors:
-            pprint(errors)
-            raise InvalidDataException(f"{len(errors)} errors occured while inserting dataframe into {table}.")
+            raise InvalidDataException(
+                f"{pformat(errors)}\n{len(errors)} errors occured while inserting dataframe into {table}."
+            )
     else:
         job_config = LoadJobConfig(write_disposition=write_disposition)
         bigquery_client.load_table_from_dataframe(
