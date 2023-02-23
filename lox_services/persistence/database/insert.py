@@ -183,8 +183,8 @@ def remove_duplicate_invoices(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     original_size = len(dataframe.index)
     dataframe['invoice_number'] = dataframe["invoice_number"].astype(str)
-    company = dataframe.iloc[0]['company']
-    carrier = dataframe.iloc[0]['carrier']
+    company = dataframe.at[0, 'company']
+    carrier = dataframe.at[0, 'carrier']
     query = f"""
         SELECT DISTINCT invoice_number 
         
@@ -220,8 +220,8 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame, test_environment: bool = F
     #Drop duplicates for dummy duplicates, with 'keep' different than False
     dataframe = dataframe.copy().drop_duplicates(subset=['tracking_number','reason_refund'])
     print(dataframe.iloc[0])
-    carrier = dataframe.iloc[0]['carrier']
-    company = dataframe.iloc[0]['company']
+    carrier = dataframe.at[0, 'carrier']
+    company = dataframe.at[0, 'company']
     dataframe['reason_refund'] = dataframe.reason_refund.astype(str)
     reason_refunds = dataframe['reason_refund'].unique().tolist()
     
@@ -290,8 +290,8 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame, test_environment: bool = F
 
 def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes duplicates from client invoices dataframe"""
-    carrier = dataframe.iloc[0]['carrier']
-    company = dataframe.iloc[0]['company']
+    carrier = dataframe.at[0, 'carrier']
+    company = dataframe.at[0, 'company']
     tracking_numbers = dataframe["tracking_number"].to_list()
     sql_query = f"""
         SELECT 
@@ -310,8 +310,8 @@ def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFram
 
 def remove_duplicate_InvoicesFromClientToCarrier(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes duplicates from InvoicesFromClientToCarrier dataframe"""
-    carrier = dataframe.iloc[0]['carrier']
-    company = dataframe.iloc[0]['company']
+    carrier = dataframe.at[0, 'carrier']
+    company = dataframe.at[0, 'company']
     tracking_numbers = dataframe["tracking_number"].to_list()
     sql_query = f"""
         SELECT 
@@ -331,8 +331,8 @@ def remove_duplicate_InvoicesFromClientToCarrier(dataframe: pd.DataFrame) -> pd.
 
 def remove_duplicate_NestedAccountNumbers(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes already saved account numbers dataframe"""
-    carrier = dataframe.iloc[0]['carrier']
-    company = dataframe.iloc[0]['company']
+    carrier = dataframe.at[0, 'carrier']
+    company = dataframe.at[0, 'company']
     sql_query = f"""
         SELECT 
             distinct account_number
@@ -391,7 +391,7 @@ def check_lox_invoice_not_exists(dataframe: pd.DataFrame) -> None:
         - Nothing if the check is successful.
         - Raises Exception otherwise.
     """
-    invoice_number = dataframe.iloc[0]['invoice_number']
+    invoice_number = dataframe.at[0, 'invoice_number']
     query = f"""
         SELECT 
             invoice_number 
