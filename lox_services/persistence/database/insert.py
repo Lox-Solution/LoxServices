@@ -304,7 +304,7 @@ def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFram
             AND tracking_number IN UNNEST({tracking_numbers})
     """
     already_saved_tracking_numbers = select(sql_query, False)["tracking_number"].to_list()
-    if len(already_saved_tracking_numbers) > 0:
+    if already_saved_tracking_numbers:
         dataframe = dataframe.loc[~dataframe["tracking_number"].isin(already_saved_tracking_numbers)]
     return dataframe
 
@@ -324,7 +324,7 @@ def remove_duplicate_InvoicesFromClientToCarrier(dataframe: pd.DataFrame) -> pd.
             AND tracking_number IN UNNEST({tracking_numbers})
     """
     already_saved_tracking_numbers = select(sql_query, False)["tracking_number"].to_list()
-    if len(already_saved_tracking_numbers) > 0:
+    if already_saved_tracking_numbers:
         dataframe = dataframe.loc[~dataframe["tracking_number"].isin(already_saved_tracking_numbers)]
     return dataframe
 
@@ -343,7 +343,7 @@ def remove_duplicate_NestedAccountNumbers(dataframe: pd.DataFrame) -> pd.DataFra
             AND carrier = "{carrier}"
     """
     already_saved_account_numbers = select(sql_query, False)["account_number"].to_list()
-    if len(already_saved_account_numbers) > 0:
+    if already_saved_account_numbers:
         print(f"Account numbers {already_saved_account_numbers} are already saved in table.")
         dataframe = dataframe.loc[~dataframe["account_number"].isin(already_saved_account_numbers)]
     return dataframe
@@ -356,7 +356,7 @@ def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
     for column in ["company", "carrier", "tracking_number", "data_source", "is_original_invoice"]:
         if column not in dataframe.columns:
             missing_columns.append(column)
-    if len(missing_columns)>0:
+    if missing_columns:
         raise MissingColumnsException(", ".join(missing_columns))
     #Check value invoice_url
     for invoice_url in dataframe["invoice_url"].to_list():
