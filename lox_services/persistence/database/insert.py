@@ -97,6 +97,10 @@ def insert_dataframe_into_database(
             dataset = "UserData"
             if table.name == "InvoicesFromClientToCarrier":
                 dataframe = remove_duplicate_InvoicesFromClientToCarrier(dataframe)
+                
+            if table.name == "NestedAccountNumbers":
+                dataframe = remove_duplicate_NestedAccountNumbers(dataframe)
+            
         elif isinstance(table, TestEnvironment_dataset):
             dataset="TestEnvironment"
             if table.name == "Refunds":
@@ -321,6 +325,28 @@ def remove_duplicate_InvoicesFromClientToCarrier(dataframe: pd.DataFrame) -> pd.
     if len(already_saved_tracking_numbers) > 0:
         dataframe = dataframe.loc[~dataframe["tracking_number"].isin(already_saved_tracking_numbers)]
     return dataframe
+
+
+def remove_duplicate_NestedAccountNumbers(dataframe: pd.DataFrame) -> pd.DataFrame:
+    """Removes already saved account numbers dataframe"""
+    carrier = dataframe.iloc[0]['carrier']
+    company = dataframe.iloc[0]['company']
+    sql_query = f"""
+        SELECT 
+            distinct account_number
+            
+        FROM UserData.NestedAccountNumbers
+        
+        WHERE company = "{company}"
+            AND carrier = "{carrier}"
+    """
+    already_saved_account_numbers = select(sql_query, False)["account_number"].to_list()
+    if len(already_saved_account_numbers) > 0:
+        print(f"Account numbers {already_saved_account_numbers} are already saved in table.")
+        dataframe = dataframe.loc[~dataframe["account_number"].isin(already_saved_account_numbers)]
+    return dataframe
+
+
 
 def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Performs data quality check on client invoices dataframe"""
