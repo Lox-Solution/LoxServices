@@ -458,10 +458,6 @@ def remove_duplicate_headers_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
         ## Returns
         The dataframe cleaned from potential header duplicates
     """
-    for index, row in dataframe.iterrows():
-        # If the entire row is similar to the header
-        if np.array_equal(row.values, dataframe.columns.values):
-            # Remove the row from the dataframe
-            dataframe.drop(index, inplace=True)
-            
+    row_mask = dataframe.apply(lambda col: col.equals(pd.Series(dataframe.columns)), axis=1)
+    dataframe = dataframe[~row_mask]
     return dataframe
