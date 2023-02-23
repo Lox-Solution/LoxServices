@@ -5,9 +5,7 @@ import re
 from pytz import timezone
 from typing import Literal
 import os
-from sys import path
 
-import numpy as np
 import pandas as pd
 from google.cloud.bigquery import Client, LoadJobConfig
 
