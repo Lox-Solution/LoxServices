@@ -3,12 +3,13 @@ from datetime import datetime
 from pprint import pprint
 import re
 from pytz import timezone
+from typing import Literal
 import os
 from sys import path
 
 import numpy as np
 import pandas as pd
-from google.cloud.bigquery import Client
+from google.cloud.bigquery import Client, LoadJobConfig
 
 from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
 from lox_services.persistence.database.exceptions import MissingColumnsException, InvalidDataException
@@ -27,12 +28,36 @@ from lox_services.utils.general_python import print_error, print_success
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(SERVICE_ACCOUNT_PATH)
 
-def insert_dataframe_into_database(dataframe: pd.DataFrame, table: DatasetTypeAlias):
+
+def insert_dataframe_into_database(
+        dataframe: pd.DataFrame,
+        table: DatasetTypeAlias,
+        write_method: Literal[
+            "insert_rows_from_dataframe",
+            "load_table_from_dataframe"
+        ] = "insert_rows_from_dataframe",
+        write_disposition: Literal[
+        "WRITE_TRUNCATE", "WRITE_APPEND", "WRITE_EMPTY"
+    ] = "WRITE_TRUNCATE",
+) -> int:
     """Inserts every row of the dataframe into the database. 
         Does duplicate checks for specific tables (Invoices, Refunds).
         ## Arguments
         - `dataframe`: The dataframe to insert into the database. Must have good column names.
         - `table`: The database table name. It must be one of the datasets.
+        - 'write_method': Which GBQ client method gets called. 'load_table_from_dataframe' avoids
+        bugs related to handling nullable PyArrow datatypes like Int64.
+        - `write_disposition`. Specifies the action that occurs if the destination table
+        already exists when using the 'load_table_from_dataframe' method. The following values
+        are supported:
+            - WRITE_TRUNCATE: If the table already exists, BigQuery overwrites the table
+            data and uses the schema from the query result.
+            - WRITE_APPEND: If the table already exists, BigQuery appends the data to the table.
+            - WRITE_EMPTY: If the table already exists and contains data, a 'duplicate'
+            error is returned in the job result.
+        Each action is atomic and only occurs if BigQuery is able to complete the job
+        successfully. Creation, truncation and append actions occur as one atomic update
+        upon job completion.
         
         ## Example
             >>> insert_dataframe_into_database(df, InvoicesData_dataset.Invoices)
@@ -46,7 +71,7 @@ def insert_dataframe_into_database(dataframe: pd.DataFrame, table: DatasetTypeAl
         print_error('dataframe argument must be a DataFrame.')
         return 0
     
-    print(f"Trying to save a dataframe ({dataframe.shape[0]} rows) to Google BigQuery table {table.name}")
+    print(f"Trying to save a dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
     if not dataframe.empty:
         if isinstance(table, InvoicesData_dataset):
             dataset = "InvoicesData"
@@ -81,7 +106,7 @@ def insert_dataframe_into_database(dataframe: pd.DataFrame, table: DatasetTypeAl
             raise TypeError("'table' param must be an instance of one of the tables Enum.")
     
     if not dataframe.empty:
-        print_success(f"Checks done - Saving dataframe ({dataframe.shape[0]} rows) to Google BigQuery table {table.name}")
+        print_success(f"Checks done - Saving dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
         bigquery_client = Client()
         # Prepares a reference to the dataset
         dataset_ref = bigquery_client.dataset(dataset)
@@ -95,21 +120,28 @@ def insert_dataframe_into_database(dataframe: pd.DataFrame, table: DatasetTypeAl
         else:
             dataframe['insert_datetime'] = dataframe['insert_datetime'].astype(str)
         dataframe['update_datetime'] = current_datetime
-        errors = bigquery_client.insert_rows_from_dataframe(
-            table=table, 
-            dataframe=dataframe,
-            ignore_unknown_values=True,
-        )[0]
-        
-        if len(errors) > 0:
-            pprint(errors)
-            raise InvalidDataException(f"{len(errors)} errors occured while inserting dataframe into {table}.")
+
+        if write_method == "insert_rows_from_dataframe":
+            errors = bigquery_client.insert_rows_from_dataframe(
+                table=table,
+                dataframe=dataframe,
+                ignore_unknown_values=True,
+            )[0]
+
+            if errors:
+                pprint(errors)
+                raise InvalidDataException(f"{len(errors)} errors occured while inserting dataframe into {table}.")
+        else:
+            job_config = LoadJobConfig(write_disposition=write_disposition)
+            bigquery_client.load_table_from_dataframe(
+                dataframe, table.table_id, job_config=job_config
+            ).result()
         
         print_success("Success, everything has been inserted.")
     else:
         print("Empty dataframe, insert aborted because unnecessary.")
     
-    return dataframe.shape[0]
+    return len(dataframe.index)
 
 
 def prepare_refunds_test_enviromnent(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -143,7 +175,7 @@ def remove_duplicate_invoices(dataframe: pd.DataFrame) -> pd.DataFrame:
         ## Returns 
         - The dataframe without the invoice numbers already uploaded.
     """
-    original_size = dataframe.shape[0]
+    original_size = len(dataframe.index)
     dataframe['invoice_number'] = dataframe["invoice_number"].astype(str)
     company = dataframe.iloc[0]['company']
     carrier = dataframe.iloc[0]['carrier']
@@ -160,7 +192,7 @@ def remove_duplicate_invoices(dataframe: pd.DataFrame) -> pd.DataFrame:
     # Remove invoice numbers that were already pushed to BQ
     dataframe = dataframe[~(dataframe['invoice_number']).isin(already_pushed['invoice_number'])]
     
-    print(f"{original_size - dataframe.shape[0]} invoice rows deleted before saving to the database.")
+    print(f"{original_size - len(dataframe.index)} invoice rows deleted before saving to the database.")
     print("Result:\n", dataframe)
     return dataframe
 
@@ -177,7 +209,7 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame, test_environment: bool = F
         ## Returns
         The dataframe cleaned from potential duplicates
     """
-    original_size = dataframe.shape[0]
+    original_size = len(dataframe.index)
     print(f"Checking {original_size} refunds...")
     #Drop duplicates for dummy duplicates, with 'keep' different than False
     dataframe = dataframe.copy().drop_duplicates(subset=['tracking_number','reason_refund'])
@@ -245,7 +277,7 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame, test_environment: bool = F
         )
         # Remove rows where the tracking number and reason refund is already present in the database
         dataframe = dataframe[~(dataframe['tracking_number'] + dataframe['smart_reason_refund']).isin(existing_data_dataframe['existing_combo'])]
-    print(f"{original_size - dataframe.shape[0]} refund rows deleted before saving to the database.")
+    print(f"{original_size - len(dataframe.index)} refund rows deleted before saving to the database.")
     print("Result:\n", dataframe)
     return dataframe
 
