@@ -456,5 +456,4 @@ def remove_duplicate_headers_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
         The dataframe cleaned from potential header duplicates
     """
     row_mask = dataframe.apply(lambda col: col.equals(pd.Series(dataframe.columns)), axis=1)
-    dataframe = dataframe[~row_mask]
-    return dataframe
+    return dataframe[~row_mask]
