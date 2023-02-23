@@ -109,44 +109,45 @@ def insert_dataframe_into_database(
         else :
             raise TypeError("'table' param must be an instance of one of the tables Enum.")
     
-    if not dataframe.empty:
-        print_success(f"Checks done - Saving dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
-        bigquery_client = Client()
-        # Prepares a reference to the dataset
-        dataset_ref = bigquery_client.dataset(dataset)
-        # Select the table where you want to push the data
-        table_ref = dataset_ref.table(table.name)
-        table = bigquery_client.get_table(table_ref)
-        dataframe = dataframe.where(pd.notnull(dataframe), None)
-        current_datetime = datetime.now(timezone('Europe/Amsterdam')).strftime('%Y-%m-%dT%H:%M:%S.%f')
-        if 'insert_datetime' not in dataframe.columns:
-            dataframe['insert_datetime'] = current_datetime
-        else:
-            dataframe['insert_datetime'] = dataframe['insert_datetime'].astype(str)
-        dataframe['update_datetime'] = current_datetime
-
-        if write_method == "insert_rows_from_dataframe":
-            errors = bigquery_client.insert_rows_from_dataframe(
-                table=table,
-                dataframe=dataframe,
-                ignore_unknown_values=True,
-            )[0]
-
-            if errors:
-                pprint(errors)
-                raise InvalidDataException(f"{len(errors)} errors occured while inserting dataframe into {table}.")
-        else:
-            job_config = LoadJobConfig(write_disposition=write_disposition)
-            bigquery_client.load_table_from_dataframe(
-                dataframe,
-                f"{table.project}.{table.dataset_id}.{table.table_id}",
-                job_config=job_config
-            ).result()
-        
-        print_success("Success, everything has been inserted.")
-    else:
+    if dataframe.empty:
         print("Empty dataframe, insert aborted because unnecessary.")
-    
+        return 0
+
+    print_success(f"Checks done - Saving dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
+    bigquery_client = Client()
+    # Prepares a reference to the dataset
+    dataset_ref = bigquery_client.dataset(dataset)
+    # Select the table where you want to push the data
+    table_ref = dataset_ref.table(table.name)
+    table = bigquery_client.get_table(table_ref)
+    dataframe = dataframe.where(pd.notnull(dataframe), None)
+    current_datetime = datetime.now(timezone('Europe/Amsterdam')).strftime('%Y-%m-%dT%H:%M:%S.%f')
+    if 'insert_datetime' not in dataframe.columns:
+        dataframe['insert_datetime'] = current_datetime
+    else:
+        dataframe['insert_datetime'] = dataframe['insert_datetime'].astype(str)
+    dataframe['update_datetime'] = current_datetime
+
+    if write_method == "insert_rows_from_dataframe":
+        errors = bigquery_client.insert_rows_from_dataframe(
+            table=table,
+            dataframe=dataframe,
+            ignore_unknown_values=True,
+        )[0]
+
+        if errors:
+            pprint(errors)
+            raise InvalidDataException(f"{len(errors)} errors occured while inserting dataframe into {table}.")
+    else:
+        job_config = LoadJobConfig(write_disposition=write_disposition)
+        bigquery_client.load_table_from_dataframe(
+            dataframe,
+            f"{table.project}.{table.dataset_id}.{table.table_id}",
+            job_config=job_config
+        ).result()
+
+    print_success("Success, everything has been inserted.")
+
     return len(dataframe.index)
 
 
