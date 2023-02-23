@@ -36,7 +36,7 @@ def insert_dataframe_into_database(
         ] = "insert_rows_from_dataframe",
         write_disposition: Literal[
         "WRITE_TRUNCATE", "WRITE_APPEND", "WRITE_EMPTY"
-    ] = "WRITE_TRUNCATE",
+        ] = "WRITE_TRUNCATE",
 ) -> int:
     """Inserts every row of the dataframe into the database. 
         Does duplicate checks for specific tables (Invoices, Refunds).
@@ -64,7 +64,6 @@ def insert_dataframe_into_database(
         - The number of inserted rows.
         - An Exception if a check didn't pass. 
     """
-    dataset = ""
     if not isinstance(dataframe, pd.DataFrame):
         print_error('dataframe argument must be a DataFrame.')
         return 0
@@ -103,10 +102,10 @@ def insert_dataframe_into_database(
             dataframe = remove_duplicate_NestedAccountNumbers(dataframe)
 
     elif isinstance(table, TestEnvironment_dataset):
-        dataset="TestEnvironment"
+        dataset = "TestEnvironment"
         if table.name == "Refunds":
             dataframe = prepare_refunds_test_enviromnent(dataframe)
-            dataframe = remove_duplicate_refunds(dataframe, test_environment = True)
+            dataframe = remove_duplicate_refunds(dataframe, test_environment=True)
     else:
         raise TypeError("'table' param must be an instance of one of the tables Enum.")
 
@@ -150,7 +149,7 @@ def insert_dataframe_into_database(
 
 
 def prepare_refunds_test_enviromnent(dataframe: pd.DataFrame) -> pd.DataFrame:
-    """"Prepare the refunds to be push on the new environment:
+    """Prepare the refunds to be push on the new environment:
         ## Arguments
         - `dataframe`: The dataframe containing the invoice numbers to check.
         
@@ -162,9 +161,9 @@ def prepare_refunds_test_enviromnent(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     if 'package_id' not in dataframe.columns:
         if 'invoice_number' in dataframe.columns:
-            dataframe['package_id'] =  dataframe.apply(lambda x: generate_id([x.carrier, x.company, x.invoice_number, x.tracking_number]), axis=1)
+            dataframe['package_id'] = dataframe.apply(lambda x: generate_id([x.carrier, x.company, x.invoice_number, x.tracking_number]), axis=1)
         else:
-            dataframe['package_id'] =  dataframe.apply(lambda x: generate_id([x.carrier, x.company, "null", x.tracking_number]), axis=1)
+            dataframe['package_id'] = dataframe.apply(lambda x: generate_id([x.carrier, x.company, "null", x.tracking_number]), axis=1)
     dataframe['request_amount'] = dataframe['total_price']
     return dataframe
 
@@ -216,8 +215,8 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame, test_environment: bool = F
     """
     original_size = len(dataframe.index)
     print(f"Checking {original_size} refunds...")
-    #Drop duplicates for dummy duplicates, with 'keep' different than False
-    dataframe = dataframe.copy().drop_duplicates(subset=['tracking_number','reason_refund'])
+    # Drop duplicates for dummy duplicates, with 'keep' different than False
+    dataframe = dataframe.copy().drop_duplicates(subset=['tracking_number', 'reason_refund'])
     print(dataframe.iloc[0])
     carrier = dataframe.at[0, 'carrier']
     company = dataframe.at[0, 'company']
@@ -243,11 +242,11 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame, test_environment: bool = F
         """
         print(query)
         existing_data_dataframe = select(query)
-        #Lost or damaged trick
-        dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(lambda x: 'Lost or Damaged' if x in ('Lost','Damaged') else x)
-        #Duplicate check
+        # Lost or damaged trick
+        dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(lambda x: 'Lost or Damaged' if x in ('Lost', 'Damaged') else x)
+        # Duplicate check
         dataframe = dataframe.drop_duplicates(
-            subset=['tracking_number','smart_reason_refund'],
+            subset=['tracking_number', 'smart_reason_refund'],
             keep=False
         )
         # Remove rows where the tracking number and reason refund is already present in the database
@@ -273,11 +272,11 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame, test_environment: bool = F
         """
         print(query)
         existing_data_dataframe = select(query)
-        #Lost or damaged trick
-        dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(lambda x: 'Lost or Damaged' if x in ('Lost','Damaged') else x)
-        #Duplicate check
+        # Lost or damaged trick
+        dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(lambda x: 'Lost or Damaged' if x in ('Lost', 'Damaged') else x)
+        # Duplicate check
         dataframe = dataframe.drop_duplicates(
-            subset=['tracking_number','smart_reason_refund'],
+            subset=['tracking_number', 'smart_reason_refund'],
             keep=False
         )
         # Remove rows where the tracking number and reason refund is already present in the database
@@ -306,6 +305,7 @@ def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFram
     if already_saved_tracking_numbers:
         dataframe = dataframe.loc[~dataframe["tracking_number"].isin(already_saved_tracking_numbers)]
     return dataframe
+
 
 def remove_duplicate_InvoicesFromClientToCarrier(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes duplicates from InvoicesFromClientToCarrier dataframe"""
@@ -348,7 +348,6 @@ def remove_duplicate_NestedAccountNumbers(dataframe: pd.DataFrame) -> pd.DataFra
     return dataframe
 
 
-
 def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Performs data quality check on client invoices dataframe"""
     missing_columns = list(
@@ -357,17 +356,17 @@ def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
     )
     if missing_columns:
         raise MissingColumnsException(", ".join(missing_columns))
-    #Check value invoice_url
+    # Check value invoice_url
     for invoice_url in dataframe["invoice_url"].to_list():
         if pd.isna(invoice_url):
             raise ValueError("invoice_url should be defined for each row")
         if not re.match(r"(https://storage.cloud.google.com).*", invoice_url):
             raise ValueError(f"invoice_url has to start by {INVOICE_BASE_URL}")
         
-    #Check value is_original_invoice
+    # Check value is_original_invoice
     is_original_invoice_wrong_values = dataframe[~dataframe["is_original_invoice"].isin([True, False])]
     if not is_original_invoice_wrong_values.empty:
-        wrong_values  = is_original_invoice_wrong_values["is_original_invoice"].unique().tolist()
+        wrong_values = is_original_invoice_wrong_values["is_original_invoice"].unique().tolist()
         raise ValueError(f"Incorrect values {wrong_values} for field is_original_invoice. Only True or False are authorized")
     
     dataframe["quantity"] = pd.to_numeric(dataframe["quantity"])
@@ -399,7 +398,7 @@ def check_lox_invoice_not_exists(dataframe: pd.DataFrame) -> None:
         
         WHERE invoice_number = "{invoice_number}"
     """
-    already_saved = select(query,False)
+    already_saved = select(query, False)
     if not already_saved.empty:
         print_error(f"The Lox invoice number {invoice_number} has already been attributed!")
         raise Exception("Cannot save in the Database. Lox invoice number has already been attributed.")
@@ -420,14 +419,14 @@ def check_duplicate_invoices_details(dataframe: pd.DataFrame) -> None:
         - Raises Exception otherwise.
     """
     invoice_numbers = list(set(dataframe["invoice_number"].to_list()))
-    if len(invoice_numbers) > 1: #We do this to have a better handle over the check
+    if len(invoice_numbers) > 1:  # We do this to have a better handle over the check
         raise Exception("Cannot save the details for more than one invoice_number.")
     else:
         invoice_number = invoice_numbers[0]
         
     descriptions = tuple(dataframe['description'])
     if len(descriptions) == 1:
-        descriptions = str(descriptions).replace(",","")
+        descriptions = str(descriptions).replace(",", "")
     query_string = f"""
         SELECT 
             invoice_number 
