@@ -70,11 +70,12 @@ def insert_dataframe_into_database(
     if not isinstance(dataframe, pd.DataFrame):
         print_error('dataframe argument must be a DataFrame.')
         return 0
-    
-    print(f"Trying to save a dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
+
     if dataframe.empty:
         print("Empty dataframe, insert aborted because unnecessary.")
         return 0
+    
+    print(f"Trying to save a dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
     if isinstance(table, InvoicesData_dataset):
         dataset = "InvoicesData"
         dataframe = remove_duplicate_headers_dataframe(dataframe)
