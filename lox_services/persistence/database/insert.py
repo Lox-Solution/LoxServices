@@ -353,10 +353,10 @@ def remove_duplicate_NestedAccountNumbers(dataframe: pd.DataFrame) -> pd.DataFra
 
 def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Performs data quality check on client invoices dataframe"""
-    missing_columns = []
-    for column in ["company", "carrier", "tracking_number", "data_source", "is_original_invoice"]:
-        if column not in dataframe.columns:
-            missing_columns.append(column)
+    missing_columns = list(
+        {"company", "carrier", "tracking_number", "data_source", "is_original_invoice"}
+        .difference(set(dataframe.columns))
+    )
     if missing_columns:
         raise MissingColumnsException(", ".join(missing_columns))
     #Check value invoice_url
