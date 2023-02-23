@@ -109,7 +109,7 @@ def insert_dataframe_into_database(
         if table.name == "Refunds":
             dataframe = prepare_refunds_test_enviromnent(dataframe)
             dataframe = remove_duplicate_refunds(dataframe, test_environment = True)
-    else :
+    else:
         raise TypeError("'table' param must be an instance of one of the tables Enum.")
 
     print_success(f"Checks done - Saving dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
