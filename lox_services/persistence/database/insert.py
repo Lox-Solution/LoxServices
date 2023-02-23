@@ -138,7 +138,9 @@ def insert_dataframe_into_database(
         else:
             job_config = LoadJobConfig(write_disposition=write_disposition)
             bigquery_client.load_table_from_dataframe(
-                dataframe, table.table_id, job_config=job_config
+                dataframe,
+                f"{table.project}.{table.dataset_id}.{table.table_id}",
+                job_config=job_config
             ).result()
         
         print_success("Success, everything has been inserted.")
