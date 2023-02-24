@@ -36,7 +36,7 @@ def insert_dataframe_into_database(
         ] = "insert_rows_from_dataframe",
         write_disposition: Literal[
         "WRITE_TRUNCATE", "WRITE_APPEND", "WRITE_EMPTY"
-        ] = "WRITE_TRUNCATE",
+        ] = "WRITE_APPEND",
 ) -> int:
     """Inserts every row of the dataframe into the database. 
         Does duplicate checks for specific tables (Invoices, Refunds).
