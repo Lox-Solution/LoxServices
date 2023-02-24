@@ -148,6 +148,7 @@ class BrightDataProxyManager:
         countries: List[str] = ['NL'],
         number_of_threads: int = 25,
         max_use_per_proxy: int = 10,
+        log: bool = True,
     ) -> List[requests.Response]:
         """Executes many requests using proxies and multithreading for multiple countries.
             ## Arguments
@@ -156,6 +157,7 @@ class BrightDataProxyManager:
             - `countries`: A list of countries where the proxies should be.
             - `number_of_threads`: The number of threads to use.
             - `max_use_per_proxy`: The maximum number of use per ip for this call.
+            - `log`: If True, the function will print the status of the requests every 10%.
 
             ## Returns
             - A list of requests.Response objects
@@ -180,7 +182,7 @@ class BrightDataProxyManager:
         results = []
         with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
             for result in executor.map(self._excecute_request_with_retry, repeat(request_method), options_with_proxies):
-                if len(results) % max(1, int(options_len / 10)) == 0:
+                if log and len(results) % max(1, int(options_len / 10)) == 0:
                     print(f"{len(results)} / {options_len}")
                 
                 results.append(result)
