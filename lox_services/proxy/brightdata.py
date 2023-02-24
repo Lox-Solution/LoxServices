@@ -1,5 +1,4 @@
 import random
-from ssl import SSLError
 from concurrent.futures import ThreadPoolExecutor
 from itertools import repeat
 from typing import Callable, List
@@ -9,6 +8,8 @@ import urllib3
 
 from lox_services.utils.decorators import DataUsage, Perf
 from lox_services.utils.general_python import print_error, print_success
+
+AVAILABLE_IPS_PER_COUNTRY = {} # Used to cache the available IPs per country. This is used to avoid calling the BrightData API too often (otherwise error 429 are returned).
 
 class BrightDataProxyManager:
     """Class that handles Bright Data proxy APIs."""
@@ -46,8 +47,16 @@ class BrightDataProxyManager:
             
             try:
                 result = request_method(**options)
-            except requests.exceptions.ProxyError or urllib3.exceptions.SSLError or urllib3.HTTPSConnectionPool or requests.exceptions.SSLError:
-                result =  requests.Response
+            
+            except requests.exceptions.ProxyError as error:
+                for arg in error.args:
+                    if isinstance(arg, urllib3.exceptions.MaxRetryError):
+                        if "407 Auth Failed (code: ip_forbidden)" in str(arg.reason.original_error):
+                            raise Exception("BrightData needs to whitelist your IP address. Please contact Melvil.") from error
+                
+                result.status_code = 407
+            
+            except requests.exceptions.SSLError:
                 result.status_code = 407
             
             ip = options["proxies"]["http"].split("ip-")[1].split(":")[0]
@@ -73,16 +82,21 @@ class BrightDataProxyManager:
         """Gets all available IPs per countries. Country Alpha-2 codes are working fine as parameters."""
         result = []
         for country in set(countries):
-            response =  requests.get(
-                url=f"https://luminati.io/api/zone/route_ips?zone={self.zones[0]}&country={country}",
-                headers=self.request_header
-            )
-            ip_list = self._handle_web_api_response(response).split("\n")
-            print_success(f"{len(ip_list)} IPs available for {country}.")
-            result += ip_list
+            if AVAILABLE_IPS_PER_COUNTRY.get(country):
+                print_success(f"Using cached IPs for {country}.")
+                result += AVAILABLE_IPS_PER_COUNTRY.get(country)
+            
+            else:
+                response =  requests.get(
+                    url=f"https://luminati.io/api/zone/route_ips?zone={self.zones[0]}&country={country}",
+                    headers=self.request_header
+                )
+                ip_list = self._handle_web_api_response(response).split("\n")
+                AVAILABLE_IPS_PER_COUNTRY[country] = ip_list
+                result += ip_list
         
-        print_success(f"{len(result)} IPs available for {len(countries)} countries.")
-        return ip_list
+        print_success(f"{len(result)} IPs available for {countries}.")
+        return result
     
     
     def _get_all_available_ips(self):
@@ -134,6 +148,7 @@ class BrightDataProxyManager:
         countries: List[str] = ['NL'],
         number_of_threads: int = 25,
         max_use_per_proxy: int = 10,
+        log: bool = True,
     ) -> List[requests.Response]:
         """Executes many requests using proxies and multithreading for multiple countries.
             ## Arguments
@@ -142,6 +157,7 @@ class BrightDataProxyManager:
             - `countries`: A list of countries where the proxies should be.
             - `number_of_threads`: The number of threads to use.
             - `max_use_per_proxy`: The maximum number of use per ip for this call.
+            - `log`: If True, the function will print the status of the requests every 10%.
 
             ## Returns
             - A list of requests.Response objects
@@ -166,7 +182,7 @@ class BrightDataProxyManager:
         results = []
         with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
             for result in executor.map(self._excecute_request_with_retry, repeat(request_method), options_with_proxies):
-                if len(results) % max(1, int(options_len / 10)) == 0:
+                if log and len(results) % max(1, int(options_len / 10)) == 0:
                     print(f"{len(results)} / {options_len}")
                 
                 results.append(result)
