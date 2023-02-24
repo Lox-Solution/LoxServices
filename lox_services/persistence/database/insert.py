@@ -118,11 +118,11 @@ def insert_dataframe_into_database(
     table = bigquery_client.get_table(table_ref)
     dataframe = dataframe.where(pd.notnull(dataframe), None)
     current_datetime = datetime.now(timezone('Europe/Amsterdam')).strftime('%Y-%m-%dT%H:%M:%S.%f')
-    if 'insert_datetime' not in dataframe.columns:
-        dataframe['insert_datetime'] = current_datetime
-    else:
-        dataframe['insert_datetime'] = dataframe['insert_datetime'].astype(str)
-    dataframe['update_datetime'] = current_datetime
+    for metadata_columns in ['insert_datetime', 'update_datetime']:
+        if metadata_columns not in dataframe.columns:
+            dataframe[metadata_columns] = current_datetime
+        else:
+            dataframe[metadata_columns] = dataframe[metadata_columns].astype(str)
 
     if write_method == "insert_rows_from_dataframe":
         errors = bigquery_client.insert_rows_from_dataframe(
