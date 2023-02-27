@@ -1,14 +1,14 @@
 """Contains the function to insert dataframes into the database."""
 from datetime import datetime
-from pprint import pprint
+from pprint import pformat
 import re
 from pytz import timezone
+from typing import Literal
 import os
-from sys import path
 
-import numpy as np
 import pandas as pd
-from google.cloud.bigquery import Client
+from google.cloud.bigquery import Client, LoadJobConfig
+from lox_services.config.env_variables import get_env_variable
 
 from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
 from lox_services.persistence.database.exceptions import MissingColumnsException, InvalidDataException
@@ -27,12 +27,54 @@ from lox_services.utils.general_python import print_error, print_success
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(SERVICE_ACCOUNT_PATH)
 
-def insert_dataframe_into_database(dataframe: pd.DataFrame, table: DatasetTypeAlias):
+def add_metadata_columns(dataframe: pd.DataFrame, write_method: str) -> pd.DataFrame:
+    """Adds the metadata columns to the dataframe.
+        ## Arguments
+            -dataframe: The dataframe to add the columns to.
+            -write_method: Which GBQ client method gets called.
+            
+        ## Returns the dataframe with the extra columns
+    """
+    current_datetime = datetime.now()
+    for metadata_columns in ['insert_datetime', 'update_datetime']:
+        # If the insertion metod is load_table_from_dataframe, the colum must be a datetime
+        if write_method == "load_table_from_dataframe":
+            dataframe[metadata_columns] = current_datetime
+        else:
+            dataframe[metadata_columns] = current_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f')
+    
+
+    return dataframe
+
+def insert_dataframe_into_database(
+        dataframe: pd.DataFrame,
+        table: DatasetTypeAlias,
+        write_method: Literal[
+            "insert_rows_from_dataframe",
+            "load_table_from_dataframe"
+        ] = "insert_rows_from_dataframe",
+        write_disposition: Literal[
+        "WRITE_TRUNCATE", "WRITE_APPEND", "WRITE_EMPTY"
+        ] = "WRITE_APPEND",
+) -> int:
     """Inserts every row of the dataframe into the database. 
         Does duplicate checks for specific tables (Invoices, Refunds).
         ## Arguments
         - `dataframe`: The dataframe to insert into the database. Must have good column names.
         - `table`: The database table name. It must be one of the datasets.
+        - 'write_method': Which GBQ client method gets called. 'load_table_from_dataframe' avoids
+        bugs related to handling nullable PyArrow datatypes like Int64.
+        - `write_disposition`. Specifies the action that occurs if the destination table
+        already exists when using the 'load_table_from_dataframe' method. The following values
+        are supported:
+            - WRITE_TRUNCATE: If the table already exists, BigQuery overwrites the table
+            data and uses the schema from the query result.
+            - WRITE_APPEND: If the table already exists, BigQuery appends the data to the table.
+            - WRITE_EMPTY: If the table already exists and contains data, a 'duplicate'
+            error is returned in the job result.
+        Each action is atomic and only occurs if BigQuery is able to complete the job
+        successfully. Creation, truncation and append actions occur as one atomic update
+        upon job completion.
         
         ## Example
             >>> insert_dataframe_into_database(df, InvoicesData_dataset.Invoices)
@@ -41,83 +83,97 @@ def insert_dataframe_into_database(dataframe: pd.DataFrame, table: DatasetTypeAl
         - The number of inserted rows.
         - An Exception if a check didn't pass. 
     """
-    dataset = ""
+    if  write_disposition == "WRITE_TRUNCATE" and get_env_variable("ENVIRONMENT")=="production":
+        raise ValueError("WRITE_TRUNCATE is not allowed in production environment.")
+        
     if not isinstance(dataframe, pd.DataFrame):
         print_error('dataframe argument must be a DataFrame.')
         return 0
+
+    if dataframe.empty:
+        print("Empty dataframe, insert aborted because unnecessary.")
+        return 0
     
-    print(f"Trying to save a dataframe ({dataframe.shape[0]} rows) to Google BigQuery table {table.name}")
-    if not dataframe.empty:
-        if isinstance(table, InvoicesData_dataset):
-            dataset = "InvoicesData"
-            dataframe = remove_duplicate_headers_dataframe(dataframe)
-            if table.name == "Invoices":
-                dataframe = remove_duplicate_invoices(dataframe)
-            if table.name == "Refunds":
-                dataframe = remove_duplicate_refunds(dataframe)
-            if table.name == "ClientInvoicesData":
-                dataframe = remove_duplicate_client_invoice_data(dataframe)
-                dataframe = client_invoice_data_quality_check(dataframe)
-        elif isinstance(table, LoxData_dataset):
-            dataset = "LoxData"
-            if table.name == "DueInvoices":
-                check_lox_invoice_not_exists(dataframe)
-            if table.name == "InvoicesDetails":
-                check_duplicate_invoices_details(dataframe)
-        elif isinstance(table, Mapping_dataset):
-            dataset = "Mapping"
-        elif isinstance(table, InvoicesDataLake_dataset):
-            dataset = "InvoicesDataLake"
-        elif isinstance(table, UserData_dataset):
-            dataset = "UserData"
-            if table.name == "InvoicesFromClientToCarrier":
-                dataframe = remove_duplicate_InvoicesFromClientToCarrier(dataframe)
-                
-            if table.name == "NestedAccountNumbers":
-                dataframe = remove_duplicate_NestedAccountNumbers(dataframe)
-            
-        elif isinstance(table, TestEnvironment_dataset):
-            dataset="TestEnvironment"
-            if table.name == "Refunds":
-                dataframe = prepare_refunds_test_enviromnent(dataframe)
-                dataframe = remove_duplicate_refunds(dataframe, test_environment = True)
-        else :
-            raise TypeError("'table' param must be an instance of one of the tables Enum.")
+    print(f"Trying to save a dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
+    if isinstance(table, InvoicesData_dataset):
+        dataset = "InvoicesData"
+        dataframe = remove_duplicate_headers_dataframe(dataframe)
+        if table.name == "Invoices":
+            dataframe = remove_duplicate_invoices(dataframe)
+        if table.name == "Refunds":
+            dataframe = remove_duplicate_refunds(dataframe)
+        if table.name == "ClientInvoicesData":
+            dataframe = remove_duplicate_client_invoice_data(dataframe)
+            dataframe = client_invoice_data_quality_check(dataframe)
+    elif isinstance(table, LoxData_dataset):
+        dataset = "LoxData"
+        if table.name == "DueInvoices":
+            check_lox_invoice_not_exists(dataframe)
+        if table.name == "InvoicesDetails":
+            check_duplicate_invoices_details(dataframe)
+    elif isinstance(table, Mapping_dataset):
+        dataset = "Mapping"
+    elif isinstance(table, InvoicesDataLake_dataset):
+        dataset = "InvoicesDataLake"
+    elif isinstance(table, UserData_dataset):
+        dataset = "UserData"
+        if table.name == "InvoicesFromClientToCarrier":
+            dataframe = remove_duplicate_InvoicesFromClientToCarrier(dataframe)
+
+        if table.name == "NestedAccountNumbers":
+            dataframe = remove_duplicate_NestedAccountNumbers(dataframe)
+
+    elif isinstance(table, TestEnvironment_dataset):
+        dataset = "TestEnvironment"
+        if table.name == "Refunds":
+            dataframe = prepare_refunds_test_enviromnent(dataframe)
+            dataframe = remove_duplicate_refunds(dataframe, test_environment=True)
+    else:
+        raise TypeError("'table' param must be an instance of one of the tables Enum.")
+
+    print_success(f"Checks done - Saving dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
+    bigquery_client = Client()
+    # Prepares a reference to the dataset
+    dataset_ref = bigquery_client.dataset(dataset)
+    # Select the table where you want to push the data
+    table_ref = dataset_ref.table(table.name)
+    table = bigquery_client.get_table(table_ref)
+    dataframe = dataframe.where(pd.notnull(dataframe), None)
+
+    # Add metadata columns
+    dataframe = add_metadata_columns(dataframe, write_method)
     
-    if not dataframe.empty:
-        print_success(f"Checks done - Saving dataframe ({dataframe.shape[0]} rows) to Google BigQuery table {table.name}")
-        bigquery_client = Client()
-        # Prepares a reference to the dataset
-        dataset_ref = bigquery_client.dataset(dataset)
-        # Select the table where you want to push the data
-        table_ref = dataset_ref.table(table.name)
-        table = bigquery_client.get_table(table_ref)
-        dataframe = dataframe.where(pd.notnull(dataframe), None)
-        current_datetime = datetime.now(timezone('Europe/Amsterdam')).strftime('%Y-%m-%dT%H:%M:%S.%f')
-        if 'insert_datetime' not in dataframe.columns:
-            dataframe['insert_datetime'] = current_datetime
-        else:
-            dataframe['insert_datetime'] = dataframe['insert_datetime'].astype(str)
-        dataframe['update_datetime'] = current_datetime
+    if write_method == "insert_rows_from_dataframe":
         errors = bigquery_client.insert_rows_from_dataframe(
-            table=table, 
+            table=table,
             dataframe=dataframe,
             ignore_unknown_values=True,
         )[0]
-        
-        if len(errors) > 0:
-            pprint(errors)
-            raise InvalidDataException(f"{len(errors)} errors occured while inserting dataframe into {table}.")
-        
-        print_success("Success, everything has been inserted.")
+
+        if errors:
+            raise InvalidDataException(
+                f"{pformat(errors)}\n{len(errors)} errors occured while inserting dataframe into {table}."
+            )
     else:
-        print("Empty dataframe, insert aborted because unnecessary.")
-    
-    return dataframe.shape[0]
+        job_config = LoadJobConfig(write_disposition=write_disposition)
+        load_job = bigquery_client.load_table_from_dataframe(
+            dataframe,
+            f"{table.project}.{table.dataset_id}.{table.table_id}",
+            job_config=job_config
+        ).result()
+
+        if load_job.errors:
+            raise InvalidDataException(
+                f"{pformat(errors)}\n{len(errors)} errors occured while inserting dataframe into {table} with method {write_disposition}."
+            )
+        
+    print_success("Success, everything has been inserted.")
+
+    return len(dataframe.index)
 
 
 def prepare_refunds_test_enviromnent(dataframe: pd.DataFrame) -> pd.DataFrame:
-    """"Prepare the refunds to be push on the new environment:
+    """Prepare the refunds to be push on the new environment:
         ## Arguments
         - `dataframe`: The dataframe containing the invoice numbers to check.
         
@@ -129,9 +185,9 @@ def prepare_refunds_test_enviromnent(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     if 'package_id' not in dataframe.columns:
         if 'invoice_number' in dataframe.columns:
-            dataframe['package_id'] =  dataframe.apply(lambda x: generate_id([x.carrier, x.company, x.invoice_number, x.tracking_number]), axis=1)
+            dataframe['package_id'] = dataframe.apply(lambda x: generate_id([x.carrier, x.company, x.invoice_number, x.tracking_number]), axis=1)
         else:
-            dataframe['package_id'] =  dataframe.apply(lambda x: generate_id([x.carrier, x.company, "null", x.tracking_number]), axis=1)
+            dataframe['package_id'] = dataframe.apply(lambda x: generate_id([x.carrier, x.company, "null", x.tracking_number]), axis=1)
     dataframe['request_amount'] = dataframe['total_price']
     return dataframe
 
@@ -147,10 +203,10 @@ def remove_duplicate_invoices(dataframe: pd.DataFrame) -> pd.DataFrame:
         ## Returns 
         - The dataframe without the invoice numbers already uploaded.
     """
-    original_size = dataframe.shape[0]
+    original_size = len(dataframe.index)
     dataframe['invoice_number'] = dataframe["invoice_number"].astype(str)
-    company = dataframe.iloc[0]['company']
-    carrier = dataframe.iloc[0]['carrier']
+    company = dataframe.at[0, 'company']
+    carrier = dataframe.at[0, 'carrier']
     query = f"""
         SELECT DISTINCT invoice_number 
         
@@ -164,7 +220,7 @@ def remove_duplicate_invoices(dataframe: pd.DataFrame) -> pd.DataFrame:
     # Remove invoice numbers that were already pushed to BQ
     dataframe = dataframe[~(dataframe['invoice_number']).isin(already_pushed['invoice_number'])]
     
-    print(f"{original_size - dataframe.shape[0]} invoice rows deleted before saving to the database.")
+    print(f"{original_size - len(dataframe.index)} invoice rows deleted before saving to the database.")
     print("Result:\n", dataframe)
     return dataframe
 
@@ -181,13 +237,13 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame, test_environment: bool = F
         ## Returns
         The dataframe cleaned from potential duplicates
     """
-    original_size = dataframe.shape[0]
+    original_size = len(dataframe.index)
     print(f"Checking {original_size} refunds...")
-    #Drop duplicates for dummy duplicates, with 'keep' different than False
-    dataframe = dataframe.copy().drop_duplicates(subset=['tracking_number','reason_refund'])
+    # Drop duplicates for dummy duplicates, with 'keep' different than False
+    dataframe = dataframe.copy().drop_duplicates(subset=['tracking_number', 'reason_refund'])
     print(dataframe.iloc[0])
-    carrier = dataframe.iloc[0]['carrier']
-    company = dataframe.iloc[0]['company']
+    carrier = dataframe.at[0, 'carrier']
+    company = dataframe.at[0, 'company']
     dataframe['reason_refund'] = dataframe.reason_refund.astype(str)
     reason_refunds = dataframe['reason_refund'].unique().tolist()
     
@@ -210,11 +266,11 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame, test_environment: bool = F
         """
         print(query)
         existing_data_dataframe = select(query)
-        #Lost or damaged trick
-        dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(lambda x: 'Lost or Damaged' if x in ('Lost','Damaged') else x)
-        #Duplicate check
+        # Lost or damaged trick
+        dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(lambda x: 'Lost or Damaged' if x in ('Lost', 'Damaged') else x)
+        # Duplicate check
         dataframe = dataframe.drop_duplicates(
-            subset=['tracking_number','smart_reason_refund'],
+            subset=['tracking_number', 'smart_reason_refund'],
             keep=False
         )
         # Remove rows where the tracking number and reason refund is already present in the database
@@ -240,24 +296,25 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame, test_environment: bool = F
         """
         print(query)
         existing_data_dataframe = select(query)
-        #Lost or damaged trick
-        dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(lambda x: 'Lost or Damaged' if x in ('Lost','Damaged') else x)
-        #Duplicate check
+        # Lost or damaged trick
+        dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(lambda x: 'Lost or Damaged' if x in ('Lost', 'Damaged') else x)
+        # Duplicate check
         dataframe = dataframe.drop_duplicates(
-            subset=['tracking_number','smart_reason_refund'],
+            subset=['tracking_number', 'smart_reason_refund'],
             keep=False
         )
         # Remove rows where the tracking number and reason refund is already present in the database
         dataframe = dataframe[~(dataframe['tracking_number'] + dataframe['smart_reason_refund']).isin(existing_data_dataframe['existing_combo'])]
-    print(f"{original_size - dataframe.shape[0]} refund rows deleted before saving to the database.")
+    dataframe.drop(columns=["smart_reason_refund"], inplace=True)
+    print(f"{original_size - len(dataframe.index)} refund rows deleted before saving to the database.")
     print("Result:\n", dataframe)
     return dataframe
 
 
 def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes duplicates from client invoices dataframe"""
-    carrier = dataframe.iloc[0]['carrier']
-    company = dataframe.iloc[0]['company']
+    carrier = dataframe.at[0, 'carrier']
+    company = dataframe.at[0, 'company']
     tracking_numbers = dataframe["tracking_number"].to_list()
     sql_query = f"""
         SELECT 
@@ -270,14 +327,15 @@ def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFram
             AND tracking_number IN UNNEST({tracking_numbers})
     """
     already_saved_tracking_numbers = select(sql_query, False)["tracking_number"].to_list()
-    if len(already_saved_tracking_numbers) > 0:
+    if already_saved_tracking_numbers:
         dataframe = dataframe.loc[~dataframe["tracking_number"].isin(already_saved_tracking_numbers)]
     return dataframe
 
+
 def remove_duplicate_InvoicesFromClientToCarrier(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes duplicates from InvoicesFromClientToCarrier dataframe"""
-    carrier = dataframe.iloc[0]['carrier']
-    company = dataframe.iloc[0]['company']
+    carrier = dataframe.at[0, 'carrier']
+    company = dataframe.at[0, 'company']
     tracking_numbers = dataframe["tracking_number"].to_list()
     sql_query = f"""
         SELECT 
@@ -290,15 +348,15 @@ def remove_duplicate_InvoicesFromClientToCarrier(dataframe: pd.DataFrame) -> pd.
             AND tracking_number IN UNNEST({tracking_numbers})
     """
     already_saved_tracking_numbers = select(sql_query, False)["tracking_number"].to_list()
-    if len(already_saved_tracking_numbers) > 0:
+    if already_saved_tracking_numbers:
         dataframe = dataframe.loc[~dataframe["tracking_number"].isin(already_saved_tracking_numbers)]
     return dataframe
 
 
 def remove_duplicate_NestedAccountNumbers(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes already saved account numbers dataframe"""
-    carrier = dataframe.iloc[0]['carrier']
-    company = dataframe.iloc[0]['company']
+    carrier = dataframe.at[0, 'carrier']
+    company = dataframe.at[0, 'company']
     sql_query = f"""
         SELECT 
             distinct account_number
@@ -309,32 +367,31 @@ def remove_duplicate_NestedAccountNumbers(dataframe: pd.DataFrame) -> pd.DataFra
             AND carrier = "{carrier}"
     """
     already_saved_account_numbers = select(sql_query, False)["account_number"].to_list()
-    if len(already_saved_account_numbers) > 0:
+    if already_saved_account_numbers:
         print(f"Account numbers {already_saved_account_numbers} are already saved in table.")
         dataframe = dataframe.loc[~dataframe["account_number"].isin(already_saved_account_numbers)]
     return dataframe
 
 
-
 def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Performs data quality check on client invoices dataframe"""
-    missing_columns = []
-    for column in ["company", "carrier", "tracking_number", "data_source", "is_original_invoice"]:
-        if column not in dataframe.columns:
-            missing_columns.append(column)
-    if len(missing_columns)>0:
+    missing_columns = list(
+        {"company", "carrier", "tracking_number", "data_source", "is_original_invoice"}
+        .difference(set(dataframe.columns))
+    )
+    if missing_columns:
         raise MissingColumnsException(", ".join(missing_columns))
-    #Check value invoice_url
+    # Check value invoice_url
     for invoice_url in dataframe["invoice_url"].to_list():
         if pd.isna(invoice_url):
             raise ValueError("invoice_url should be defined for each row")
         if not re.match(r"(https://storage.cloud.google.com).*", invoice_url):
             raise ValueError(f"invoice_url has to start by {INVOICE_BASE_URL}")
         
-    #Check value is_original_invoice
+    # Check value is_original_invoice
     is_original_invoice_wrong_values = dataframe[~dataframe["is_original_invoice"].isin([True, False])]
     if not is_original_invoice_wrong_values.empty:
-        wrong_values  = is_original_invoice_wrong_values["is_original_invoice"].unique().tolist()
+        wrong_values = is_original_invoice_wrong_values["is_original_invoice"].unique().tolist()
         raise ValueError(f"Incorrect values {wrong_values} for field is_original_invoice. Only True or False are authorized")
     
     dataframe["quantity"] = pd.to_numeric(dataframe["quantity"])
@@ -357,7 +414,7 @@ def check_lox_invoice_not_exists(dataframe: pd.DataFrame) -> None:
         - Nothing if the check is successful.
         - Raises Exception otherwise.
     """
-    invoice_number = dataframe.iloc[0]['invoice_number']
+    invoice_number = dataframe.at[0, 'invoice_number']
     query = f"""
         SELECT 
             invoice_number 
@@ -366,8 +423,8 @@ def check_lox_invoice_not_exists(dataframe: pd.DataFrame) -> None:
         
         WHERE invoice_number = "{invoice_number}"
     """
-    already_saved = select(query,False)
-    if already_saved.shape[0] > 0:
+    already_saved = select(query, False)
+    if not already_saved.empty:
         print_error(f"The Lox invoice number {invoice_number} has already been attributed!")
         raise Exception("Cannot save in the Database. Lox invoice number has already been attributed.")
     else:
@@ -387,14 +444,14 @@ def check_duplicate_invoices_details(dataframe: pd.DataFrame) -> None:
         - Raises Exception otherwise.
     """
     invoice_numbers = list(set(dataframe["invoice_number"].to_list()))
-    if len(invoice_numbers) > 1: #We do this to have a better handle over the check
+    if len(invoice_numbers) > 1:  # We do this to have a better handle over the check
         raise Exception("Cannot save the details for more than one invoice_number.")
     else:
         invoice_number = invoice_numbers[0]
         
     descriptions = tuple(dataframe['description'])
     if len(descriptions) == 1:
-        descriptions = str(descriptions).replace(",","")
+        descriptions = str(descriptions).replace(",", "")
     query_string = f"""
         SELECT 
             invoice_number 
@@ -423,10 +480,5 @@ def remove_duplicate_headers_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
         ## Returns
         The dataframe cleaned from potential header duplicates
     """
-    for index, row in dataframe.iterrows():
-        # If the entire row is similar to the header
-        if np.array_equal(row.values, dataframe.columns.values):
-            # Remove the row from the dataframe
-            dataframe.drop(index, inplace=True)
-            
-    return dataframe
+    row_mask = dataframe.apply(lambda col: col.equals(pd.Series(dataframe.columns)), axis=1)
+    return dataframe[~row_mask]
