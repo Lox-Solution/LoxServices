@@ -8,6 +8,7 @@ import os
 
 import pandas as pd
 from google.cloud.bigquery import Client, LoadJobConfig
+from lox_services.config.env_variables import get_env_variable
 
 from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
 from lox_services.persistence.database.exceptions import MissingColumnsException, InvalidDataException
@@ -82,6 +83,9 @@ def insert_dataframe_into_database(
         - The number of inserted rows.
         - An Exception if a check didn't pass. 
     """
+    if  write_disposition == "WRITE_TRUNCATE" and get_env_variable("ENVIRONMENT")=="production":
+        raise ValueError("WRITE_TRUNCATE is not allowed in production environment.")
+        
     if not isinstance(dataframe, pd.DataFrame):
         print_error('dataframe argument must be a DataFrame.')
         return 0
