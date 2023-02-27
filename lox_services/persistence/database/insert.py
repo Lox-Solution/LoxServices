@@ -26,7 +26,14 @@ from lox_services.utils.general_python import print_error, print_success
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(SERVICE_ACCOUNT_PATH)
 
-def add_metadata_columns(dataframe, write_method):
+def add_metadata_columns(dataframe: pd.DataFrame, write_method: str) -> pd.DataFrame:
+    """Adds the metadata columns to the dataframe.
+        ## Arguments
+            -dataframe: The dataframe to add the columns to.
+            -write_method: Which GBQ client method gets called.
+            
+        ## Returns the dataframe with the extra columns
+    """
     current_datetime = datetime.now()
     for metadata_columns in ['insert_datetime', 'update_datetime']:
         # If the insertion metod is load_table_from_dataframe, the colum must be a datetime
