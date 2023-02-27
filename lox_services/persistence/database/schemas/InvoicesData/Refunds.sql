@@ -31,6 +31,7 @@ InvoicesData.Refunds
     credit_discovery_date DATE,
     insert_datetime DATETIME NOT NULL, --REQUIRED
     update_datetime DATETIME,
+    claimable_amount FLOAT64,
     original_credit_amount FLOAT64,
     original_credit_currency STRING
 )
