@@ -140,8 +140,8 @@ def insert_dataframe_into_database(
     table = bigquery_client.get_table(table_ref)
     dataframe = dataframe.where(pd.notnull(dataframe), None)
 
-    dataframe = add_metadata_columns(dataframe, write_method)
     # Add metadata columns
+    dataframe = add_metadata_columns(dataframe, write_method)
     
     if write_method == "insert_rows_from_dataframe":
         errors = bigquery_client.insert_rows_from_dataframe(
@@ -156,12 +156,17 @@ def insert_dataframe_into_database(
             )
     else:
         job_config = LoadJobConfig(write_disposition=write_disposition)
-        bigquery_client.load_table_from_dataframe(
+        load_job = bigquery_client.load_table_from_dataframe(
             dataframe,
             f"{table.project}.{table.dataset_id}.{table.table_id}",
             job_config=job_config
         ).result()
 
+        if load_job.errors:
+            raise InvalidDataException(
+                f"{pformat(errors)}\n{len(errors)} errors occured while inserting dataframe into {table} with method {write_disposition}."
+            )
+        
     print_success("Success, everything has been inserted.")
 
     return len(dataframe.index)
