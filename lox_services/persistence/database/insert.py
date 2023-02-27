@@ -26,6 +26,17 @@ from lox_services.utils.general_python import print_error, print_success
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(SERVICE_ACCOUNT_PATH)
 
+def add_metadata_columns(dataframe, write_method):
+    current_datetime = datetime.now()
+    for metadata_columns in ['insert_datetime', 'update_datetime']:
+        # If the insertion metod is load_table_from_dataframe, the colum must be a datetime
+        if write_method == "load_table_from_dataframe":
+            dataframe[metadata_columns] = current_datetime
+        else:
+            dataframe[metadata_columns] = current_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f')
+    
+
+    return dataframe
 
 def insert_dataframe_into_database(
         dataframe: pd.DataFrame,
