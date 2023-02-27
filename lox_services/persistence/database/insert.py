@@ -281,6 +281,7 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame, test_environment: bool = F
         )
         # Remove rows where the tracking number and reason refund is already present in the database
         dataframe = dataframe[~(dataframe['tracking_number'] + dataframe['smart_reason_refund']).isin(existing_data_dataframe['existing_combo'])]
+    dataframe.drop(columns=["smart_reason_refund"], inplace=True)
     print(f"{original_size - len(dataframe.index)} refund rows deleted before saving to the database.")
     print("Result:\n", dataframe)
     return dataframe
