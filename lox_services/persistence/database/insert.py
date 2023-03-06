@@ -131,6 +131,11 @@ def insert_dataframe_into_database(
     else:
         raise TypeError("'table' param must be an instance of one of the tables Enum.")
 
+    
+    if dataframe.empty:
+        print("Empty dataframe, insert aborted because unnecessary.")
+        return 0
+    
     print_success(f"Checks done - Saving dataframe ({len(dataframe.index)} rows) to Google BigQuery table {table.name}")
     bigquery_client = Client()
     # Prepares a reference to the dataset
