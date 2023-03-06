@@ -22,7 +22,7 @@ def download_locale(language_code: str, encoding: str):
     subprocess.check_call([download_locale_filepath, language_code, encoding])
 
 
-def use_locale(language_code: str, encoding: str = 'utf8'):
+def use_locale(language_code: str, encoding: str = 'UTF-8'):
     """Sets the locale for the current thread to the given language and encoding.
         ## Example
         >>> use_locale('fr_FR')

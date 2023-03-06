@@ -16,6 +16,7 @@ class InvoicesData_dataset(Enum):
     Invoices = "Invoices"
     InvoicesSave = "InvoicesSave"
     Refunds = "Refunds"
+    ClaimHistory = "ClaimHistory"
 
 
 class InvoicesDataLake_dataset(Enum):
