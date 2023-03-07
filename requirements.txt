@@ -32,6 +32,7 @@ pytz>=2021.1
 lxml>=4.9.1
 cryptography>=37.0.2
 python-dotenv >= 0.21.1
+tqdm >= 4.65.0
 
 # Cloud
 PyVirtualDisplay>=3.0
