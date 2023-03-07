@@ -23,3 +23,4 @@
 0.1.13 Added a fake name generator
 0.1.14 Added parameterized query, screenshoting in selenium exceptions, uploading of output folder to GCS
 0.1.15 Added tagging members in slack, switched to dotenv package for env variables
+0.1.16 Added temporary table function, cache proxy IPs per country, load_table_from_dataframe function, metadata columns, integrate black formatting
