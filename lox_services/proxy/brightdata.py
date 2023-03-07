@@ -1,7 +1,6 @@
 import random
-from concurrent.futures import ThreadPoolExecutor
-from itertools import repeat
-from typing import Callable, List
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Callable, List, Sequence
 from tqdm import tqdm
 
 import requests
@@ -12,7 +11,8 @@ from lox_services.utils.general_python import print_error, print_success
 
 AVAILABLE_IPS_PER_COUNTRY = (
     {}
-)  # Used to cache the available IPs per country. This is used to avoid calling the BrightData API too often (otherwise error 429 are returned).
+)  # Used to cache the available IPs per country. This is used to avoid calling
+# the BrightData API too often (otherwise error 429 are returned).
 
 
 class BrightDataProxyManager:
@@ -86,7 +86,7 @@ class BrightDataProxyManager:
 
         return result
 
-    def _get_available_ips_per_countries(self, countries: List[str]):
+    def _get_available_ips_per_countries(self, countries: Sequence[str]):
         """Gets all available IPs per countries. Country Alpha-2 codes are working fine as parameters."""
         result = []
         for country in set(countries):
@@ -118,8 +118,8 @@ class BrightDataProxyManager:
 
     def _populate_proxies_into_request_options(
         self,
-        request_options: List[dict],
-        proxies: List[str],
+        request_options: Sequence[dict],
+        proxies: Sequence[str],
         max_use_per_proxy: int = 1,
     ):
         # Generate the proxy option as accepted by requests package.
@@ -155,8 +155,8 @@ class BrightDataProxyManager:
         self,
         *,
         request_method: Callable,
-        request_options: List[dict],
-        countries: List[str] = ["NL"],
+        request_options: Sequence[dict],
+        countries: Sequence[str] = ("NL",),
         number_of_threads: int = 25,
         max_use_per_proxy: int = 10,
         show_progress: bool = True,
@@ -189,25 +189,22 @@ class BrightDataProxyManager:
         options_with_proxies = self._populate_proxies_into_request_options(
             request_options, proxies, max_use_per_proxy
         )
-        # options_with_proxies = request_options
 
+        results = []
         with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
-            results = (
-                list(
-                    tqdm(
-                        executor.map(
-                            self._excecute_request_with_retry,
-                            repeat(request_method),
-                            options_with_proxies,
-                        ),
-                        total=len(request_options),
-                    )
+            options_len = len(options_with_proxies)
+            futures = [
+                executor.submit(
+                    self._excecute_request_with_retry, request_method, option
                 )
-                if show_progress
-                else executor.map(
-                    self._excecute_request_with_retry,
-                    repeat(request_method),
-                    options_with_proxies,
-                )
-            )
+                for option in options_with_proxies
+            ]
+            if show_progress:
+                progress_bar = tqdm(total=options_len)
+            for future in as_completed(futures):
+                results.append(future.result())
+                if show_progress:
+                    progress_bar.update()
+            if show_progress:
+                progress_bar.close()
         return results
