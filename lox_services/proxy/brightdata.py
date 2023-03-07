@@ -190,6 +190,7 @@ class BrightDataProxyManager:
             request_options, proxies, max_use_per_proxy
         )
 
+        # The right way to add a progress bar with multithreading -
         # https://stackoverflow.com/a/63834834
         results = []
         with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
