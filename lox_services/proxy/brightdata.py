@@ -190,6 +190,7 @@ class BrightDataProxyManager:
             request_options, proxies, max_use_per_proxy
         )
 
+        # https://stackoverflow.com/a/63834834
         results = []
         with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
             options_len = len(options_with_proxies)
