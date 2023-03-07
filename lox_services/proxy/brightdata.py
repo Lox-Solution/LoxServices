@@ -191,21 +191,23 @@ class BrightDataProxyManager:
         )
         # options_with_proxies = request_options
 
-        results = []
-        options_len = len(request_options)
-        if show_progress:
-            progress_bar = tqdm(total=options_len)
-
         with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
-            for result in executor.map(
-                self._excecute_request_with_retry,
-                repeat(request_method),
-                options_with_proxies,
-            ):
-                results.append(result)
-                if show_progress:
-                    progress_bar.update()  # NOQA
-        if show_progress:
-            progress_bar.close()
-
+            results = (
+                list(
+                    tqdm(
+                        executor.map(
+                            self._excecute_request_with_retry,
+                            repeat(request_method),
+                            options_with_proxies,
+                        ),
+                        total=len(request_options),
+                    )
+                )
+                if show_progress
+                else executor.map(
+                    self._excecute_request_with_retry,
+                    repeat(request_method),
+                    options_with_proxies,
+                )
+            )
         return results
