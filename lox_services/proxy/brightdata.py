@@ -159,7 +159,7 @@ class BrightDataProxyManager:
         countries: Sequence[str] = ("NL",),
         number_of_threads: int = 25,
         max_use_per_proxy: int = 10,
-        show_progress: bool = True,
+        show_progress: bool = False,
     ) -> List[requests.Response]:
         """Executes many requests using proxies and multithreading for multiple countries.
         ## Arguments
