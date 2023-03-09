@@ -194,19 +194,27 @@ class BrightDataProxyManager:
         # https://stackoverflow.com/a/63834834
         results = []
         options_len = len(options_with_proxies)
-        with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
-            futures = [
-                executor.submit(
-                    self._excecute_request_with_retry, request_method, option
-                )
-                for option in options_with_proxies
-            ]
-            if show_progress:
-                progress_bar = tqdm(total=options_len)
-            for future in as_completed(futures):
-                results.append(future.result())
-                if show_progress:
+        if show_progress:
+            progress_bar = tqdm(total=options_len)
+            with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
+                futures = [
+                    executor.submit(
+                        self._excecute_request_with_retry, request_method, option
+                    )
+                    for option in options_with_proxies
+                ]
+                for future in as_completed(futures):
+                    results.append(future.result())
                     progress_bar.update()
-            if show_progress:
-                progress_bar.close()
+            progress_bar.close()
+        else:
+            with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
+                futures = [
+                    executor.submit(
+                        self._excecute_request_with_retry, request_method, option
+                    )
+                    for option in options_with_proxies
+                ]
+                for future in as_completed(futures):
+                    results.append(future.result())
         return results
