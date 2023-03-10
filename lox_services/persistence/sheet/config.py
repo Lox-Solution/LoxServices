@@ -12,7 +12,7 @@ def get_google_sheet_client(scopes: List[str] = ['https://www.googleapis.com/aut
     """Returns the google sheet client already configured with a service account
     """
     google_sheet_client = gspread.service_account(
-        filename=os.path.join(ROOT_PATH, 'Algorithms/Utils/GoogleSheet/lox-google-sheet_service_account.json'),
+        filename=os.path.join(ROOT_PATH, 'lox-google-sheet_service_account.json'),
         scopes=scopes
     )
     return google_sheet_client
