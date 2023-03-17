@@ -18,6 +18,32 @@ CONVERSION_KEYS = {
         "&quot": "\"",
         "&#039": "'"
     }
+
+def replace_injection_keys(message: str, reverse: bool = False) -> str:
+    """Replaces injection keys in the given message with their corresponding symbols.
+
+    Parameters:
+        -`message`: The message to replace injection keys in.
+        -`reverse`: Whether to reverse the injection keys to their original values. Defaults to False.
+
+    Returns:
+        str: The message with injection keys replaced.
+
+    Example:
+        >>> replace_injection_keys("Hello <world>!")
+        "Hello &lt;world&gt;!"
+        >>> replace_injection_keys("Hello &lt;world&gt;!", True)
+        "Hello <world>!"
+    """
+    
+    for key, value in CONVERSION_KEYS.items():
+        if reverse:
+            message = message.replace(key, value)
+        else:
+            message = message.replace(value, key)
+        
+    return message
+
 # generate a new, not in the same file than the old one 
 def generate_key() -> None:
     """Generates a key from password and salt and adds it in env variables.
