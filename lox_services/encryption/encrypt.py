@@ -84,6 +84,7 @@ def encrypt_message(message: str):
         ## Returns 
         The encrypted message as a string.
     """
+    message = replace_injection_keys(message)
     key = load_key()
     encoded_message = message.encode()
     f = Fernet(key)
