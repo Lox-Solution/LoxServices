@@ -11,6 +11,13 @@ from lox_services.config.env_variables import get_env_variable
 from lox_services.utils.general_python import print_error
 
 
+CONVERSION_KEYS = {
+        "&amp": "&",
+        "&gt": ">",
+        "&lt": "<",
+        "&quot": "\"",
+        "&#039": "'"
+    }
 # generate a new, not in the same file than the old one 
 def generate_key() -> None:
     """Generates a key from password and salt and adds it in env variables.
