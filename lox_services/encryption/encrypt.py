@@ -104,6 +104,6 @@ def decrypt_message(encrypted_message):
     key = load_key()
     f = Fernet(key)
     decrypted_message = f.decrypt(encrypted_message.encode())
-    
-    return decrypted_message.decode()
+    decoded_message = decrypted_message.decode()
+    return replace_injection_keys(decoded_message, True)
 
