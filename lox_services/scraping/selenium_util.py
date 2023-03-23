@@ -211,7 +211,6 @@ def wait_till_disapear(
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
     """
     wait.until(EC.invisibility_of_element_located((selector_type, selector)))
-    return
 
 
 def random_speed(average: float, threshold: float) -> float:
@@ -256,9 +255,9 @@ DriverStorageType = Literal["cookies", "local", "session", "all"]
 
 
 def clear_storage(driver: webdriver.Chrome, storage_type: DriverStorageType = "all"):
-    if storage_type in ["cookies", "all"]:
+    if storage_type in {"cookies", "all"}:
         driver.delete_all_cookies()
-    if storage_type in ["local", "all"]:
+    if storage_type in {"local", "all"}:
         driver.execute_script("window.localStorage.clear();")
-    if storage_type in ["session", "all"]:
+    if storage_type in {"session", "all"}:
         driver.execute_script("window.sessionStorage.clear();")
