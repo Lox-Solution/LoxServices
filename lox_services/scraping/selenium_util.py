@@ -1,5 +1,5 @@
 """
-All Utils function for Selenium use. 
+All Utils function for Selenium use.
 The name of the file is explicit to not confuse it with the PIP selenium package.
 """
 import os
@@ -96,19 +96,23 @@ def safe_find_element(
     return wait.until(element_present)
 
 
-def safe_find_elements(driver: webdriver.Chrome, *, selector_type: By = By.CSS_SELECTOR, selector: str,
-                       timeout: int = 10) -> List[WebElement]:
+def safe_find_elements(
+    driver: webdriver.Chrome,
+    *,
+    selector_type: By = By.CSS_SELECTOR,
+    selector: str,
+    timeout: int = 10,
+) -> List[WebElement]:
     """Find all element matching the selector in the given driver.
-        ## Arguments:
-        - `driver`: The driver that will be used to look up for elements.
-        - `selector_type`: The type of the selector used (CSS by default). It can be any element of the
-        selenium.webdriver.common.by.By .
-        - `selector`: The selector used to look for the elements.
-        - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
+    ## Arguments:
+    - `driver`: The driver that will be used to look up for elements.
+    - `selector_type`: The type of the selector used (CSS by default). It can be any element of the selenium.webdriver.common.by.By .
+    - `selector`: The selector used to look for the elements.
+    - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
 
-        ## Returns:
-        - The elements that matche the selector.
-        - NoSuchElementException if no element found within timeout.
+    ## Returns:
+    - The elements that matche the selector.
+    - NoSuchElementException if no element found within timeout.
     """
     try:
         element_present = EC.presence_of_element_located((selector_type, selector))
@@ -119,7 +123,7 @@ def safe_find_elements(driver: webdriver.Chrome, *, selector_type: By = By.CSS_S
     except NoSuchElementException as no_such_element:
         raise NoSuchElementException from no_such_element
     except:
-        print_error('An unknown error occured in Utils.selenium.')
+        print_error("An unknown error occured in Utils.selenium.")
         raise
 
 
@@ -202,11 +206,10 @@ def safe_send_keys(
 def wait_till_disapear(
     wait: WebDriverWait, selector_type: By, selector: str, timeout: int = 60
 ):
-    """Wait until an element disappears
+    """Wait until an element disapears
     ## Arguments:
     - `wait`: The wait element that will be used to wait until a certain number of second.
-    - `selector_type`: The type of the selector used (CSS by default). It can be any element of the
-    selenium.webdriver.common.by.By .
+    - `selector_type`: The type of the selector used (CSS by default). It can be any element of the selenium.webdriver.common.by.By .
     - `selector`: The selector used to look for the elements.
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
     """
@@ -255,9 +258,9 @@ DriverStorageType = Literal["cookies", "local", "session", "all"]
 
 
 def clear_storage(driver: webdriver.Chrome, storage_type: DriverStorageType = "all"):
-    if storage_type in {"cookies", "all"}:
+    if storage_type in ["cookies", "all"]:
         driver.delete_all_cookies()
-    if storage_type in {"local", "all"}:
+    if storage_type in ["local", "all"]:
         driver.execute_script("window.localStorage.clear();")
-    if storage_type in {"session", "all"}:
+    if storage_type in ["session", "all"]:
         driver.execute_script("window.sessionStorage.clear();")

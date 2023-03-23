@@ -2,8 +2,8 @@
 from os import getenv, path
 
 
-# To find easily the root of the project. 
-# Should be like this: "local_absolute_path/Main-Algorithms/Algorithms" 
+# To find easily the root of the project.
+# Should be like this: "local_absolute_path/Main-Algorithms/Algorithms"
 ROOT_PATH: str = getenv("PYTHONPATH", "/")
 
 _cloud_root_path = getenv("CLOUD_ROOT_PATH")

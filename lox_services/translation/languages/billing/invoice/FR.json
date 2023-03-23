@@ -6,7 +6,7 @@
     "t_title": "Facture Lox Solution - {invoice_date}",
     "t_vat_number": "Numéro de TVA",
     "t_invoice_date": "Date de facture",
-    "t_invoice_due_date": "Date limite de paiement",      
+    "t_invoice_due_date": "Date limite de paiement",
     "t_reason": "Produit",
     "t_quantity": "Quantité",
     "t_due_amount": "Montant dû",
