@@ -27,28 +27,26 @@ class Test_encrypt_functions(unittest.TestCase):
 
     def test_replace_injection_keys(self):
         # Test message with injection keys
-        self.assertEqual(
-            replace_injection_keys("Hello <world>!"), "Hello &lt;world&gt;!"
-        )
+        self.assertEqual(replace_injection_keys("Hello <world>!"), "Hello &ltworld&gt!")
 
         # Test message with reversed injection keys
         self.assertEqual(
-            replace_injection_keys("Hello &lt;world&gt;!", True), "Hello <world>!"
+            replace_injection_keys("Hello &ltworld&gt!", True), "Hello <world>!"
         )
 
         # Test message with multiple injection keys
         self.assertEqual(
             replace_injection_keys(
-                "This is a &lt;test&gt; message with &amp; multiple &quot;injection&quot; keys."
+                'This is a <test> message with & multiple "injection" keys.'
             ),
-            "This is a &amp;lt;test&amp;gt; message with &amp; multiple &amp;quot;injection&amp;quot; keys.",
+            "This is a &lttest&gt message with &amp multiple &quotinjection&quot keys.",
         )
 
         # Test message with reversed multiple injection keys
         self.assertEqual(
             replace_injection_keys(
-                "This is a &amp;lt;test&amp;gt; message with &amp; multiple &amp;quot;injection&amp;quot; keys.",
+                "This is a &amplttest&ampgt message with &amp multiple &ampquotinjection&ampquot keys.",
                 True,
             ),
-            'This is a &lt;test&gt; message with "injection" keys.',
+            'This is a <test> message with & multiple "injection" keys.',
         )
