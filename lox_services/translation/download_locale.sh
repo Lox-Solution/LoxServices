@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Set color to yellow
-echo '\033[0;33m' 
+echo '\033[0;33m'
 
 # Params:
 language=$1
@@ -21,7 +21,7 @@ fi
 if (locale -a | grep $language.$encoding); then
     echo "Locale '$language.$encoding' already installed."
 
-else 
+else
     echo "Locale $language.$encoding not installed."
     echo "Installing..."
     sudo locale-gen $language.$encoding

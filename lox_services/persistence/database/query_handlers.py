@@ -74,7 +74,9 @@ def raw_query(
     if parameters:
         parameters = QueryJobConfig(
             query_parameters=[
-                ArrayQueryParameter(parameter[0], parameter[1].value, parameter[2])  # NOQA
+                ArrayQueryParameter(
+                    parameter[0], parameter[1].value, parameter[2]
+                )  # NOQA
                 if (
                     isinstance(parameter[2], Sequence)
                     and not isinstance(parameter[2], str)
