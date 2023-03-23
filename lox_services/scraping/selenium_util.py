@@ -5,10 +5,10 @@ The name of the file is explicit to not confuse it with the PIP selenium package
 import os
 import time
 import random
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as EC  # NOQA
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -74,27 +74,26 @@ def safe_find_element(
     selector_type: By = By.CSS_SELECTOR,
     selector: str,
     timeout: int = 10,
+    wait: Optional[WebDriverWait] = None,
 ) -> WebElement:
     """Find 1 element in the given driver.
     ## Arguments:
     - `driver`: The driver that will be used to look up the element.
-    - `selector_type`: The type of the selector used (CSS by default). It can be any element of the selenium.webdriver.common.by.By .
+    - `selector_type`: The type of the selector used (CSS by default). It can be any element of
+    the selenium.webdriver.common.by.By .
     - `selector`: The selector used to look for the element.
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
+    - 'wait': a WebDriverWait instance to avoid repeated instance creation
 
     ## Returns:
     - The element that matches the selector.
-    - NoSuchElementException if no element found within timeout.
+    ## Raises
+    - NoSuchElementException, TimeoutException if no element found within timeout.
     """
-    try:
-        element_present = EC.presence_of_element_located((selector_type, selector))
-        WebDriverWait(driver, timeout).until(element_present)
-        return driver.find_element(selector_type, selector)
-    except (TimeoutException, NoSuchElementException) as exception:
-        raise NoSuchElementException from exception
-    except:
-        print_error("An unknown error occured in Utils.selenium.")
-        raise
+    if wait is None:
+        wait = WebDriverWait(driver, timeout)
+    element_present = EC.presence_of_element_located((selector_type, selector))
+    return wait.until(element_present)
 
 
 def safe_find_elements(
@@ -129,19 +128,17 @@ def safe_find_elements(
 
 
 def wait_until_clickable_and_click(
-    wait: WebDriverWait, selector: str, timeout: int = 30
+    wait: WebDriverWait, selector: str, timeout: int = 30, by: By = By.CSS_SELECTOR
 ):
     """Wait until an element is clickable, then click on it using css selector.
     ## Arguments:
     - `wait`: The wait element that will be used to wait until a certain number of second.
     - `selector`: The selector used to look for the elements.
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
+    - 'by': select which element to look for
     """
-    try:
-        element = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)))
-        element.click()
-    except Exception as e:
-        raise Exception from e
+    element = wait.until(EC.element_to_be_clickable((by, selector)))
+    element.click()
 
 
 def wait_until_clickable_and_click_by_xpath(wait: WebDriverWait, selector: str):
@@ -180,7 +177,7 @@ def wait_then_send_keys(
     - `driver`: The driver that will be used to look up for elements.
     - `wait`: The wait element that will be used to wait until a certain number of second.
     - `selector`: The selector used to look for the elements.
-    - `input_text`: The text that will be send to the element
+    - `input_text`: The text that will be sent to the element
     - `clear`: True if the field needs to be cleared before to get filled
     """
     wait.until(lambda driver: driver.find_element(By.CSS_SELECTOR, selector))
@@ -217,7 +214,6 @@ def wait_till_disapear(
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
     """
     wait.until(EC.invisibility_of_element_located((selector_type, selector)))
-    return
 
 
 def random_speed(average: float, threshold: float) -> float:
