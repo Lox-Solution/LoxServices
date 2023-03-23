@@ -20,7 +20,7 @@ disable=
     invalid-name, # for file names
     no-else-return, #for if else return statements
     missing-module-docstring, #module name and path should be clear enough
-    
+
 [FORMAT]
 max-line-length=140
 ignore-long-lines=f\"|f\'|\"\"\"|#|(^\s*\w*(\s)?((:|=)\s)?('|").*('|"|(('|"),))$)

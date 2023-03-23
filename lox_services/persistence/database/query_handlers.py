@@ -61,7 +61,13 @@ def raw_query(
     if print_query:
         print(gpy.colorize(query, Colors.MAGENTA))
         if parameters:
-            print("parameters:", [f"{parameter[1]} {parameter[0]} : {parameter[2]}" for parameter in parameters])
+            print(
+                "parameters:",
+                [
+                    f"{parameter[1]} {parameter[0]} : {parameter[2]}"
+                    for parameter in parameters
+                ],
+            )
 
     bigquery_client = Client()
 

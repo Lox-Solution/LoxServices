@@ -3,7 +3,10 @@ import errno
 import socket
 from base64 import decodebytes
 
-def establish_sftp_connection(ssh_client, server, port, username, password, keydata, key_type):
+
+def establish_sftp_connection(
+    ssh_client, server, port, username, password, keydata, key_type
+):
     """Establishes sftp connection to server.
     ## Arguments
     - `ssh_client`: The client object.
@@ -16,7 +19,7 @@ def establish_sftp_connection(ssh_client, server, port, username, password, keyd
 
     ## Returns
     - A new SFTPClient session object.
-    
+
     ## Important
     - When you are done using the client object don't forget to CLOSE it!!!
 
@@ -37,13 +40,13 @@ def establish_sftp_connection(ssh_client, server, port, username, password, keyd
     key = paramiko.RSAKey(data=decodebytes(keydata))
     ssh_client.get_host_keys().add(server, key_type, key)
     try:
-        ssh_client.connect(server, port, username, password, timeout = 10)
-        print ('Connection succesfully established … ')
+        ssh_client.connect(server, port, username, password, timeout=10)
+        print("Connection succesfully established … ")
         return ssh_client.open_sftp()
     except paramiko.AuthenticationException:
         print("Authentication failed, please verify your credentials: %s")
     except paramiko.BadHostKeyException as badHostKeyException:
-        print("Unable to verify server's host key: %s" % badHostKeyException)    
+        print("Unable to verify server's host key: %s" % badHostKeyException)
     except paramiko.SSHException as sshException:
         print("Unable to establish SSH connection: %s" % sshException)
     except socket.error as v:
