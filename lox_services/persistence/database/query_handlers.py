@@ -2,7 +2,7 @@
 import os
 import re
 import time
-from typing import Any, Optional, Tuple, Sequence
+from typing import Any, Optional, Tuple, Sequence, Iterator, Union
 
 from google.cloud.bigquery import (
     Client,
@@ -61,14 +61,20 @@ def raw_query(
     if print_query:
         print(gpy.colorize(query, Colors.MAGENTA))
         if parameters:
-            print("parameters:", [f"{parameter[1]} {parameter[0]} : {parameter[2]}" for parameter in parameters])
+            print(
+                "parameters:",
+                [
+                    f"{parameter[1]} {parameter[0]} : {parameter[2]}"
+                    for parameter in parameters
+                ],
+            )
 
     bigquery_client = Client()
 
     if parameters:
         parameters = QueryJobConfig(
             query_parameters=[
-                ArrayQueryParameter(parameter[0], parameter[1].value, parameter[2])
+                ArrayQueryParameter(parameter[0], parameter[1].value, parameter[2])  # NOQA
                 if (
                     isinstance(parameter[2], Sequence)
                     and not isinstance(parameter[2], str)
@@ -90,15 +96,18 @@ def select(
     print_query: bool = True,
     *,
     parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
-) -> DataFrame:
+    as_iterator: bool = False,
+) -> Union[DataFrame, Iterator]:
     """Checks if the query begings with a SELECT statement. If so the query is being executed.
     ## Arguments
     - `query`: String representation of the query to be executed.
-    - `print_query`: Tells whether or not to print the query before executing it.
+    - `print_query`: Tells whether to print the query before executing it.
     - `parameters`: List of parameters used to avoid SQL injection
+    = 'as_iterator': In case results just need to be iterated over, as opposed to requiring
+    vectorized operations, this returns a lazily evaluated iterator of query results.
 
     ## Example
-        >>> select("SELECT * FROM InvoicesData.Refunds where carrier="UPS" LIMIT 10")
+        >>> select("SELECT * FROM InvoicesData.Refunds where carrier='UPS' LIMIT 10")
         >>> select ("SELECT * FROM InvoicesData.Refunds where carrier=@carrier LIMIT 10", parameters = [("carrier", BQParameterType.STRING, "UPS")])
 
     ## Return
@@ -107,11 +116,10 @@ def select(
     if not (query.lstrip().startswith("SELECT") or query.lstrip().startswith("WITH")):
         raise BadQueryTypeException("SELECT or WITH")
 
-    return (
-        raw_query(query, print_query=print_query, parameters=parameters)
-        .result()
-        .to_dataframe()
-    )
+    result = raw_query(query, print_query=print_query, parameters=parameters).result()
+    if as_iterator:
+        return result
+    return result.to_dataframe()
 
 
 def update(
@@ -123,7 +131,7 @@ def update(
     """Checks if the query begings with a UPDATE statement. If so the query is being executed.
     ## Arguments
     - `query`: String representation of the query to be executed.
-    - `print_query`: Tells whether or not to print the query before executing it.
+    - `print_query`: Tells whether to print the query before executing it.
     - `parameters`: List of parameters used to avoid SQL injection
 
     ## Example
@@ -146,7 +154,7 @@ def update(
 
     count = 0
     query_success = False
-    result = None
+    result_returned = None
     while not query_success:
         try:
             result = raw_query(query, print_query=print_query, parameters=parameters)
@@ -174,13 +182,13 @@ def delete(
     print_query: bool = True,
     *,
     parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
-) -> DataFrame:
+) -> None:
     """Checks if the query begings with a DELETE statement. If so the query is being executed.
 
     ## Arguments
 
     - `query`: String representation of the query to be executed.
-    - `print_query`: Tells whether or not to print the query before executing it.
+    - `print_query`: Tells whether to print the query before executing it.
     - `parameters`: List of parameters used to avoid SQL injection
 
     ## Example
