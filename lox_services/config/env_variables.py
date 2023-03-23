@@ -20,5 +20,3 @@ def get_env_variable(key: str) -> Any:
             f"'{key}' key does not exist in .env file or in environment variables."
         )
     return get_env
-
-
