@@ -5,7 +5,8 @@ The name of the file is explicit to not confuse it with the PIP selenium package
 import os
 import time
 import random
-from typing import List, Literal, Optional
+from enum import Enum
+from typing import List, Literal, Optional, Union
 
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support import expected_conditions as EC  # NOQA
@@ -72,7 +73,7 @@ def safe_find_element(
     driver: webdriver.Chrome,
     *,
     selector_type: By = By.CSS_SELECTOR,
-    selector: str,
+    selector: Union[str, Enum],
     timeout: int = 10,
     wait: Optional[WebDriverWait] = None,
 ) -> WebElement:
@@ -90,6 +91,8 @@ def safe_find_element(
     ## Raises
     - NoSuchElementException, TimeoutException if no element found within timeout.
     """
+    if isinstance(selector, Enum):
+        selector = selector.value
     if wait is None:
         wait = WebDriverWait(driver, timeout)
     element_present = EC.presence_of_element_located((selector_type, selector))
@@ -128,7 +131,10 @@ def safe_find_elements(
 
 
 def wait_until_clickable_and_click(
-    wait: WebDriverWait, selector: str, timeout: int = 30, by: By = By.CSS_SELECTOR
+    wait: WebDriverWait,
+    selector: Union[str, Enum],
+    timeout: int = 30,
+    by: By = By.CSS_SELECTOR,
 ):
     """Wait until an element is clickable, then click on it using css selector.
     ## Arguments:
@@ -137,6 +143,8 @@ def wait_until_clickable_and_click(
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
     - 'by': select which element to look for
     """
+    if isinstance(selector, Enum):
+        selector = selector.value
     element = wait.until(EC.element_to_be_clickable((by, selector)))
     element.click()
 
