@@ -3,7 +3,6 @@ Defines some utils functions for the project.
 """
 import os
 import re
-import time
 import unicodedata
 from datetime import datetime
 from typing import Iterator, List, Literal, Tuple
@@ -210,7 +209,7 @@ def get_file_size(file_path: str) -> Tuple[float, str]:
 
 
 def safe_remove(file_path: str):
-    "Remove a file if existing"
+    """Remove a file if existing"""
     try:
         os.remove(file_path)
     except FileNotFoundError:
@@ -327,6 +326,20 @@ def format_amount_to_human_string(value, language="EN", currency="€") -> str:
         return value
 
 
+def convert_sym_to_code(currency_symbol: Literal["$", "£", "€"]) -> str:
+    """Function that converts a currency symbol to a currency code ( 3 digits )
+    ## Arguments:
+    - `currency_symbol`: The symbol of the currency we want to convert
+
+    ## Returns:
+    - The currency code in 3 digits
+    """
+    try:
+        return {"$": "USD", "£": "GBP", "€": "EUR"}[currency_symbol]
+    except KeyError as e:
+        raise KeyError(f"Unknown symbol {currency_symbol}") from e
+
+
 def split_array(array: List[List], number_of_sub_arrays: int):
     """Creates a list of `n` sub-arrays coming from the original array.
     ## Arguments
@@ -390,12 +403,13 @@ def remove_all_file_with_format_from_folder(
     *,
     file_format: str,
     folder_path: str,
-    ignored_files: List[str] = [],
+    ignored_files: List[str] = (),
     recursive: bool = False,
 ) -> List[str]:
     """Remove all file of a given format that are in a folder.
     ## Arguments
-    - 'file_format' : kind of file you want to remove, either "csv", "xlsx", "pdf" (to avoid deleting everything in one run)
+    - 'file_format' : kind of file you want to remove, either "csv", "xlsx", "pdf"
+    (to avoid deleting everything in one run)
     - 'folder_path' : Path of the folder to clean.
     - 'ignored_files' : list of file NAME to not delete. default value : []
     - 'recursive' : make the function recursive on subfolder if true. default value : False
