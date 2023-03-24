@@ -1,6 +1,7 @@
 import os
 import unittest
 
+
 from lox_services.encryption.encrypt import (
     load_key,
     encrypt_message,
@@ -24,6 +25,7 @@ class Test_encrypt_functions(unittest.TestCase):
         self.assertEqual(
             decrypt_message(encrypted_msg), decrypt_message(FAKE_ENCRYPTED_PASSWORD)
         )
+
 
     def test_replace_injection_keys(self):
         # Test message with injection keys
