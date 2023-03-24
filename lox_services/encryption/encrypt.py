@@ -11,7 +11,41 @@ from lox_services.config.env_variables import get_env_variable
 from lox_services.utils.general_python import print_error
 
 
-# generate a new, not in the same file than the old one
+CONVERSION_KEYS = {
+        "&amp": "&",
+        "&gt": ">",
+        "&lt": "<",
+        "&quot": "\"",
+        "&#039": "'"
+    }
+
+def replace_injection_keys(message: str, reverse: bool = False) -> str:
+    """Replaces injection keys in the given message with their corresponding symbols.
+
+    Parameters:
+        -`message`: The message to replace injection keys in.
+        -`reverse`: Whether to reverse the injection keys to their original values. Defaults to False.
+
+    Returns:
+        str: The message with injection keys replaced.
+
+    Example:
+        >>> replace_injection_keys("Hello <world>!")
+        "Hello &lt;world&gt;!"
+        >>> replace_injection_keys("Hello &lt;world&gt;!", True)
+        "Hello <world>!"
+    """
+    
+    for key, value in CONVERSION_KEYS.items():
+        if reverse:
+            message = message.replace(key, value)
+        else:
+            message = message.replace(value, key)
+        
+    return message
+
+# generate a new, not in the same file than the old one 
+
 def generate_key() -> None:
     """Generates a key from password and salt and adds it in env variables."""
     password = getpass.getpass("Password:")
@@ -52,6 +86,7 @@ def encrypt_message(message: str):
     ## Returns
     The encrypted message as a string.
     """
+    message = replace_injection_keys(message)
     key = load_key()
     encoded_message = message.encode()
     f = Fernet(key)
@@ -72,4 +107,5 @@ def decrypt_message(encrypted_message):
     f = Fernet(key)
     decrypted_message = f.decrypt(encrypted_message.encode())
 
-    return decrypted_message.decode()
+    decoded_message = decrypted_message.decode()
+    return replace_injection_keys(decoded_message, True)
