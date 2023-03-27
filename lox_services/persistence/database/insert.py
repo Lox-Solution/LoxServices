@@ -321,12 +321,12 @@ def remove_duplicate_refunds(
         dataframe["tracking_number"] = dataframe.tracking_number.astype(str)
         tracking_numbers = dataframe["tracking_number"].tolist()
         query = f"""
-        SELECT DISTINCT
-            tracking_number || CASE
-                WHEN reason_refund = 'Lost' OR reason_refund = 'Damaged'
-                    THEN 'Lost or Damaged'
-                    ELSE reason_refund
-                END
+        SELECT DISTINCT 
+            tracking_number || CASE 
+                WHEN reason_refund IN ('Lost', 'Damaged', 'Delivery Dispute: Lost', 'Delivery Dispute: Damaged')
+                    THEN 'Lost or Damaged' 
+                    ELSE reason_refund 
+                END 
             AS existing_combo
 
         FROM InvoicesData.Refunds
