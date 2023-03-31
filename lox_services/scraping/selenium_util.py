@@ -277,7 +277,7 @@ def clear_storage(driver: webdriver.Chrome, storage_type: DriverStorageType = "a
 def bind_arguments_to_a_selenium_func(
     func: Callable, driver: webdriver.Chrome, wait: WebDriverWait, by: By
 ) -> Callable:
-    """Declutter repeated calls to some designatedd Selenium function by binding a
+    """Declutter repeated calls to some designated Selenium function by binding a
     specific webdriver, wait and by instance as default arguments to it."""
     return lambda selector: func(
         driver=driver,
