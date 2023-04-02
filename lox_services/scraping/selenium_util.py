@@ -287,8 +287,9 @@ def bind_arguments_to_a_selenium_func(
         return lambda selector, selector_type=default_type: func(
             driver=driver, wait=wait, selector=selector, selector_type=selector_type
         )
-    return lambda selector: func(
+    return lambda selector, selector_type: func(
         driver=driver,
         wait=wait,
         selector=selector,
+        selector_type=selector_type
     )
