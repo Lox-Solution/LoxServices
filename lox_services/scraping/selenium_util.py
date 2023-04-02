@@ -98,6 +98,31 @@ def safe_find_element(
     return wait.until(element_present)
 
 
+def find(
+    driver: webdriver.Chrome, selector: Union[str, Enum], selector_type: By, **kwargs
+) -> WebElement:
+    """
+    Same as 'safe_find_element', but without waiting. find(Some.CONSTANT) should be
+    less typing than driver.find_element(Some.CONSTANT.value), which results in cleaner code.
+
+    ## Arguments:
+    - `driver`: The driver that will be used to look up the element.
+    - `selector_type`: The type of the selector used (CSS by default). It can be any element of
+    the selenium.webdriver.common.by.By .
+    - `selector`: The selector used to look for the element.
+    - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
+
+    ## Returns:
+    - The element that matches the selector.
+    ## Raises
+    - NoSuchElementException, TimeoutException if no element found within timeout.
+    """
+
+    if isinstance(selector, Enum):
+        selector = selector.value
+    return driver.find_element(selector_type, selector)
+
+
 def safe_find_elements(
     driver: webdriver.Chrome,
     *,
@@ -131,10 +156,11 @@ def safe_find_elements(
 
 
 def wait_until_clickable_and_click(
-    wait: WebDriverWait,
+    wait: Optional[WebDriverWait],
     selector: Union[str, Enum],
     timeout: int = 30,
     by: By = By.CSS_SELECTOR,
+    driver: Optional[webdriver.Chrome] = None,
 ):
     """Wait until an element is clickable, then click on it using css selector.
     ## Arguments:
@@ -143,6 +169,8 @@ def wait_until_clickable_and_click(
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
     - 'by': select which element to look for
     """
+    if wait is None:
+        wait = WebDriverWait(driver, timeout)
     if isinstance(selector, Enum):
         selector = selector.value
     element = wait.until(EC.element_to_be_clickable((by, selector)))
@@ -283,13 +311,11 @@ def bind_arguments_to_a_selenium_func(
 ) -> Callable:
     """Declutter repeated calls to some designated Selenium function by binding a
     specific WebDriver, WebDriverWait and By instances as default arguments to it."""
+
     if default_type is not None:
         return lambda selector, selector_type=default_type: func(
             driver=driver, wait=wait, selector=selector, selector_type=selector_type
         )
     return lambda selector, selector_type: func(
-        driver=driver,
-        wait=wait,
-        selector=selector,
-        selector_type=selector_type
+        driver=driver, wait=wait, selector=selector, selector_type=selector_type
     )
