@@ -216,7 +216,7 @@ def wait_then_send_keys(
     - `input_text`: The text that will be sent to the element
     - `clear`: True if the field needs to be cleared before to get filled
     """
-    wait.until(lambda driver: driver.find_element(By.CSS_SELECTOR, selector))
+    wait.until(lambda dr: dr.find_element(By.CSS_SELECTOR, selector))
     if clear:
         driver.find_element(By.CSS_SELECTOR, selector).clear()
         time.sleep(0.3)
