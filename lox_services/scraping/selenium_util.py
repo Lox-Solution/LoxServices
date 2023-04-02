@@ -307,7 +307,7 @@ def bind_arguments_to_a_selenium_func(
     func: Callable,
     driver: webdriver.Chrome,
     wait: WebDriverWait,
-    default_type: Optional[By],
+    default_type: Optional[By] = None,
 ) -> Callable:
     """Declutter repeated calls to some designated Selenium function by binding a
     specific WebDriver, WebDriverWait and By instances as default arguments to it."""
