@@ -27,8 +27,7 @@ def wait_until_page_loaded(driver: webdriver.Chrome, timeout: int = 10):
     """
     try:
         WebDriverWait(driver, timeout).until(
-            lambda driver: driver.execute_script("return document.readyState")
-            == "complete"
+            lambda dr: dr.execute_script("return document.readyState") == "complete"
         )
         return
     except TimeoutException as timeout_exception:
@@ -109,12 +108,13 @@ def safe_find_elements(
     """Find all element matching the selector in the given driver.
     ## Arguments:
     - `driver`: The driver that will be used to look up for elements.
-    - `selector_type`: The type of the selector used (CSS by default). It can be any element of the selenium.webdriver.common.by.By .
+    - `selector_type`: The type of the selector used (CSS by default). It can be any element of
+    the selenium.webdriver.common.by.By .
     - `selector`: The selector used to look for the elements.
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
 
     ## Returns:
-    - The elements that matche the selector.
+    - The elements that matches the selector.
     - NoSuchElementException if no element found within timeout.
     """
     try:
@@ -126,7 +126,7 @@ def safe_find_elements(
     except NoSuchElementException as no_such_element:
         raise NoSuchElementException from no_such_element
     except:
-        print_error("An unknown error occured in Utils.selenium.")
+        print_error("An unknown error occurred in Utils.selenium.")
         raise
 
 
@@ -169,7 +169,7 @@ def wait_then_clear(
         - `wait`: The wait element that will be used to wait until a certain number of second.
         - `selector`: The selector used to look for the elements.
     """
-    wait.until(lambda driver: driver.find_element(By.CSS_SELECTOR, selector))
+    wait.until(lambda dr: dr.find_element(By.CSS_SELECTOR, selector))
     driver.find_element(By.CSS_SELECTOR, selector).clear()
 
 
@@ -214,10 +214,11 @@ def safe_send_keys(
 def wait_till_disapear(
     wait: WebDriverWait, selector_type: By, selector: str, timeout: int = 60
 ):
-    """Wait until an element disapears
+    """Wait until an element disappears
     ## Arguments:
     - `wait`: The wait element that will be used to wait until a certain number of second.
-    - `selector_type`: The type of the selector used (CSS by default). It can be any element of the selenium.webdriver.common.by.By .
+    - `selector_type`: The type of the selector used (CSS by default). It can be any element of
+    the selenium.webdriver.common.by.By .
     - `selector`: The selector used to look for the elements.
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
     """
@@ -275,13 +276,19 @@ def clear_storage(driver: webdriver.Chrome, storage_type: DriverStorageType = "a
 
 
 def bind_arguments_to_a_selenium_func(
-    func: Callable, driver: webdriver.Chrome, wait: WebDriverWait, by: By
+    func: Callable,
+    driver: webdriver.Chrome,
+    wait: WebDriverWait,
+    default_type: Optional[By],
 ) -> Callable:
     """Declutter repeated calls to some designated Selenium function by binding a
-    specific webdriver, wait and by instance as default arguments to it."""
+    specific WebDriver, WebDriverWait and By instances as default arguments to it."""
+    if default_type is not None:
+        return lambda selector, selector_type=default_type: func(
+            driver=driver, wait=wait, selector=selector, selector_type=selector_type
+        )
     return lambda selector: func(
         driver=driver,
         wait=wait,
-        by=by,
         selector=selector,
     )
