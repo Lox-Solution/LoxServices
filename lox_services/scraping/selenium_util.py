@@ -6,6 +6,7 @@ import os
 import time
 import random
 from enum import Enum
+from functools import partial
 from typing import Callable, List, Literal, Optional, Union
 
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -99,7 +100,7 @@ def safe_find_element(
 
 
 def find(
-    driver: webdriver.Chrome, selector: Union[str, Enum], selector_type: By, **kwargs
+    driver: webdriver.Chrome, selector: Union[str, Enum], selector_type: By
 ) -> WebElement:
     """
     Same as 'safe_find_element', but without waiting. find(Some.CONSTANT) should be
@@ -168,6 +169,7 @@ def wait_until_clickable_and_click(
     - `selector`: The selector used to look for the elements.
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
     - 'by': select which element to look for
+    - 'driver': The driver that can be used to create a WebDriverWait instance
     """
     if wait is None:
         wait = WebDriverWait(driver, timeout)
@@ -306,16 +308,17 @@ def clear_storage(driver: webdriver.Chrome, storage_type: DriverStorageType = "a
 def bind_arguments_to_a_selenium_func(
     func: Callable,
     driver: webdriver.Chrome,
-    wait: WebDriverWait,
+    wait: Optional[WebDriverWait] = None,
     default_type: Optional[By] = None,
 ) -> Callable:
     """Declutter repeated calls to some designated Selenium function by binding a
     specific WebDriver, WebDriverWait and By instances as default arguments to it."""
 
-    if default_type is not None:
-        return lambda selector, selector_type=default_type: func(
-            driver=driver, wait=wait, selector=selector, selector_type=selector_type
-        )
-    return lambda selector, selector_type: func(
-        driver=driver, wait=wait, selector=selector, selector_type=selector_type
+    partial_func = (
+        partial(func, driver=driver, wait=wait)
+        if wait is not None
+        else partial(func, driver=driver)
     )
+    if default_type is None:
+        return partial_func
+    return partial(partial_func, selector_type=default_type)
