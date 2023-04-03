@@ -28,7 +28,7 @@ def wait_until_page_loaded(driver: webdriver.Chrome, timeout: int = 10):
     """
     try:
         WebDriverWait(driver, timeout).until(
-            lambda dr: dr.execute_script("return document.readyState") == "complete"
+            lambda driver: driver.execute_script("return document.readyState") == "complete"
         )
         return
     except TimeoutException as timeout_exception:
@@ -100,7 +100,7 @@ def safe_find_element(
 
 
 def find(
-    driver: webdriver.Chrome, selector: Union[str, Enum], selector_type: By
+    driver: webdriver.Chrome, selector: Union[str, Enum], selector_type: By = By.CSS_SELECTOR
 ) -> WebElement:
     """
     Same as 'safe_find_element', but without waiting. find(Some.CONSTANT) should be
@@ -111,7 +111,6 @@ def find(
     - `selector_type`: The type of the selector used (CSS by default). It can be any element of
     the selenium.webdriver.common.by.By .
     - `selector`: The selector used to look for the element.
-    - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
 
     ## Returns:
     - The element that matches the selector.
@@ -199,7 +198,7 @@ def wait_then_clear(
         - `wait`: The wait element that will be used to wait until a certain number of second.
         - `selector`: The selector used to look for the elements.
     """
-    wait.until(lambda dr: dr.find_element(By.CSS_SELECTOR, selector))
+    wait.until(lambda driver: driver.find_element(By.CSS_SELECTOR, selector))
     driver.find_element(By.CSS_SELECTOR, selector).clear()
 
 
@@ -218,7 +217,7 @@ def wait_then_send_keys(
     - `input_text`: The text that will be sent to the element
     - `clear`: True if the field needs to be cleared before to get filled
     """
-    wait.until(lambda dr: dr.find_element(By.CSS_SELECTOR, selector))
+    wait.until(lambda driver: driver.find_element(By.CSS_SELECTOR, selector))
     if clear:
         driver.find_element(By.CSS_SELECTOR, selector).clear()
         time.sleep(0.3)
@@ -242,7 +241,7 @@ def safe_send_keys(
 
 # Wait for the loading spinner to be gone
 def wait_till_disapear(
-    wait: WebDriverWait, selector_type: By, selector: str, timeout: int = 60
+    wait: WebDriverWait, selector: str, selector_type: By = By.CSS_SELECTOR, timeout: int = 60
 ):
     """Wait until an element disappears
     ## Arguments:
