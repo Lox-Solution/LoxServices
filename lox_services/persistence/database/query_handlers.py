@@ -129,7 +129,7 @@ def update(
     print_query: bool = True,
     *,
     parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
-) -> DataFrame:
+) -> int:
     """Checks if the query begings with a UPDATE statement. If so the query is being executed.
     ## Arguments
     - `query`: String representation of the query to be executed.
