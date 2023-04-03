@@ -278,13 +278,13 @@ def remove_duplicate_refunds(
     dataframe["reason_refund"] = dataframe.reason_refund.astype(str)
     reason_refunds = dataframe["reason_refund"].unique().tolist()
 
-   
+    
     dataframe["tracking_number"] = dataframe.tracking_number.astype(str)
     tracking_numbers = dataframe["tracking_number"].tolist()
     query = f"""
     SELECT DISTINCT
         tracking_number || CASE
-            WHEN reason_refund = 'Lost' OR reason_refund = 'Damaged'
+            WHEN reason_refund IN ("Lost", "Damaged", "Delivery Dispute: Lost", "Delivery Dispute: Damaged")
                 THEN 'Lost or Damaged'
                 ELSE reason_refund
             END
@@ -301,7 +301,7 @@ def remove_duplicate_refunds(
     existing_data_dataframe = select(query)
     # Lost or damaged trick
     dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(
-        lambda x: "Lost or Damaged" if x in ("Lost", "Damaged") else x
+        lambda x: "Lost or Damaged" if x in ("Lost", "Damaged", "Delivery Dispute: Lost", "Delivery Dispute: Damaged" ) else x
     )
     # Duplicate check
     dataframe = dataframe.drop_duplicates(
