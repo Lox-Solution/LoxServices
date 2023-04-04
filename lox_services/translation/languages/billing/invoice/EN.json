@@ -6,7 +6,7 @@
     "t_title": "Lox Solution invoice - {invoice_date}",
     "t_vat_number": "VAT number",
     "t_invoice_date": "Invoice date",
-    "t_invoice_due_date": "Invoice due date",      
+    "t_invoice_due_date": "Invoice due date",
     "t_reason": "Product",
     "t_quantity": "Quantity",
     "t_due_amount": "Due amount",
