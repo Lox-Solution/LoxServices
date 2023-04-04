@@ -6,7 +6,8 @@ import os
 import time
 import random
 from enum import Enum
-from typing import List, Literal, Optional, Union
+from functools import partial
+from typing import Callable, List, Literal, Optional, Union
 
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support import expected_conditions as EC  # NOQA
@@ -27,8 +28,7 @@ def wait_until_page_loaded(driver: webdriver.Chrome, timeout: int = 10):
     """
     try:
         WebDriverWait(driver, timeout).until(
-            lambda driver: driver.execute_script("return document.readyState")
-            == "complete"
+            lambda driver: driver.execute_script("return document.readyState") == "complete"
         )
         return
     except TimeoutException as timeout_exception:
@@ -99,6 +99,30 @@ def safe_find_element(
     return wait.until(element_present)
 
 
+def find(
+    driver: webdriver.Chrome, selector: Union[str, Enum], selector_type: By = By.CSS_SELECTOR
+) -> WebElement:
+    """
+    Same as 'safe_find_element', but without waiting. find(Some.CONSTANT) should be
+    less typing than driver.find_element(Some.CONSTANT.value), which results in cleaner code.
+
+    ## Arguments:
+    - `driver`: The driver that will be used to look up the element.
+    - `selector_type`: The type of the selector used (CSS by default). It can be any element of
+    the selenium.webdriver.common.by.By .
+    - `selector`: The selector used to look for the element.
+
+    ## Returns:
+    - The element that matches the selector.
+    ## Raises
+    - NoSuchElementException, TimeoutException if no element found within timeout.
+    """
+
+    if isinstance(selector, Enum):
+        selector = selector.value
+    return driver.find_element(selector_type, selector)
+
+
 def safe_find_elements(
     driver: webdriver.Chrome,
     *,
@@ -109,12 +133,13 @@ def safe_find_elements(
     """Find all element matching the selector in the given driver.
     ## Arguments:
     - `driver`: The driver that will be used to look up for elements.
-    - `selector_type`: The type of the selector used (CSS by default). It can be any element of the selenium.webdriver.common.by.By .
+    - `selector_type`: The type of the selector used (CSS by default). It can be any element of
+    the selenium.webdriver.common.by.By .
     - `selector`: The selector used to look for the elements.
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
 
     ## Returns:
-    - The elements that matche the selector.
+    - The elements that matches the selector.
     - NoSuchElementException if no element found within timeout.
     """
     try:
@@ -126,15 +151,16 @@ def safe_find_elements(
     except NoSuchElementException as no_such_element:
         raise NoSuchElementException from no_such_element
     except:
-        print_error("An unknown error occured in Utils.selenium.")
+        print_error("An unknown error occurred in Utils.selenium.")
         raise
 
 
 def wait_until_clickable_and_click(
-    wait: WebDriverWait,
+    wait: Optional[WebDriverWait],
     selector: Union[str, Enum],
     timeout: int = 30,
     by: By = By.CSS_SELECTOR,
+    driver: Optional[webdriver.Chrome] = None,
 ):
     """Wait until an element is clickable, then click on it using css selector.
     ## Arguments:
@@ -142,7 +168,10 @@ def wait_until_clickable_and_click(
     - `selector`: The selector used to look for the elements.
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
     - 'by': select which element to look for
+    - 'driver': The driver that can be used to create a WebDriverWait instance
     """
+    if wait is None:
+        wait = WebDriverWait(driver, timeout)
     if isinstance(selector, Enum):
         selector = selector.value
     element = wait.until(EC.element_to_be_clickable((by, selector)))
@@ -212,12 +241,13 @@ def safe_send_keys(
 
 # Wait for the loading spinner to be gone
 def wait_till_disapear(
-    wait: WebDriverWait, selector_type: By, selector: str, timeout: int = 60
+    wait: WebDriverWait, selector: str, selector_type: By = By.CSS_SELECTOR, timeout: int = 60
 ):
-    """Wait until an element disapears
+    """Wait until an element disappears
     ## Arguments:
     - `wait`: The wait element that will be used to wait until a certain number of second.
-    - `selector_type`: The type of the selector used (CSS by default). It can be any element of the selenium.webdriver.common.by.By .
+    - `selector_type`: The type of the selector used (CSS by default). It can be any element of
+    the selenium.webdriver.common.by.By .
     - `selector`: The selector used to look for the elements.
     - `timeout`: The maximum number of seconds to wait until the function returns a timeout.
     """
@@ -272,3 +302,22 @@ def clear_storage(driver: webdriver.Chrome, storage_type: DriverStorageType = "a
         driver.execute_script("window.localStorage.clear();")
     if storage_type in ["session", "all"]:
         driver.execute_script("window.sessionStorage.clear();")
+
+
+def bind_arguments_to_a_selenium_func(
+    func: Callable,
+    driver: webdriver.Chrome,
+    wait: Optional[WebDriverWait] = None,
+    default_type: Optional[By] = None,
+) -> Callable:
+    """Declutter repeated calls to some designated Selenium function by binding a
+    specific WebDriver, WebDriverWait and By instances as default arguments to it."""
+
+    partial_func = (
+        partial(func, driver=driver, wait=wait)
+        if wait is not None
+        else partial(func, driver=driver)
+    )
+    if default_type is None:
+        return partial_func
+    return partial(partial_func, selector_type=default_type)
