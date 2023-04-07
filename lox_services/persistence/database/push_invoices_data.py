@@ -4,6 +4,7 @@ from enum import Enum
 from typing import List, Tuple
 
 import pandas as pd
+import numpy as np
 
 from lox_services.persistence.database.datasets import InvoicesData_dataset
 from lox_services.persistence.database.insert import insert_dataframe_into_database
@@ -18,14 +19,13 @@ from lox_services.persistence.database.schema import (
 )
 from lox_services.persistence.database.utils import (
     format_time,
-    format_datetime,
     replace_nan_with_none_in_dataframe,
 )
 from lox_services.utils.enums import Files
 
 
 def push_run_to_database(
-    run_output_folder, carrier, company, account_number_input: str = ""
+    run_output_folder: str, carrier: str, company: str, account_number_input: str = ""
 ) -> dict:
     """Add to the database all the important files of the given folder.
     Returns a dictionary reporesenting the run report.
@@ -60,11 +60,16 @@ def push_run_to_database(
             header=0,
             dtype={"postal_code_reciever": str},
         )
-        if df_invoice.shape[0] > 0:
+        # In case postal_code_reciever falsely gets interpreted as a float
+        df_invoice["postal_code_reciever"] = df_invoice[
+            "postal_code_reciever"
+        ].str.removesuffix(".0")
+
+        if not df_invoice.empty:
             # If some columns are missing, add the columns with None values
-            for column in dtypes_invoices:
-                if column not in df_invoice.columns:
-                    df_invoice.loc[:, column] = None
+            missing_columns = set(dtypes_invoices).difference(set(df_invoice.columns))
+            if missing_columns:
+                df_invoice = df_invoice.assign(**dict.fromkeys(missing_columns, None))
 
             # "Make sure that the columns have the good type
             df_invoice = df_invoice.fillna(value=na_invoices).astype(dtypes_invoices)
@@ -83,17 +88,25 @@ def push_run_to_database(
             infer_datetime_format=date_format,
             header=0,
         )
-        if df_deliveries.shape[0] > 0:
-            for column in dtypes_deliveries:
-                if column not in df_deliveries.columns:
-                    df_deliveries.loc[:, column] = None
+        if not df_deliveries.empty:
+            # If some columns are missing, add the columns with None values
+            missing_columns = set(dtypes_deliveries).difference(
+                set(df_deliveries.columns)
+            )
+            if missing_columns:
+                df_deliveries = df_deliveries.assign(
+                    **dict.fromkeys(missing_columns, None)
+                )
 
             # Format time
             if "date_time" not in df_deliveries.columns:
                 df_deliveries.loc[:, "time"] = df_deliveries["time"].apply(format_time)
-                df_deliveries.loc[:, "date_time"] = df_deliveries.apply(
-                    lambda x: format_datetime(x["date"], x["time"]), axis=1
+                df_deliveries["date_time"] = np.where(
+                    (df_deliveries["date"].isna()) | (df_deliveries["time"].isna()),
+                    pd.NaT,
+                    df_deliveries["date"] + "T" + df_deliveries["time"],
                 )
+
             df_deliveries = df_deliveries.fillna(value=na_deliveries).astype(
                 dtypes_deliveries
             )
@@ -111,20 +124,16 @@ def push_run_to_database(
         df_refund: pd.DataFrame = pd.read_csv(
             refunds_path, infer_datetime_format=date_format, header=0
         )
-        if df_refund.shape[0] > 0:
+        if not df_refund.empty:
             # If some columns are missing, add the columns with None values
-            for column in dtypes_refunds:
-                if column not in df_refund.columns:
-                    print(column)
-                    df_refund.loc[:, column] = None
+            missing_columns = set(dtypes_refunds).difference(set(df_refund.columns))
+            if missing_columns:
+                df_refund = df_refund.assign(**dict.fromkeys(missing_columns, None))
 
             # "Make sure that the columns have the good type
             df_refund = df_refund.fillna(value=na_refunds).astype(dtypes_refunds)
 
-            for column in dates_refunds:
-                df_refund[column] = df_refund[column].apply(
-                    lambda x: x if x != "" else None
-                )
+            df_refund[dates_refunds] = df_refund[dates_refunds].replace({"": None})
 
             list_files_to_push.append((df_refund, InvoicesData_dataset.Refunds))
 
