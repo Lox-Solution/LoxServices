@@ -145,11 +145,11 @@ def make_temporary_table(
     client.update_table(table_ref, ["expires"])  # API request
 
 
-def make_validate_iso3166_2() -> Callable[[pd.DataFrame, str], None]:
+def make_validate_country_code() -> Callable[[pd.DataFrame, str], None]:
     """Namespace for all the valid country codes."""
     valid_codes = {country.alpha_2 for country in pycountry.countries}
 
-    def inner_validate_iso3166_2(
+    def inner_validate_country_code(
         df: pd.DataFrame, country_code_col: Union[str, Sequence[str]]
     ) -> None:
         """
@@ -189,7 +189,7 @@ def make_validate_iso3166_2() -> Callable[[pd.DataFrame, str], None]:
                 "a valid ISO 3166-2 country code."
             )
 
-    return inner_validate_iso3166_2
+    return inner_validate_country_code
 
 
-validate_iso3166_2 = make_validate_iso3166_2()
+validate_country_code = make_validate_country_code()
