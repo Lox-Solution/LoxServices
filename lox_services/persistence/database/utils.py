@@ -4,7 +4,9 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
+from tabulate import tabulate
 import pandas as pd
+import pycountry
 from google.cloud.bigquery import Client, DatasetReference, LoadJobConfig
 
 from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
@@ -141,3 +143,36 @@ def make_temporary_table(
     table_ref = client.get_table(table_ref)
     table_ref.expires = datetime.now(timezone.utc) + timedelta(hours=1)
     client.update_table(table_ref, ["expires"])  # API request
+
+
+def validate_iso3166_2(df: pd.DataFrame, country_code_col: str) -> None:
+    """
+    Validate whether all rows in a DataFrame contain a valid ISO-3166-2 country code.
+
+    In the future, this check can be expanded as a custom data quality check for dataframe schema
+    (pandera, Great Expectations).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing a column with ISO-3166-2 country codes.
+    country_code_col : str
+        A string containing target country code column
+
+    Returns
+    -------
+    bool
+        True if all rows contain a valid ISO-3166-2 country code, False otherwise.
+    """
+    valid_codes = {country.alpha_2 for country in pycountry.countries}
+    error_mask = (df[country_code_col].notna()) & (
+        ~df[country_code_col].isin(valid_codes)
+    )
+    if error_mask.any():
+        df.loc[error_mask, country_code_col].pipe(
+            tabulate, headers="keys", tablefmt="psql"
+        )
+        raise ValueError(
+            "The following populated rows do not contain "
+            "a valid ISO 3166-2 country code."
+        )

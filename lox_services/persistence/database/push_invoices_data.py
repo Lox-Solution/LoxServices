@@ -20,6 +20,7 @@ from lox_services.persistence.database.schema import (
 from lox_services.persistence.database.utils import (
     format_time,
     replace_nan_with_none_in_dataframe,
+    validate_iso3166_2
 )
 from lox_services.utils.enums import Files
 
@@ -94,6 +95,8 @@ def push_run_to_database(
         df_invoice["postal_code_reciever"] = df_invoice[
             "postal_code_reciever"
         ].str.removesuffix(".0")
+
+        validate_iso3166_2(df_invoice, "country_code_receiver")
 
         if not df_invoice.empty:
             df_invoice = process_df(df_invoice, dtypes_invoices, na_invoices)
