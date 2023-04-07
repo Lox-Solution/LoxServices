@@ -40,7 +40,7 @@ class TestValidateISO31662(unittest.TestCase):
         # Create a DataFrame for testing
         self.df = pd.DataFrame(
             {
-                "country_code": [
+                "country_code_1": [
                     "US",
                     "CA",
                     "MX",
@@ -51,24 +51,46 @@ class TestValidateISO31662(unittest.TestCase):
                     "IN",
                     "BR",
                     "AU",
-                ]
+                ],
+                "country_code_2": [
+                    "GB",
+                    "FR",
+                    "JP",
+                    "CN",
+                    "IN",
+                    "BR",
+                    "AU",
+                    "US",
+                    "CA",
+                    "MX",
+                ],
             }
         )
 
     def test_validate_iso3166_2_with_valid_codes(self):
         # Test the function with valid ISO-3166-2 country codes
-        self.assertIsNone(validate_iso3166_2(self.df, "country_code"))
+        self.assertIsNone(validate_iso3166_2(self.df, "country_code_1"))
+        self.assertIsNone(
+            validate_iso3166_2(self.df, ["country_code_1", "country_code_2"])
+        )
 
     def test_validate_iso3166_2_with_invalid_codes(self):
         # Test the function with invalid ISO-3166-2 country codes
-        self.df.loc[3, "country_code"] = "GB1"
+        self.df.loc[3, "country_code_1"] = "GB1"
+        self.df.loc[2, "country_code_2"] = "CA1"
         with self.assertRaises(ValueError):
-            validate_iso3166_2(self.df, "country_code")
+            validate_iso3166_2(self.df, "country_code_1")
+        with self.assertRaises(ValueError):
+            validate_iso3166_2(self.df, ["country_code_1", "country_code_2"])
 
     def test_validate_iso3166_2_with_missing_values(self):
         # Test the function with missing values in the country code column
-        self.df.loc[4, "country_code"] = pd.NA
-        self.assertIsNone(validate_iso3166_2(self.df, "country_code"))
+        self.df.loc[4, "country_code_1"] = pd.NA
+        self.df.loc[2, "country_code_2"] = pd.NA
+        self.assertIsNone(validate_iso3166_2(self.df, "country_code_1"))
+        self.assertIsNone(
+            validate_iso3166_2(self.df, ["country_code_1", "country_code_2"])
+        )
 
     def test_validate_iso3166_2_with_nonexistent_country_code_column(self):
         # Test the function with a non-existent country code column

@@ -2,7 +2,7 @@
 import os
 import re
 from datetime import datetime, timedelta, timezone
-from typing import Literal
+from typing import Callable, Literal, Sequence, Union
 
 from tabulate import tabulate
 import pandas as pd
@@ -145,34 +145,51 @@ def make_temporary_table(
     client.update_table(table_ref, ["expires"])  # API request
 
 
-def validate_iso3166_2(df: pd.DataFrame, country_code_col: str) -> None:
-    """
-    Validate whether all rows in a DataFrame contain a valid ISO-3166-2 country code.
-
-    In the future, this check can be expanded as a custom data quality check for dataframe schema
-    (pandera, Great Expectations).
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame containing a column with ISO-3166-2 country codes.
-    country_code_col : str
-        A string containing target country code column
-
-    Returns
-    -------
-    bool
-        True if all rows contain a valid ISO-3166-2 country code, False otherwise.
-    """
+def make_validate_iso3166_2() -> Callable[[pd.DataFrame, str], None]:
+    """Namespace for all the valid country codes."""
     valid_codes = {country.alpha_2 for country in pycountry.countries}
-    error_mask = (df[country_code_col].notna()) & (
-        ~df[country_code_col].isin(valid_codes)
-    )
-    if error_mask.any():
-        df.loc[error_mask, country_code_col].pipe(
-            tabulate, headers="keys", tablefmt="psql"
+
+    def inner_validate_iso3166_2(
+        df: pd.DataFrame, country_code_col: Union[str, Sequence[str]]
+    ) -> None:
+        """
+        Validate whether all rows in a DataFrame contain a valid ISO-3166-2 country code.
+
+        In the future, this check can be expanded as a custom data quality check for dataframe schema
+        (pandera, Great Expectations).
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame containing a column with ISO-3166-2 country codes.
+        country_code_col : str
+            A string containing target country code column
+
+        Returns
+        -------
+        bool
+            True if all rows contain a valid ISO-3166-2 country code, False otherwise.
+        """
+        if isinstance(country_code_col, str):
+            country_code_col = [country_code_col]
+
+        error_mask = (
+            df[country_code_col]
+            .apply(lambda col: (col.notna()) & ~(col.isin(valid_codes)))
+            .any(axis="columns")
         )
-        raise ValueError(
-            "The following populated rows do not contain "
-            "a valid ISO 3166-2 country code."
-        )
+        if error_mask.any():
+            print(
+                df.loc[error_mask, country_code_col].pipe(
+                    tabulate, headers="keys", tablefmt="psql"
+                )
+            )
+            raise ValueError(
+                "The following populated rows do not contain "
+                "a valid ISO 3166-2 country code."
+            )
+
+    return inner_validate_iso3166_2
+
+
+validate_iso3166_2 = make_validate_iso3166_2()

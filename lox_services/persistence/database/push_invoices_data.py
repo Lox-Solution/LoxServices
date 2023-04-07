@@ -96,7 +96,7 @@ def push_run_to_database(
             "postal_code_reciever"
         ].str.removesuffix(".0")
 
-        validate_iso3166_2(df_invoice, "country_code_receiver")
+        validate_iso3166_2(df_invoice, ["country_code_receiver", "country_code_sender"])
 
         if not df_invoice.empty:
             df_invoice = process_df(df_invoice, dtypes_invoices, na_invoices)
