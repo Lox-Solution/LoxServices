@@ -1,4 +1,3 @@
-
 BQ_CURRENT_DATE = "CURRENT_DATE('Europe/Amsterdam')"
 
 BQ_CURRENT_DATETIME = "CURRENT_DATETIME('Europe/Amsterdam')"

@@ -7,6 +7,7 @@ from google.cloud.bigquery import Client
 
 from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
 
+
 class InvoicesData_dataset(Enum):
     "Class that represents the classes present in InvoicesData dataset"
     ClientInvoicesData = "ClientInvoicesData"
@@ -42,9 +43,8 @@ class UserData_dataset(Enum):
     Credentials = "Credentials"
     InvoicesFromClientToCarrier = "InvoicesFromClientToCarrier"
     Logos = "Logos"
-    ClientApiAccess  ="ClientApiAccess"    
+    ClientApiAccess = "ClientApiAccess"
     NestedAccountNumbers = "NestedAccountNumbers"
-
 
 
 class Mapping_dataset(Enum):
@@ -75,5 +75,5 @@ DatasetTypeAlias = Union[
     LoxData_dataset,
     UserData_dataset,
     TestEnvironment_dataset,
-    InvoicesDataLake_dataset
+    InvoicesDataLake_dataset,
 ]

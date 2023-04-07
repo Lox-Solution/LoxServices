@@ -11,7 +11,6 @@ from lox_services.persistence.database.utils import make_temporary_table
 
 
 class TestDatabaseFunctions(unittest.TestCase):
-
     def test_make_temporary_table(self):
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_PATH
         with open(SERVICE_ACCOUNT_PATH, "r", encoding="utf-8") as file:
