@@ -64,7 +64,6 @@ def process_postal_and_country_cols(df: pd.DataFrame) -> pd.DataFrame:
     # In case postal_code_receiver falsely gets interpreted as a float
     df[postal_code_cols] = (
         df[postal_code_cols]
-        .astype("string[pyarrow]")  # Sometimes, .read_csv() fails to coerce a datatype
         .apply(lambda col: col.str.removesuffix(".0"))
     )
 
@@ -106,7 +105,10 @@ def push_run_to_database(
             invoice_path,
             infer_datetime_format=date_format,
             header=0,
-            dtype={"postal_code_reciever": "string[pyarrow]"},
+            dtype={
+                "postal_code_receiver": "string[pyarrow]",
+                "postal_code_sender": "string[pyarrow]",
+            },
         ).pipe(process_postal_and_country_cols)
 
         if not df_invoice.empty:

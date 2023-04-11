@@ -136,7 +136,7 @@ def make_temporary_table(
     query_job.result()
     if query_job.errors is not None:
         raise ValueError(
-            f"Error occured when loading data to the table - f{query_job.errors}"
+            f"Error occurred when loading data to the table - f{query_job.errors}"
         )
 
     table_ref = DatasetReference(project, dataset_id).table(table_name)
