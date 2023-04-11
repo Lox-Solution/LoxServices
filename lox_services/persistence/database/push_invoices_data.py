@@ -55,6 +55,23 @@ def process_df(
     return df
 
 
+def process_postal_and_country_cols(df: pd.DataFrame) -> pd.DataFrame:
+    """Remove faux floating point conversion and validate country code columns in the
+    dataframe."""
+    postal_code_cols = df.columns[
+        df.columns.isin({"postal_code_receiver", "postal_code_sender"})
+    ].tolist()
+    # In case postal_code_receiver falsely gets interpreted as a float
+    df[postal_code_cols] = (
+        df[postal_code_cols]
+        .astype("string[pyarrow]")  # Sometimes, .read_csv() fails to coerce a datatype
+        .apply(lambda col: col.str.removesuffix(".0"))
+    )
+
+    validate_country_code(df, ["country_code_receiver", "country_code_sender"])
+    return df
+
+
 def push_run_to_database(
     run_output_folder: str, carrier: str, company: str, account_number_input: str = ""
 ) -> dict:
@@ -90,21 +107,7 @@ def push_run_to_database(
             infer_datetime_format=date_format,
             header=0,
             dtype={"postal_code_reciever": "string[pyarrow]"},
-        )
-
-        postal_code_cols = df_invoice.columns[
-            df_invoice.columns.isin({"postal_code_receiver", "postal_code_sender"})
-        ].tolist()
-        # In case postal_code_reciever falsely gets interpreted as a float
-        df_invoice[postal_code_cols] = (
-            df_invoice[postal_code_cols]
-            .astype("string[pyarrow]")  # Sometimes, .read_csv() fails to coerce a dtype
-            .apply(lambda col: col.str.removesuffix(".0"))
-        )
-
-        validate_country_code(
-            df_invoice, ["country_code_receiver", "country_code_sender"]
-        )
+        ).pipe(process_postal_and_country_cols)
 
         if not df_invoice.empty:
             df_invoice = process_df(df_invoice, dtypes_invoices, na_invoices)

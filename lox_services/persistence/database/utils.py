@@ -153,7 +153,8 @@ def make_validate_country_code() -> Callable[[pd.DataFrame, str], None]:
         df: pd.DataFrame, country_code_col: Union[str, Sequence[str]]
     ) -> None:
         """
-        Validate whether all rows in a DataFrame contain a valid ISO-3166-2 country code.
+        Validate whether all rows in a DataFrame contain a valid ISO-3166-2 country code, so long as
+        they are populated.
 
         In the future, this check can be expanded as a custom data quality check for dataframe schema
         (pandera, Great Expectations).
