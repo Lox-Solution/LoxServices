@@ -32,8 +32,8 @@ jobs:
       run: |
         echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
         echo PYTHONPATH: $PYTHONPATH
-        echo "ENVIRONMENT=developement" >> $GITHUB_ENV
-        echo ENVIRONMENT: $ENVIRONMENT
+        echo "ENVIRONMENT=development" >> $GITHUB_ENV
+        echo "${{ env.ENVIRONMENT }}"
     - name: Test with unittest
       run: |
         python -m unittest discover -s "./tests" -p "test_*.py"
