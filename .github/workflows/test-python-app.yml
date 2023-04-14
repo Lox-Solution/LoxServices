@@ -8,6 +8,10 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "develop" ]
+  workflow_dispatch:
+
+env:
+  ENVIRONMENT: development
 
 permissions:
   contents: read
