@@ -33,9 +33,9 @@ jobs:
         echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
         echo PYTHONPATH: "${{ env.PYTHONPATH }}"
         echo "ENVIRONMENT=development" >> $GITHUB_ENV
-        echo "${{ env.ENVIRONMENT }}"
+        echo ENVIRONMENT: "${{ env.ENVIRONMENT }}"
         echo "DEVELOPMENT_SERVICE_ACCOUNT=dev" >> $GITHUB_ENV
-        echo "${{ env.DEVELOPMENT_SERVICE_ACCOUNT }}"
+        echo DEVELOPMENT_SERVICE_ACCOUNT: "${{ env.DEVELOPMENT_SERVICE_ACCOUNT }}"
         
     - name: Test with unittest
       run: |
