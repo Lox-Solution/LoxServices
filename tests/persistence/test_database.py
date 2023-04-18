@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timedelta, timezone
 
 import pandas as pd
+import pandas.testing as pdt
 from google.cloud.bigquery import Client, DatasetReference
 
 from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
@@ -11,6 +12,7 @@ from lox_services.persistence.database.utils import (
     make_temporary_table,
     validate_country_code,
 )
+from lox_services.persistence.database.insert import remove_duplicate_headers_dataframe
 
 
 class TestDatabaseFunctions(unittest.TestCase):
@@ -32,6 +34,49 @@ class TestDatabaseFunctions(unittest.TestCase):
         self.assertLess(
             (datetime.now(timezone.utc) + timedelta(hours=1)) - table_ref.expires,
             timedelta(seconds=1),
+        )
+
+    def test_remove_duplicate_headers_dataframe(self):
+        df = pd.DataFrame({"A": [1, 2, 3], "B": ["foo", "bar", "baz"]})
+
+        expected_output = pd.DataFrame({"A": [1, 2, 3], "B": ["foo", "bar", "baz"]})
+        pdt.assert_frame_equal(
+            remove_duplicate_headers_dataframe(df).reset_index(drop=True),
+            expected_output.reset_index(drop=True),
+        )
+
+        # Test with a dataframe that has duplicate headers
+        df_dup = pd.DataFrame(
+            {"A": ["A", "B", "C"], "B": ["B", "B", "C"], "C": ["C", "B", "C"]}
+        )
+        expected_output_dup = pd.DataFrame(
+            {"A": ["B", "C"], "B": ["B", "C"], "C": ["B", "C"]}
+        )
+        pdt.assert_frame_equal(
+            remove_duplicate_headers_dataframe(df_dup).reset_index(drop=True),
+            expected_output_dup.reset_index(drop=True),
+        )
+
+        # Test with a dataframe that has a header row in the middle of the dataframe
+        df_middle = pd.DataFrame(
+            {
+                "A": ["1", "A", "2", "3", "A", "A"],
+                "B": ["foo", "B", "bar", "baz", "B", "B"],
+                "C": ["4", "C", "5", "6", "C", "C"],
+                "D": ["qux", "D", "quux", "corge", "D", "Z"],
+            }
+        )
+        expected_output_middle = pd.DataFrame(
+            {
+                "A": ["1", "2", "3", "A"],
+                "B": ["foo", "bar", "baz", "B"],
+                "C": ["4", "5", "6", "C"],
+                "D": ["qux", "quux", "corge", "Z"],
+            }
+        )
+        pdt.assert_frame_equal(
+            remove_duplicate_headers_dataframe(df_middle).reset_index(drop=True),
+            expected_output_middle.reset_index(drop=True),
         )
 
 
