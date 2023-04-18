@@ -4,7 +4,7 @@
   "quantity": "hoeveelheid",
   "online_order": "?",
   "order_date": "?",
-  "order_number": "?",
+  "invoice": "?",
   "reference": "?",
   "subtotal": "?",
   "total": "?",
