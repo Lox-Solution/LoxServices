@@ -135,12 +135,6 @@ def insert_dataframe_into_database(
 
         if table.name == "NestedAccountNumbers":
             dataframe = remove_duplicate_NestedAccountNumbers(dataframe)
-
-    elif isinstance(table, TestEnvironment_dataset):
-        dataset = "TestEnvironment"
-        if table.name == "Refunds":
-            dataframe = prepare_refunds_test_enviromnent(dataframe)
-            dataframe = remove_duplicate_refunds(dataframe, test_environment=True)
     else:
         raise TypeError("'table' param must be an instance of one of the tables Enum.")
 
@@ -259,7 +253,7 @@ def remove_duplicate_invoices(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 def remove_duplicate_refunds(
-    dataframe: pd.DataFrame, test_environment: bool = False
+    dataframe: pd.DataFrame
 ) -> pd.DataFrame:
     """Removes rows for which the package has already a refund for the same reason, or one related (Lost & Damaged).
     Removes duplicates in the dataframe as well.
@@ -284,74 +278,41 @@ def remove_duplicate_refunds(
     dataframe["reason_refund"] = dataframe.reason_refund.astype(str)
     reason_refunds = dataframe["reason_refund"].unique().tolist()
 
-    if test_environment:
-        dataframe["package_id"] = dataframe.package_id.astype(str)
-        package_ids = dataframe["package_id"].tolist()
-        query = f"""
-        SELECT DISTINCT
-            package_id || CASE
-                WHEN reason_refund = 'Lost' OR reason_refund = 'Damaged'
-                    THEN 'Lost or Damaged'
-                    ELSE reason_refund
-                END
-            AS existing_combo
+    
+    dataframe["tracking_number"] = dataframe.tracking_number.astype(str)
+    tracking_numbers = dataframe["tracking_number"].tolist()
+    query = f"""
+    SELECT DISTINCT
+        tracking_number || CASE
+            WHEN reason_refund IN ("Lost", "Damaged", "Delivery Dispute: Lost", "Delivery Dispute: Damaged")
+                THEN 'Lost or Damaged'
+                ELSE reason_refund
+            END
+        AS existing_combo
 
-        FROM TestEnvironment.Refunds refunds
+    FROM InvoicesData.Refunds
 
-        WHERE package_id IN UNNEST({package_ids})
-            AND reason_refund IN UNNEST({reason_refunds})
-        """
-        print(query)
-        existing_data_dataframe = select(query)
-        # Lost or damaged trick
-        dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(
-            lambda x: "Lost or Damaged" if x in ("Lost", "Damaged") else x
+    WHERE company = "{company}"
+        AND carrier = "{carrier}"
+        AND tracking_number IN UNNEST({tracking_numbers})
+        AND reason_refund IN UNNEST({reason_refunds})
+    """
+    print(query)
+    existing_data_dataframe = select(query)
+    # Lost or damaged trick
+    dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(
+        lambda x: "Lost or Damaged" if x in ("Lost", "Damaged", "Delivery Dispute: Lost", "Delivery Dispute: Damaged" ) else x
+    )
+    # Duplicate check
+    dataframe = dataframe.drop_duplicates(
+        subset=["tracking_number", "smart_reason_refund"], keep=False
+    )
+    # Remove rows where the tracking number and reason refund is already present in the database
+    dataframe = dataframe[
+        ~(dataframe["tracking_number"] + dataframe["smart_reason_refund"]).isin(
+            existing_data_dataframe["existing_combo"]
         )
-        # Duplicate check
-        dataframe = dataframe.drop_duplicates(
-            subset=["tracking_number", "smart_reason_refund"], keep=False
-        )
-        # Remove rows where the tracking number and reason refund is already present in the database
-        dataframe = dataframe[
-            ~(dataframe["package_id"] + dataframe["smart_reason_refund"]).isin(
-                existing_data_dataframe["existing_combo"]
-            )
-        ]
-    else:
-        dataframe["tracking_number"] = dataframe.tracking_number.astype(str)
-        tracking_numbers = dataframe["tracking_number"].tolist()
-        query = f"""
-        SELECT DISTINCT
-            tracking_number || CASE
-                WHEN reason_refund = 'Lost' OR reason_refund = 'Damaged'
-                    THEN 'Lost or Damaged'
-                    ELSE reason_refund
-                END
-            AS existing_combo
-
-        FROM InvoicesData.Refunds
-
-        WHERE company = "{company}"
-            AND carrier = "{carrier}"
-            AND tracking_number IN UNNEST({tracking_numbers})
-            AND reason_refund IN UNNEST({reason_refunds})
-        """
-        print(query)
-        existing_data_dataframe = select(query)
-        # Lost or damaged trick
-        dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(
-            lambda x: "Lost or Damaged" if x in ("Lost", "Damaged") else x
-        )
-        # Duplicate check
-        dataframe = dataframe.drop_duplicates(
-            subset=["tracking_number", "smart_reason_refund"], keep=False
-        )
-        # Remove rows where the tracking number and reason refund is already present in the database
-        dataframe = dataframe[
-            ~(dataframe["tracking_number"] + dataframe["smart_reason_refund"]).isin(
-                existing_data_dataframe["existing_combo"]
-            )
-        ]
+    ]
     dataframe.drop(columns=["smart_reason_refund"], inplace=True)
     print(
         f"{original_size - len(dataframe.index)} refund rows deleted before saving to the database."
