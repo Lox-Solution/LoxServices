@@ -2,10 +2,10 @@
 from datetime import datetime
 from pprint import pformat
 import re
-from pytz import timezone
 from typing import Literal
 import os
 
+import numpy as np
 import pandas as pd
 from google.cloud.bigquery import Client, LoadJobConfig
 from lox_services.config.env_variables import get_env_variable
@@ -20,7 +20,6 @@ from lox_services.persistence.database.datasets import (
     InvoicesDataLake_dataset,
     LoxData_dataset,
     Mapping_dataset,
-    TestEnvironment_dataset,
     DatasetTypeAlias,
     UserData_dataset,
 )
@@ -131,7 +130,7 @@ def insert_dataframe_into_database(
     elif isinstance(table, UserData_dataset):
         dataset = "UserData"
         if table.name == "InvoicesFromClientToCarrier":
-            dataframe = remove_duplicate_InvoicesFromClientToCarrier(dataframe)
+            dataframe = remove_duplicate_invoices_from_client_to_carrier(dataframe)
 
         if table.name == "NestedAccountNumbers":
             dataframe = remove_duplicate_NestedAccountNumbers(dataframe)
@@ -177,7 +176,8 @@ def insert_dataframe_into_database(
 
         if load_job.errors:
             raise InvalidDataException(
-                f"{pformat(errors)}\n{len(errors)} errors occured while inserting dataframe into {table} with method {write_disposition}."
+                f"{pformat(load_job.errors)}\n{len(load_job.errors)} errors occured while "
+                f"inserting dataframe into {table} with method {write_disposition}."
             )
 
     print_success("Success, everything has been inserted.")
@@ -252,9 +252,7 @@ def remove_duplicate_invoices(dataframe: pd.DataFrame) -> pd.DataFrame:
     return dataframe
 
 
-def remove_duplicate_refunds(
-    dataframe: pd.DataFrame
-) -> pd.DataFrame:
+def remove_duplicate_refunds(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes rows for which the package has already a refund for the same reason, or one related (Lost & Damaged).
     Removes duplicates in the dataframe as well.
     ## Arguments
@@ -278,7 +276,6 @@ def remove_duplicate_refunds(
     dataframe["reason_refund"] = dataframe.reason_refund.astype(str)
     reason_refunds = dataframe["reason_refund"].unique().tolist()
 
-    
     dataframe["tracking_number"] = dataframe.tracking_number.astype(str)
     tracking_numbers = dataframe["tracking_number"].tolist()
     query = f"""
@@ -300,8 +297,12 @@ def remove_duplicate_refunds(
     print(query)
     existing_data_dataframe = select(query)
     # Lost or damaged trick
-    dataframe["smart_reason_refund"] = dataframe["reason_refund"].apply(
-        lambda x: "Lost or Damaged" if x in ("Lost", "Damaged", "Delivery Dispute: Lost", "Delivery Dispute: Damaged" ) else x
+    dataframe["smart_reason_refund"] = np.where(
+        dataframe["reason_refund"].isin(
+            {"Lost", "Damaged", "Delivery Dispute: Lost", "Delivery Dispute: Damaged"}
+        ),
+        "Lost or Damaged",
+        dataframe["reason_refund"],
     )
     # Duplicate check
     dataframe = dataframe.drop_duplicates(
@@ -346,7 +347,7 @@ def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFram
     return dataframe
 
 
-def remove_duplicate_InvoicesFromClientToCarrier(
+def remove_duplicate_invoices_from_client_to_carrier(
     dataframe: pd.DataFrame,
 ) -> pd.DataFrame:
     """Removes duplicates from InvoicesFromClientToCarrier dataframe"""
@@ -503,7 +504,7 @@ def check_duplicate_invoices_details(dataframe: pd.DataFrame) -> None:
     already_saved = select(query_string, False)
     if not already_saved.empty:
         print_error("These invoices details have already been saved!")
-        raise Exception(
+        raise ValueError(
             "Cannot save in the Database. Invoices details have already been saved."
         )
 
@@ -521,7 +522,4 @@ def remove_duplicate_headers_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     ## Returns
     The dataframe cleaned from potential header duplicates
     """
-    row_mask = dataframe.apply(
-        lambda col: col.equals(pd.Series(dataframe.columns)), axis=1
-    )
-    return dataframe[~row_mask]
+    return dataframe.loc[~(dataframe == dataframe.columns).all(axis="columns")]
