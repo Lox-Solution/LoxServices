@@ -113,7 +113,9 @@ def upload_file(
         )
 
 
-def download_file_from_url(url: str, output_folder: str):
+def download_file_from_url(
+    url: str, output_folder: str, skip_if_existing: bool = False
+):
     "Download file from storage by the storage url associated"
     url = urllib.parse.unquote(url)
     path = url.split("cloud.google.com/")[1].rsplit("?authuser", 1)[0]
@@ -122,8 +124,12 @@ def download_file_from_url(url: str, output_folder: str):
     bucket = path.split("/")[0]
     blob = path.split("/", 1)[1]
     file_name = blob.rsplit("/", 1)[1]
+    output_path = os.path.join(output_folder, file_name)
 
-    download_file(bucket, blob, os.path.join(output_folder, file_name))
+    if os.path.exists(output_path) and skip_if_existing:
+        return
+
+    download_file(bucket, blob, output_path)
 
 
 def push_and_delete_run_output_folder(run_folder: str, destination_folder: str):
