@@ -324,8 +324,6 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes duplicates from client invoices dataframe"""
-    carrier = dataframe.iloc[0]["carrier"]
-    company = dataframe.iloc[0]["company"]
     tracking_numbers = dataframe["tracking_number"].to_list()
     sql_query = f"""
         SELECT
@@ -333,9 +331,7 @@ def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFram
 
         FROM InvoicesData.ClientInvoicesData
 
-        WHERE company = "{company}"
-            AND carrier = "{carrier}"
-            AND tracking_number IN UNNEST({tracking_numbers})
+        WHERE tracking_number IN UNNEST({tracking_numbers})
     """
     already_saved_tracking_numbers = select(sql_query, False)[
         "tracking_number"
