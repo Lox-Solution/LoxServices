@@ -34,7 +34,7 @@ class Test_pdf_functions(unittest.TestCase):
         self.assertEqual(inchesToPDFUnits(initial_tuple), final_tuple)
 
     def test_PDFtoDf(self):
-        "A dataframe must be returned from the PDF file"
+        "A List of dataframe must be returned from the PDF file"
         first_page_to_read = 1
         last_page_to_read = 1
         area = []
@@ -43,8 +43,7 @@ class Test_pdf_functions(unittest.TestCase):
         list_dataframe_created = PDFtoDf(
             PDF_PATH, first_page_to_read, last_page_to_read, area, columns, guess
         )
-
-        self.assertEqual(isinstance(list_dataframe_created[0], pd.DataFrame), True)
+        self.assertEqual(all(isinstance(x, pd.DataFrame) for x in list_dataframe_created), True)
 
     def test_is_word_in_pdf(self):
         "True must be returned when the word is present in the dataframe, False otherwise"
