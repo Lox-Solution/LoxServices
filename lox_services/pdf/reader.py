@@ -101,7 +101,7 @@ def PDFtoDf(
     area: List[str],
     columns: List[str],
     guess: bool,
-) -> pd.DataFrame:
+) -> List[pd.DataFrame]:
     """Converts a PDF file to a dataframe and returns it
 
     ## Arguments
