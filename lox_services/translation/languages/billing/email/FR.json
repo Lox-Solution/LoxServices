@@ -1,10 +1,10 @@
 {
     "local_language": "fr_FR",
-    "subject": "Facture Lox - {company}: {month} {year}",
-    "title": "Facture Lox - {month} {year}",
+    "subject": "Reçu Lox - {company}: {month} {year}",
+    "title": "Reçu Lox - {month} {year}",
     "entrance_greetings": "Hello l'équipe {company}",
     "paragraph_1": "J'espère que vous allez bien !",
-    "paragraph_2": "Vous trouverez en pièce jointe la facture Lox en format PDF et csv du mois de {month}.",
+    "paragraph_2": "Vous trouverez en pièce jointe le reçu Lox en format PDF et csv du mois de {month}.",
     "paragraph_3": "Nous restons disponibles pour toutes questions.",
     "exit_greetings": "À très vite,",
     "signature": "L'équipe Lox",
