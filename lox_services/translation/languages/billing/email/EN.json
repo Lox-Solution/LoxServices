@@ -1,10 +1,10 @@
 {
     "local_language": "en_US",
-    "subject": "Lox Invoice - {company}: {month} {year}",
-    "title": "Lox Invoice - {month} {year}",
+    "subject": "Lox Statement - {company}: {month} {year}",
+    "title": "Lox Statement - {month} {year}",
     "entrance_greetings": "Dear {company},",
     "paragraph_1": "We hope everything is alright!",
-    "paragraph_2": "Attached, you will find the invoice of Lox including specifications regarding {month}.",
+    "paragraph_2": "Attached, you will find the statement of Lox including specifications regarding {month}.",
     "paragraph_3": "It includes all the savings we have realised on behalf of {company} for the month of {month}.",
     "exit_greetings": "Enjoy your savings,",
     "signature": "The Lox Team",

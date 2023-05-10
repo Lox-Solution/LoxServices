@@ -1,9 +1,10 @@
 """All functions to save invoice data into the database"""
 import os
 from enum import Enum
-from typing import List, Tuple
+from typing import Mapping, List, Tuple
 
 import pandas as pd
+import numpy as np
 
 from lox_services.persistence.database.datasets import InvoicesData_dataset
 from lox_services.persistence.database.insert import insert_dataframe_into_database
@@ -18,14 +19,60 @@ from lox_services.persistence.database.schema import (
 )
 from lox_services.persistence.database.utils import (
     format_time,
-    format_datetime,
     replace_nan_with_none_in_dataframe,
+    validate_country_code,
 )
 from lox_services.utils.enums import Files
 
 
+def process_df(
+    df: pd.DataFrame,
+    dtype_cols: Mapping[str, str],
+    na_fill_value: Mapping[str, str],
+    format_time_cols: bool = False,
+    replace_empty_dates: bool = False,
+) -> pd.DataFrame:
+    """Process dataframes before appending them to a processing batch."""
+    # If some columns are missing, add the columns with None values
+    missing_columns = set(dtype_cols).difference(set(df.columns))
+    if missing_columns:
+        df = df.assign(**dict.fromkeys(missing_columns, None))
+
+    # Format time
+    if format_time_cols and "date_time" not in df.columns:
+        df["time"] = df["time"].apply(format_time)
+        df["date_time"] = np.where(
+            (df["date"].isna()) | (df["time"].isna()),
+            pd.NaT,
+            df["date"] + "T" + df["time"],
+        )
+
+    df = df.fillna(value=na_fill_value).astype(dtype_cols)
+
+    if replace_empty_dates:
+        df[dates_refunds] = df[dates_refunds].replace({"": None})
+
+    return df
+
+
+def process_postal_and_country_cols(df: pd.DataFrame) -> pd.DataFrame:
+    """Remove faux floating point conversion and validate country code columns in the
+    dataframe."""
+    postal_code_cols = df.columns[
+        df.columns.isin({"postal_code_receiver", "postal_code_sender"})
+    ].tolist()
+    # In case postal_code_receiver falsely gets interpreted as a float
+    df[postal_code_cols] = (
+        df[postal_code_cols]
+        .apply(lambda col: col.str.removesuffix(".0"))
+    )
+
+    validate_country_code(df, ["country_code_receiver", "country_code_sender"])
+    return df
+
+
 def push_run_to_database(
-    run_output_folder, carrier, company, account_number_input: str = ""
+    run_output_folder: str, carrier: str, company: str, account_number_input: str = ""
 ) -> dict:
     """Add to the database all the important files of the given folder.
     Returns a dictionary reporesenting the run report.
@@ -58,16 +105,14 @@ def push_run_to_database(
             invoice_path,
             infer_datetime_format=date_format,
             header=0,
-            dtype={"postal_code_reciever": str},
-        )
-        if df_invoice.shape[0] > 0:
-            # If some columns are missing, add the columns with None values
-            for column in dtypes_invoices:
-                if column not in df_invoice.columns:
-                    df_invoice.loc[:, column] = None
+            dtype={
+                "postal_code_receiver": "string[pyarrow]",
+                "postal_code_sender": "string[pyarrow]",
+            },
+        ).pipe(process_postal_and_country_cols)
 
-            # "Make sure that the columns have the good type
-            df_invoice = df_invoice.fillna(value=na_invoices).astype(dtypes_invoices)
+        if not df_invoice.empty:
+            df_invoice = process_df(df_invoice, dtypes_invoices, na_invoices)
 
             list_files_to_push.append((df_invoice, InvoicesData_dataset.Invoices))
 
@@ -83,19 +128,10 @@ def push_run_to_database(
             infer_datetime_format=date_format,
             header=0,
         )
-        if df_deliveries.shape[0] > 0:
-            for column in dtypes_deliveries:
-                if column not in df_deliveries.columns:
-                    df_deliveries.loc[:, column] = None
+        if not df_deliveries.empty:
 
-            # Format time
-            if "date_time" not in df_deliveries.columns:
-                df_deliveries.loc[:, "time"] = df_deliveries["time"].apply(format_time)
-                df_deliveries.loc[:, "date_time"] = df_deliveries.apply(
-                    lambda x: format_datetime(x["date"], x["time"]), axis=1
-                )
-            df_deliveries = df_deliveries.fillna(value=na_deliveries).astype(
-                dtypes_deliveries
+            df_deliveries = process_df(
+                df_deliveries, dtypes_deliveries, na_deliveries, format_time_cols=True
             )
 
             list_files_to_push.append(
@@ -111,21 +147,10 @@ def push_run_to_database(
         df_refund: pd.DataFrame = pd.read_csv(
             refunds_path, infer_datetime_format=date_format, header=0
         )
-        if df_refund.shape[0] > 0:
-            # If some columns are missing, add the columns with None values
-            for column in dtypes_refunds:
-                if column not in df_refund.columns:
-                    print(column)
-                    df_refund.loc[:, column] = None
-
-            # "Make sure that the columns have the good type
-            df_refund = df_refund.fillna(value=na_refunds).astype(dtypes_refunds)
-
-            for column in dates_refunds:
-                df_refund[column] = df_refund[column].apply(
-                    lambda x: x if x != "" else None
-                )
-
+        if not df_refund.empty:
+            df_refund = process_df(
+                df_refund, dtypes_refunds, na_refunds, replace_empty_dates=True
+            )
             list_files_to_push.append((df_refund, InvoicesData_dataset.Refunds))
 
     report = {}

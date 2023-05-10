@@ -4,7 +4,6 @@
   "quantity": "quantity",
   "online_order": "online order",
   "order_date": "order date",
-  "invoice": "order number",
   "reference": "reference",
   "subtotal": "sub-total",
   "total": "total",
