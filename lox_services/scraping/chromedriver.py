@@ -12,6 +12,7 @@ from lox_services.config.env_variables import get_env_variable
 from lox_services.config.paths import OUTPUT_FOLDER
 from lox_services.persistence.storage.constants import SELENIUM_CRASHES_BUCKET
 from lox_services.persistence.storage.storage import upload_file
+from lox_services.utils.general_python import safe_mkdir
 
 
 class ChromeWithPrefs(undetected_webdriver.Chrome):
@@ -69,10 +70,12 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
                 try:
                     timestamp = datetime.now().timestamp()
                     file_name = str(timestamp).replace(".", "_") + ".png"
-                    upload_file(
-                        SELENIUM_CRASHES_BUCKET, self.get_screenshot_as_png(), file_name
-                    )
+                    file_path = os.path.join(OUTPUT_FOLDER, "screenshot", file_name)
+                    safe_mkdir(file_path)
+                    self.get_screenshot_as_file(file_path)
+                    upload_file(SELENIUM_CRASHES_BUCKET, file_path, file_name)
                     screenshot = f"https://storage.cloud.google.com/{SELENIUM_CRASHES_BUCKET}/{file_name}?authuser=0"
+                    os.remove(file_path)
                 except Exception:
                     print("Can't take screenshot.")
                     pass
