@@ -25,3 +25,4 @@
 0.1.15 Added tagging members in slack, switched to dotenv package for env variables
 0.1.16 Added temporary table function, cache proxy IPs per country, load_table_from_dataframe function, metadata columns, integrate black formatting
 0.1.17 Added regex utility function, postal code processing, country validation and adapted lox bills statements
+0.1.18 Fixed screenshot crash feature
