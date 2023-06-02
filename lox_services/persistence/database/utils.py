@@ -148,6 +148,8 @@ def make_temporary_table(
 def make_validate_country_code() -> Callable[[pd.DataFrame, str], None]:
     """Namespace for all the valid country codes."""
     valid_codes = {country.alpha_2 for country in pycountry.countries}
+    # Add Military Zone Country code colissimo
+    valid_codes.add("S1")
 
     def inner_validate_country_code(
         df: pd.DataFrame, country_code_col: Union[str, Sequence[str]]
@@ -194,3 +196,6 @@ def make_validate_country_code() -> Callable[[pd.DataFrame, str], None]:
 
 
 validate_country_code = make_validate_country_code()
+
+if __name__ == "__main__":
+    print("coucou")
