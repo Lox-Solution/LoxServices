@@ -4,6 +4,7 @@ All functions and configurations to write all sorts of pdfs.
 import re
 import os
 import pandas as pd
+from base64 import b64decode
 from weasyprint import HTML, CSS
 
 from lox_services.utils.general_python import print_success
@@ -77,3 +78,25 @@ def generate_pdf_file_from_html_css(
         stylesheets=[css],
     )
     print_success("Pdf created successfuly.")
+
+
+def save_pdf_from_base_64(pdf_base_64: str, file_path: str) -> None:
+    """
+    Saves a pdf from a base64 string representation.
+    ## Arguments:
+    - `pdf_base_64`: The base64 string representation of the pdf.
+    - `file_path`: The absolute path where the pdf should be saved.
+    """
+    # Decode the Base64 string, making sure that it contains only valid characters
+    bytes = b64decode(pdf_base_64, validate=True)
+
+    # Perform a basic validation to make sure that the result is a valid PDF file
+    # Be aware! The magic number (file signature) is not 100% reliable solution to validate PDF files
+    # Moreover, if you get Base64 from an untrusted source, you must sanitize the PDF contents
+    if bytes[0:4] != b"%PDF":
+        raise ValueError("Missing the PDF file signature")
+
+    # Write the PDF contents to a local file
+    f = open(file_path, "wb")
+    f.write(bytes)
+    f.close()

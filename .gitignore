@@ -137,3 +137,6 @@ dmypy.json
 
 
 chromedriver
+
+# IDE - VSCode
+.vscode/settings.json
