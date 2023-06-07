@@ -1,6 +1,6 @@
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Callable, List, Sequence
+from typing import Callable, List, Sequence, Tuple
 from tqdm import tqdm
 
 import requests
@@ -218,3 +218,68 @@ class BrightDataProxyManager:
                 for future in as_completed(futures):
                     results.append(future.result())
         return results
+
+    @Perf
+    def function_with_multithreading_proxies(
+        self,
+        *,
+        request_method: Callable,
+        request_options: Sequence[dict],
+        countries: Sequence[str] = ("NL",),
+        number_of_threads: int = 25,
+        max_use_per_proxy: int = 10,
+        show_progress: bool = False,
+    ) -> dict[List[requests.Response], List[str]]:
+        """Executes many requests using proxies and multithreading for multiple countries.
+        ## Arguments
+        - `request_method`: Must be a requests method like requests.get ot requests.post or requests.put, etc...
+        - `request_options`: The list of options to used by the request_method.
+        - `countries`: A list of countries where the proxies should be.
+        - `number_of_threads`: The number of threads to use.
+        - `max_use_per_proxy`: The maximum number of use per ip for this call.
+        - `show_progress`: If True, the function will print a pretty progress bar.
+
+        ## Returns
+        - A list of requests.Response objects
+
+        ## Examples
+        ```python
+        proxy_manager = BrightDataProxyManager(brightdata_username, brightdata_password, brightdata_api_token)
+        test_ips = proxy_manager.request_with_multithreading_proxies(
+            request_method=requests.get,
+            request_options=[{"url": "https://api.ipify.org?format=json"} for _ in range(20)],
+            countries=["FR", "NL"],
+            number_of_threads=20
+        )
+        ```
+        """
+        responses_list = []
+        tracking_numbers_list = []
+
+        number_of_threads = min(50, number_of_threads)
+        proxies = self._get_available_ips_per_countries(countries)
+        options_with_proxies = self._populate_proxies_into_request_options(
+            request_options, proxies, max_use_per_proxy
+        )
+
+        options_len = len(options_with_proxies)
+        progress_bar = tqdm(total=options_len)
+        # The right way to add a progress bar with multithreading -
+        # https://stackoverflow.com/a/63834834
+        results = []
+        options_len = len(options_with_proxies)
+        with ThreadPoolExecutor(max_workers=number_of_threads) as executor:
+            futures = [
+                executor.submit(lambda option=option: request_method(**option))
+                for option in options_with_proxies
+            ]
+            for future in as_completed(futures):
+                results.append(future.result())
+                progress_bar.update()
+        progress_bar.close()
+
+        for item in results:
+            responses_list.extend(item["responses"])
+            tracking_numbers_list.extend(item["tracking_numbers"])
+
+        return responses_list, tracking_numbers_list
