@@ -229,7 +229,7 @@ class BrightDataProxyManager:
         number_of_threads: int = 25,
         max_use_per_proxy: int = 10,
         show_progress: bool = False,
-    ) -> dict[List[requests.Response], List[str]]:
+    ) -> Tuple[List[requests.Response], List[str]]:
         """Executes many requests using proxies and multithreading for multiple countries.
         ## Arguments
         - `request_method`: Must be a requests method like requests.get ot requests.post or requests.put, etc...
