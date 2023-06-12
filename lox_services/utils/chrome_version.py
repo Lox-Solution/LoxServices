@@ -45,7 +45,7 @@ def get_chrome_version(fallback_version : int = 109):
     """Get the version of Chrome installed on the machine. 
 
     Args:
-        fallback_version (int): The version to return if the version is not found. Defaults to 109.
+        fallback_version (int): The version to return, if the chrome version is not found by script. Defaults to 109.
 
     Returns:
         int: The version of Chrome. If version is not found, return fallback_version.
