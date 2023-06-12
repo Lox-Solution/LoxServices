@@ -4,8 +4,8 @@ from sys import platform
 
 from lox_services.utils.general_python import print_info
 
-def extract_version_registry(output):
-    """Extracts the version of Chrome from the registry output.
+def extract_version_registry(output: str) -> str:
+    """Extracts the version of Chrome from the registry output for Windows machines.
 
     Args:
         output (str): The output of the registry query.
@@ -21,8 +21,8 @@ def extract_version_registry(output):
     except TypeError:
         return
 
-def extract_version_folder():
-    """Check if the Chrome folder exists in the x32 or x64 Program Files folders.
+def extract_version_folder() -> str:
+    """Check if the Chrome folder exists in the x32 or x64 Program Files folders for Windows machines.
 
     Returns:
         str: The version of Chrome.
@@ -41,7 +41,7 @@ def extract_version_folder():
     return None
 
     
-def get_chrome_version(fallback_version : int = 109):
+def get_chrome_version(fallback_version : int = 109) -> int:
     """Get the version of Chrome installed on the machine. 
 
     Args:
