@@ -68,7 +68,5 @@ def get_chrome_version():
         print(ex)
 
     full_version = os.popen(f"{install_path} --version").read().strip('Google Chrome ').strip() if install_path else version
-
-    print(f"Chrome version: {full_version}")
     
     return int(full_version.split('.')[0]) if full_version else 109
