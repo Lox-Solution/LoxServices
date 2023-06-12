@@ -40,11 +40,15 @@ def extract_version_folder():
                     return match.group(0)
     return None
 
-def get_chrome_version(default_version = 109):
-    """Get the version of Chrome installed on the machine.
+    
+def get_chrome_version(fallback_version : int = 109):
+    """Get the version of Chrome installed on the machine. 
+
+    Args:
+        fallback_version (int): The version to return if the version is not found. Defaults to 109.
 
     Returns:
-        int: The version of Chrome. If version is not found, returns 109.
+        int: The version of Chrome. If version is not found, return fallback_version.
     """
     version = None
     install_path = None
@@ -67,8 +71,8 @@ def get_chrome_version(default_version = 109):
                 # Try folder path.
                 version = extract_version_folder()
     except Exception as ex:
-        print_info(f"Error while getting Chrome version: {ex}, returning deault version {default_version}.")
+        print_info(f"Error while getting Chrome version: {ex}, returning deault version {fallback_version}.")
         
     full_version = os.popen(f"{install_path} --version").read().strip('Google Chrome ').strip('Chromium ').strip() if install_path else version
     
-    return int(full_version.split('.')[0]) if full_version else default_version
+    return int(full_version.split('.')[0]) if full_version else fallback_version
