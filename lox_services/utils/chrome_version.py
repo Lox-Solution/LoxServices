@@ -52,7 +52,7 @@ def get_chrome_version(default_version = 109):
     try:
         if platform == "linux" or platform == "linux2":
             # linux
-            install_path = "/usr/bin/google-chrome"
+            install_path = "/usr/bin/chromium-browser"
         elif platform == "darwin":
             # OS X
             install_path = "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
@@ -69,7 +69,6 @@ def get_chrome_version(default_version = 109):
     except Exception as ex:
         print_info(f"Error while getting Chrome version: {ex}, returning deault version {default_version}.")
         
-
-    full_version = os.popen(f"{install_path} --version").read().strip('Google Chrome ').strip() if install_path else version
+    full_version = os.popen(f"{install_path} --version").read().strip('Google Chrome ').strip('Chromium ').strip() if install_path else version
     
     return int(full_version.split('.')[0]) if full_version else default_version
