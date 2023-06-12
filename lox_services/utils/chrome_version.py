@@ -2,6 +2,8 @@ import os
 import re
 from sys import platform
 
+from lox_services.utils.general_python import print_info
+
 def extract_version_registry(output):
     """Extracts the version of Chrome from the registry output.
 
@@ -38,7 +40,7 @@ def extract_version_folder():
                     return match.group(0)
     return None
 
-def get_chrome_version():
+def get_chrome_version(default_version = 109):
     """Get the version of Chrome installed on the machine.
 
     Returns:
@@ -65,8 +67,9 @@ def get_chrome_version():
                 # Try folder path.
                 version = extract_version_folder()
     except Exception as ex:
-        print(ex)
+        print_info(f"Error while getting Chrome version: {ex}, returning deault version {default_version}.")
+        
 
     full_version = os.popen(f"{install_path} --version").read().strip('Google Chrome ').strip() if install_path else version
     
-    return int(full_version.split('.')[0]) if full_version else 109
+    return int(full_version.split('.')[0]) if full_version else default_version
