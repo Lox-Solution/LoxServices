@@ -142,15 +142,5 @@ def run_chromedriver(
     """
     if get_env_variable("ENVIRONMENT") == "production":
         shutdown_current_instances()
-    try:
-        return init_chromedriver(download_folder, size_length, size_width, version)
-    except WebDriverException as e:
-        error = str(e.args[0]).lower()
-        if "chromedriver only supports chrome version" in error:
-            downloaded_version = error.split("current browser version is ")[1].split(
-                "."
-            )[0]
-            return init_chromedriver(
-                download_folder, size_length, size_width, int(downloaded_version)
-            )
-        raise e
+        
+    return init_chromedriver(download_folder, size_length, size_width, version)
