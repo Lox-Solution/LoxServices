@@ -41,13 +41,11 @@ class BrightDataProxyManager:
     def _excecute_request_with_retry(
         request_method: Callable, options: dict, retries: int = 3
     ):
-
         tries = 0
         result = requests.Response
         result.status_code = 300
 
-        while result.status_code >= 300 and tries < retries:
-
+        while result.status_code >= 300:
             try:
                 result = request_method(**options)
 
