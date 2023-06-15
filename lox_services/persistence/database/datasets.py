@@ -68,6 +68,10 @@ class TestEnvironment_dataset(Enum):
     Refunds = "Refunds"
     Refunds_copy = "Refunds_copy"
 
+class Utils_dataset(Enum):
+    "Class that represents the classes present in Utils dataset"
+    CurrencyConversion = "CurrencyConversion"
+
 
 DatasetTypeAlias = Union[
     InvoicesData_dataset,
