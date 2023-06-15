@@ -13,6 +13,7 @@ from lox_services.config.paths import OUTPUT_FOLDER
 from lox_services.persistence.storage.constants import SELENIUM_CRASHES_BUCKET
 from lox_services.persistence.storage.storage import upload_file
 from lox_services.utils.general_python import safe_mkdir
+from lox_services.utils.chrome_version import get_chrome_version
 
 
 class ChromeWithPrefs(undetected_webdriver.Chrome):
@@ -128,7 +129,7 @@ def run_chromedriver(
     download_folder: str = OUTPUT_FOLDER,
     size_length: int = 960,
     size_width: int = 960,
-    version: int = 109,
+    version: int = get_chrome_version(),
 ):
     """Creates an undetected chromedriver with the wanted download folder.
     ## Arguments
@@ -141,4 +142,5 @@ def run_chromedriver(
     """
     if get_env_variable("ENVIRONMENT") == "production":
         shutdown_current_instances()
+        
     return init_chromedriver(download_folder, size_length, size_width, version)
