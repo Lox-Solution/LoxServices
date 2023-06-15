@@ -22,6 +22,7 @@ from lox_services.persistence.database.datasets import (
     Mapping_dataset,
     DatasetTypeAlias,
     UserData_dataset,
+    Utils_dataset,
 )
 from lox_services.persistence.database.query_handlers import select
 from lox_services.persistence.database.utils import generate_id
@@ -134,6 +135,10 @@ def insert_dataframe_into_database(
 
         if table.name == "NestedAccountNumbers":
             dataframe = remove_duplicate_NestedAccountNumbers(dataframe)
+    elif isinstance(table, Utils_dataset):
+        dataset = "Utils"
+        if table.name == "CurrencyConversion":
+            dataframe = remove_duplicate_currency_conversion(dataframe)
     else:
         raise TypeError("'table' param must be an instance of one of the tables Enum.")
 
@@ -390,6 +395,28 @@ def remove_duplicate_NestedAccountNumbers(dataframe: pd.DataFrame) -> pd.DataFra
         )
         dataframe = dataframe.loc[
             ~dataframe["account_number"].isin(already_saved_account_numbers)
+        ]
+    return dataframe
+
+def remove_duplicate_currency_conversion(dataframe: pd.DataFrame) -> pd.DataFrame:
+    """Removes already saved currency conversion dataframe"""
+    sql_query = """
+        SELECT
+            distinct date || currency_code_from || currency_code_to AS existing_entry
+
+        FROM Utils.CurrencyConversion
+    """
+    already_saved_entries = select(sql_query, False)["existing_entry"].to_list()
+    if already_saved_entries:
+        print(
+            f"Currency conversion entries {already_saved_entries} are already saved in table."
+        )
+        dataframe = dataframe.loc[
+            ~(
+                dataframe["date"]
+                + dataframe["currency_code_from"]
+                + dataframe["currency_code_to"]
+            ).isin(already_saved_entries)
         ]
     return dataframe
 
