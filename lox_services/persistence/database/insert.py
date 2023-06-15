@@ -413,7 +413,7 @@ def remove_duplicate_currency_conversion(dataframe: pd.DataFrame) -> pd.DataFram
         )
         dataframe = dataframe.loc[
             ~(
-                dataframe["date"]
+                str(dataframe["date"])
                 + dataframe["currency_code_from"]
                 + dataframe["currency_code_to"]
             ).isin(already_saved_entries)
