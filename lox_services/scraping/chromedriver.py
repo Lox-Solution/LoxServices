@@ -149,7 +149,7 @@ def run_chromedriver(
         try:
             return init_chromedriver(download_folder, size_length, size_width, version)
         except:
-            print(f"retry nb {tries}")
             tries = tries + 1
+            print(f"retry nb {tries}")
 
     raise Exception("Chromedriver cannot start.")
