@@ -142,5 +142,14 @@ def run_chromedriver(
     """
     if get_env_variable("ENVIRONMENT") == "production":
         shutdown_current_instances()
-        
-    return init_chromedriver(download_folder, size_length, size_width, version)
+
+    tries = 0
+
+    while tries < 3:
+        try:
+            return init_chromedriver(download_folder, size_length, size_width, version)
+        except:
+            tries = tries + 1
+            print(f"retry nb {tries}")
+
+    raise Exception("Chromedriver cannot start.")
