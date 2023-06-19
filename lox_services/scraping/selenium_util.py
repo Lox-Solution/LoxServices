@@ -28,7 +28,8 @@ def wait_until_page_loaded(driver: webdriver.Chrome, timeout: int = 10):
     """
     try:
         WebDriverWait(driver, timeout).until(
-            lambda driver: driver.execute_script("return document.readyState") == "complete"
+            lambda driver: driver.execute_script("return document.readyState")
+            == "complete"
         )
         return
     except TimeoutException as timeout_exception:
@@ -100,7 +101,9 @@ def safe_find_element(
 
 
 def find(
-    driver: webdriver.Chrome, selector: Union[str, Enum], selector_type: By = By.CSS_SELECTOR
+    driver: webdriver.Chrome,
+    selector: Union[str, Enum],
+    selector_type: By = By.CSS_SELECTOR,
 ) -> WebElement:
     """
     Same as 'safe_find_element', but without waiting. find(Some.CONSTANT) should be
