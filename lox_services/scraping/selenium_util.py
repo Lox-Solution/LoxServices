@@ -242,8 +242,8 @@ def safe_send_keys(
 # Wait for the loading spinner to be gone
 def wait_till_disapear(
     wait: WebDriverWait,
-    selector: str = "",
     selector_type: By = By.CSS_SELECTOR,
+    selector: str = "",
     timeout: int = 60,
 ):
     """Wait until an element disappears
