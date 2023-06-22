@@ -4,11 +4,11 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name='lox_services',
-    version='0.1.18',
-    author='Lox Solution',
-    author_email='natasa.zekic@loxsolution.com',
-    description='A package with Lox services',
+    name="lox_services",
+    version="0.1.20",
+    author="Lox Solution",
+    author_email="natasa.zekic@loxsolution.com",
+    description="A package with Lox services",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Lox-Solution/LoxServices",
