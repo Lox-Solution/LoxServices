@@ -49,7 +49,7 @@ class UserData_dataset(Enum):
 
 class Mapping_dataset(Enum):
     "Class that represents the classes present in Mapping dataset"
-    ClaimStatus = "ClaimStatus"
+    ClaimStatuses = "ClaimStatuses"
     StatusMapping = "StatusMapping"
     TempAppend = "TempAppend"
     TempTable = "TempTable"
@@ -67,6 +67,7 @@ class TestEnvironment_dataset(Enum):
     Service_level_agreements = "Service_level_agreements"
     Refunds = "Refunds"
     Refunds_copy = "Refunds_copy"
+
 
 class Utils_dataset(Enum):
     "Class that represents the classes present in Utils dataset"
