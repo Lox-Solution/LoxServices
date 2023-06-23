@@ -61,9 +61,13 @@ def get_chrome_version(fallback_version: int = 114) -> int:
                 output = subprocess.check_output(['google-chrome', '--version'], stderr=subprocess.STDOUT)
                 version = output.decode().strip().split()[-1]
                 return version
-            except subprocess.CalledProcessError:
-                install_path = "/usr/bin/chromium-browser"
-                return install_path
+            except subprocess.CalledProcessError as e:
+                if "command not found" in e.output.decode():
+                    install_path = "/usr/bin/chromium-browser"
+                    return install_path
+                else:
+                    # Handle other CalledProcessError exceptions
+                    print("An error occurred:", e)
             
         elif platform == "darwin":
             # OS X
