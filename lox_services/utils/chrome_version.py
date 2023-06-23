@@ -56,19 +56,11 @@ def get_chrome_version(fallback_version: int = 114) -> int:
 
     try:
         if platform == "linux" or platform == "linux2":
-            # Check first for the chrome version if it chrome is not installed then check for the chromium path for chromium version in linux
-            try:
-                output = subprocess.check_output(['google-chrome', '--version'], stderr=subprocess.STDOUT)
-                version = output.decode().strip().split()[-1]
-                return version
-            except subprocess.CalledProcessError as e:
-                if "command not found" in e.output.decode():
-                    install_path = "/usr/bin/chromium-browser"
-                    return install_path
-                else:
-                    # Handle other CalledProcessError exceptions
-                    print("An error occurred:", e)
-            
+            # Check the path of chrome and chromium in linux and return path for version
+            install_paths = ["/usr/bin/google-chrome", "/usr/bin/chromium-browser", "/opt/google/chrome/google-chrome"]
+            for path in install_paths:
+                if os.path.exists(path):
+                    return path         
         elif platform == "darwin":
             # OS X
             install_path = "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
