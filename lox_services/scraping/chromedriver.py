@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import json
+import time
 import tempfile
 from functools import reduce
 
@@ -148,8 +149,10 @@ def run_chromedriver(
     while tries < 3:
         try:
             return init_chromedriver(download_folder, size_length, size_width, version)
-        except:
+        except Exception as e:
+            last_exception = e
             tries = tries + 1
-            print(f"retry nb {tries}")
+            time.sleep(10)
+            print(f"Retry nb: {tries}")
 
-    raise Exception("Chromedriver cannot start.")
+    raise last_exception
