@@ -56,7 +56,7 @@ def get_chrome_version(fallback_version: int = 114) -> int:
 
     try:
         if platform == "linux" or platform == "linux2":
-            # linux
+            # Check first for the chrome version if it chrome is not installed then check for the chromium path for chromium version
             try:
                 output = subprocess.check_output(['google-chrome', '--version'], stderr=subprocess.STDOUT)
                 version = output.decode().strip().split()[-1]
