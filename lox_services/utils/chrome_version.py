@@ -1,5 +1,6 @@
 import os
 import re
+import subprocess
 from sys import platform
 
 from lox_services.utils.general_python import print_info
@@ -56,7 +57,14 @@ def get_chrome_version(fallback_version: int = 114) -> int:
     try:
         if platform == "linux" or platform == "linux2":
             # linux
-            install_path = "/usr/bin/chromium-browser"
+            try:
+                output = subprocess.check_output(['google-chrome', '--version'], stderr=subprocess.STDOUT)
+                version = output.decode().strip().split()[-1]
+                return version
+            except subprocess.CalledProcessError:
+                install_path = "/usr/bin/chromium-browser"
+                return install_path
+            
         elif platform == "darwin":
             # OS X
             install_path = "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
@@ -76,3 +84,7 @@ def get_chrome_version(fallback_version: int = 114) -> int:
     full_version = os.popen(f"{install_path} --version").read().strip('Google Chrome ').strip('Chromium ').strip() if install_path else version
     
     return int(full_version.split('.')[0]) if full_version else fallback_version
+
+
+if __name__ == "__main__":
+    print(get_chrome_version())
