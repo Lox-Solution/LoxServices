@@ -40,9 +40,9 @@ def extract_version_folder() -> str:
                     return match.group(0)
     return None
 
-    
-def get_chrome_version(fallback_version : int = 109) -> int:
-    """Get the version of Chrome installed on the machine. 
+
+def get_chrome_version(fallback_version: int = 114) -> int:
+    """Get the version of Chrome installed on the machine.
 
     Args:
         fallback_version (int): The version to return, if the chrome version is not found by script. Defaults to 109.
