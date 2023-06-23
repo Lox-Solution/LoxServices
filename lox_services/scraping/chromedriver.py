@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import json
+import time
 import tempfile
 from functools import reduce
 
@@ -142,5 +143,16 @@ def run_chromedriver(
     """
     if get_env_variable("ENVIRONMENT") == "production":
         shutdown_current_instances()
-        
-    return init_chromedriver(download_folder, size_length, size_width, version)
+
+    tries = 0
+
+    while tries < 3:
+        try:
+            return init_chromedriver(download_folder, size_length, size_width, version)
+        except Exception as e:
+            last_exception = e
+            tries = tries + 1
+            time.sleep(10)
+            print(f"Retry nb: {tries}")
+
+    raise last_exception
