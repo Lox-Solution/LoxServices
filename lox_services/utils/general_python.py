@@ -5,7 +5,7 @@ import os
 import re
 import unicodedata
 from datetime import datetime
-from typing import Iterator, List, Literal, Tuple
+from typing import Iterator, List, Literal, Optional, Tuple
 
 import pandas as pd
 
@@ -166,22 +166,37 @@ def string_search(
 
 def is_one_element_substring(
     value: str, list_values: List[str], full_string: bool = False
-):
-    """Checks if one element of the list is a substring of the given value.
-    ## Arguments
-    `value` : string value to check
-    `list_values`: list of potential substring
-    `full_string` : if True, look for equal string and not substring, Default False
+) -> Tuple[bool, Optional[str]]:
+    """
+    Checks if the given value has a substring that matches any element in the list_values.
+
+    Args:
+        value (str): The string to check for matching substrings.
+        list_values (List[str]): A list of strings to compare against the value.
+        full_string (bool, optional): If True, checks for an exact match between the value and elements in the list_values.
+                                    If False, checks for any substring match. Defaults to False.
+
+    Returns:
+        Tuple[bool, Optional[str]]: A tuple containing a boolean value indicating if a match was found and an optional string
+                                    representing the matching element. If no match is found, the boolean value is False and
+                                    the string is None.
+
+    Examples:
+        >>> is_one_element_substring("apple", ["app", "banana", "orange"])
+        True, "app"
+
+        >>> is_one_element_substring("apple", ["app", "banana", "orange"], full_string=True)
+        False, None
     """
     for el in list_values:
         if full_string and value == el:
             print(f"element {el} is equal to value {value}")
-            return True
+            return True, el
         if not full_string and re.search(re.escape(el), value):
             print(f"element {el} matches value {value}")
-            return True
+            return True, el
 
-    return False
+    return False, None
 
 
 def string_search_from_series(serie: pd.Series, strings: List[str]) -> List[bool]:

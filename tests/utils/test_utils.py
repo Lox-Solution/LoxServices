@@ -93,8 +93,21 @@ class TestSubstringFunctions(unittest.TestCase):
         li_2 = ["Darian", "Melvil"]
         li_3 = ["Alex_Mathis_Natasa", "Darian_Melvil"]
 
-        self.assertIs(is_one_element_substring(value, li_1, False), True)
-        self.assertIs(is_one_element_substring(value, li_1, True), False)
-        self.assertIs(is_one_element_substring(value, li_2), False)
-        self.assertIs(is_one_element_substring(value, li_3, False), True)
-        self.assertIs(is_one_element_substring(value, li_3, True), True)
+        self.assertIs(is_one_element_substring(value, li_1, False)[0], True)
+        self.assertEqual(is_one_element_substring(value, li_1, False)[1], "Natasa")
+
+        self.assertIs(is_one_element_substring(value, li_1, True)[0], False)
+        self.assertEqual(is_one_element_substring(value, li_1, True)[1], None)
+
+        self.assertIs(is_one_element_substring(value, li_2)[0], False)
+        self.assertEqual(is_one_element_substring(value, li_2)[1], None)
+
+        self.assertIs(is_one_element_substring(value, li_3, False)[0], True)
+        self.assertEqual(
+            is_one_element_substring(value, li_3, False)[1], "Alex_Mathis_Natasa"
+        )
+
+        self.assertIs(is_one_element_substring(value, li_3, True)[0], True)
+        self.assertEqual(
+            is_one_element_substring(value, li_3, True)[1], "Alex_Mathis_Natasa"
+        )
