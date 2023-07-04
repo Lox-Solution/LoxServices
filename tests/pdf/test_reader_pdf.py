@@ -1,9 +1,13 @@
 import os
 import pandas as pd
 import unittest
+from unittest.mock import patch
+from typing import List
+import tabula
 
 from lox_services.pdf.reader import (
     PDFtoDf,
+    PDFtoCSV,
     convertListOfInchesToListOfPdfUnits,
     countNumberOfPagesOfPdf,
     inchesToPDFUnits,
@@ -32,6 +36,32 @@ class Test_pdf_functions(unittest.TestCase):
         initial_tuple = (1, 1.5, 2)
         final_tuple = (72, 108, 144)
         self.assertEqual(inchesToPDFUnits(initial_tuple), final_tuple)
+
+    @patch("countNumberOfPagesOfPdf")  # Mocking the countNumberOfPagesOfPdf function
+    @patch("tabula.convert_into")  # Mocking the convert_into function
+    def test_PDFtoCSV(self, mock_convert_into, mock_countNumberOfPagesOfPdf):
+        mock_countNumberOfPagesOfPdf.return_value = 5  # Mocking the return value of countNumberOfPagesOfPdf
+        path_to_pdf = PDF_PATH
+        first_page_to_read = 2
+        area = [10, 20, 30, 40]
+        columns = [0.1, 0.2, 0.3]
+        guess = True
+
+        expected_csv_path = path_to_pdf.replace(".pdf", ".csv")
+
+        csv_path = PDFtoCSV(path_to_pdf, first_page_to_read, area, columns, guess)
+
+        self.assertEqual(csv_path, expected_csv_path)  # Check if the returned CSV path is correct
+        mock_countNumberOfPagesOfPdf.assert_called_once_with(path_to_pdf)  # Check if countNumberOfPagesOfPdf was called with the correct argument
+        mock_convert_into.assert_called_once_with(
+            path_to_pdf,
+            output_path=expected_csv_path,
+            pages="2-5",
+            area=area,
+            columns=columns,
+            guess=guess,
+        )  # Check if convert_into was called with the correct arguments
+
 
     def test_PDFtoDf(self):
         "A List of dataframe must be returned from the PDF file"
