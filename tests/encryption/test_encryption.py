@@ -1,8 +1,15 @@
 import os
 import unittest
+from getpass import getpass
+
+from unittest.mock import patch, MagicMock
+from io import StringIO
+from base64 import urlsafe_b64encode
+from hashlib import scrypt
 
 
 from lox_services.encryption.encrypt import (
+    generate_key,
     load_key,
     encrypt_message,
     decrypt_message,
@@ -17,6 +24,22 @@ os.environ["ENCRYPTION_KEY"] = FAKE_ENCRYPTION_KEY
 
 
 class Test_encrypt_functions(unittest.TestCase):
+    @patch('getpass.getpass')
+    @patch('os.environ')
+    def test_generate_key(self, mock_environ, mock_getpass):
+        mock_getpass.side_effect = ["password123", "password123", "somesalt", "somesalt"]
+        mock_environ.__setitem__ = MagicMock()
+
+        key_encoded = generate_key()
+
+        mock_getpass.assert_called_with("Verify salt:")
+        self.assertEqual(mock_getpass.call_count, 4)
+        mock_environ.__setitem__.assert_called_once_with("ENCRYPTION_KEY", str(key_encoded))
+        self.assertEqual(key_encoded, urlsafe_b64encode(scrypt(
+            "password123".encode('utf-8'), salt="somesalt".encode('utf-8'), n=16384, r=8, p=1, dklen=32
+        )))
+
+        
     def test_load_key(self):
         self.assertEqual(load_key(), bytes(FAKE_ENCRYPTION_KEY, "UTF-8"))
 
