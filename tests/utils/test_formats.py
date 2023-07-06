@@ -33,6 +33,8 @@ class TestConversionFunctions(unittest.TestCase):
         # Assertions
         self.assertIsInstance(result, dict)
         self.assertEqual(result, {"key1": "value1", "key2": "value2"})
+        
+        os.remove(file_path)
 
     def test_image_to_base64(self):
         # Define the relative path to the test image file
@@ -74,6 +76,11 @@ class TestConversionFunctions(unittest.TestCase):
         # Assertions
         self.assertIsInstance(result, str)
         self.assertEqual(result, "test data")
+        
+        os.remove(infile)
+
+        os.remove(tofile)
+
 
 if __name__ == "__main__":
     unittest.main()
