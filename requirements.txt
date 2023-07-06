@@ -2,6 +2,7 @@
 
 #Testing
 pylint>=2.14.2
+pytest>=7.4.0
 
 #Google
 google-cloud>=0.34.0
