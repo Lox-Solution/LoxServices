@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 import undetected_chromedriver.v2 as uc
+from lox_services.scraping.chromedriver import run_chromedriver
 from lox_services.scraping.selenium_util import (
     wait_until_page_loaded,
     wait_for_end_of_download,
@@ -38,7 +39,11 @@ DEFAULT_TEXT_TO_WRITE = 'some text'
 class TestUtils(unittest.TestCase):
 
     def setUp(self):
-        self.driver = uc.Chrome()
+        self.driver = run_chromedriver(
+            download_folder="output_folder",
+            size_length=960,
+            size_width=960,
+        )
         self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
         self.folder_path = Path(os.getcwd()) / 'tests' / 'scraping' / 'download_folder'
         self.folder_path.mkdir(parents=True, exist_ok=True)
