@@ -1,8 +1,6 @@
-import base64
 import gzip
 import os
 import re
-import shutil
 import unittest
 from lox_services.utils.formats import (
     json_file_to_python_dictionary,
@@ -10,13 +8,15 @@ from lox_services.utils.formats import (
     gzip_to_csv,
 )
 
+
 class TestConversionFunctions(unittest.TestCase):
     def setUp(self):
         """Set up the base directory of your repository."""
-        self.base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Files')
+        self.base_dir = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "Files"
+        )
         if not os.path.exists(self.base_dir):
             os.makedirs(self.base_dir)
-            
 
     def test_json_file_to_python_dictionary(self):
         # Define the relative path to the test JSON file
@@ -33,7 +33,7 @@ class TestConversionFunctions(unittest.TestCase):
         # Assertions
         self.assertIsInstance(result, dict)
         self.assertEqual(result, {"key1": "value1", "key2": "value2"})
-        
+
         os.remove(file_path)
 
     def test_image_to_base64(self):
@@ -46,13 +46,11 @@ class TestConversionFunctions(unittest.TestCase):
         # Assertions
         self.assertIsInstance(result, str)
         print(result)
-        
+
         """Check if a string is Base64 encoded."""
         # https://stackoverflow.com/questions/8571501/how-to-check-whether-a-string-is-base64-encoded-or-not
-        pattern = r'^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$'
+        pattern = r"^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$"
         return bool(re.match(pattern, result))
-        
-        
 
     def test_gzip_to_csv(self):
         # Define the relative paths to the test input and output files
@@ -76,7 +74,7 @@ class TestConversionFunctions(unittest.TestCase):
         # Assertions
         self.assertIsInstance(result, str)
         self.assertEqual(result, "test data")
-        
+
         os.remove(infile)
 
         os.remove(tofile)

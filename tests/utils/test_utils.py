@@ -111,3 +111,7 @@ class TestSubstringFunctions(unittest.TestCase):
         self.assertEqual(
             is_one_element_substring(value, li_3, True)[1], "Alex_Mathis_Natasa"
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

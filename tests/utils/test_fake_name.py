@@ -1,6 +1,7 @@
 import unittest
 from lox_services.utils.fake_name import _closure_make_french_name, make_french_name
 
+
 class TestMakeFrenchName(unittest.TestCase):
     def test_make_french_name(self):
         # Create an instance of the closure function
@@ -20,6 +21,7 @@ class TestMakeFrenchName(unittest.TestCase):
         # Perform assertions to verify the result
         self.assertIsInstance(result, str)
         self.assertNotEqual(result, "")
+
 
 if __name__ == "__main__":
     unittest.main()
