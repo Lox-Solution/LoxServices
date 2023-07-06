@@ -35,3 +35,7 @@ class Test_writer_pdf_functions(unittest.TestCase):
 
         # Clean up the temporary file
         Path(temp_file_path).unlink()
+
+
+if __name__ == "__main__":
+    unittest.main()
