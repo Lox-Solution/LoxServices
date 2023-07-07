@@ -6,7 +6,6 @@ from pathlib import Path
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
-import undetected_chromedriver.v2 as uc
 from lox_services.scraping.chromedriver import run_chromedriver
 from lox_services.scraping.selenium_util import (
     wait_until_page_loaded,
