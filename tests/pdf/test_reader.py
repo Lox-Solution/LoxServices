@@ -14,7 +14,7 @@ from lox_services.pdf.reader import (
     is_word_in_pdf,
 )
 
-PDF_PATH = os.path.join(os.path.dirname(__file__), "XXXXXDXXXXXXXX.pdf")
+PDF_PATH = os.path.join(os.path.dirname(__file__), "Files", "XXXXXDXXXXXXXX.pdf")
 
 
 class Test_pdf_functions(unittest.TestCase):
@@ -37,34 +37,29 @@ class Test_pdf_functions(unittest.TestCase):
         final_tuple = (72, 108, 144)
         self.assertEqual(inchesToPDFUnits(initial_tuple), final_tuple)
 
-    def test_PDFtoCSV(self, mock_convert_into, mock_countNumberOfPagesOfPdf):
-        mock_countNumberOfPagesOfPdf.return_value = (
-            5  # Mocking the return value of countNumberOfPagesOfPdf
-        )
+    def test_PDFtoCSV(self):
         path_to_pdf = PDF_PATH
-        first_page_to_read = 2
-        area = [10, 20, 30, 40]
-        columns = [0.1, 0.2, 0.3]
+        first_page_to_read = 1
+        area = []
+        columns = []
         guess = True
 
         expected_csv_path = path_to_pdf.replace(".pdf", ".csv")
 
         csv_path = PDFtoCSV(path_to_pdf, first_page_to_read, area, columns, guess)
-
+        print(csv_path)
         self.assertEqual(
             csv_path, expected_csv_path
         )  # Check if the returned CSV path is correct
-        mock_countNumberOfPagesOfPdf.assert_called_once_with(
-            path_to_pdf
-        )  # Check if countNumberOfPagesOfPdf was called with the correct argument
-        mock_convert_into.assert_called_once_with(
-            path_to_pdf,
-            output_path=expected_csv_path,
-            pages="2-5",
-            area=area,
-            columns=columns,
-            guess=guess,
-        )  # Check if convert_into was called with the correct arguments
+        dataframe_from_pdf = pd.read_csv(csv_path, header=None)
+
+        self.assertTrue(
+            any(
+                "john" in str(row[0]).lower()
+                for _, row in dataframe_from_pdf.iterrows()
+            ),
+            "The first column does not contain the word 'John'.",
+        )
 
     def test_PDFtoDf(self):
         "A List of dataframe must be returned from the PDF file"
@@ -83,7 +78,7 @@ class Test_pdf_functions(unittest.TestCase):
     def test_is_word_in_pdf(self):
         "True must be returned when the word is present in the dataframe, False otherwise"
 
-        word_existing_in_pdf = "Invoice 71344294"
+        word_existing_in_pdf = "Alice"
         word_non_existing_in_pdf = "Hello world"
         self.assertEqual(is_word_in_pdf(PDF_PATH, 1, 1, word_existing_in_pdf), True)
         self.assertEqual(
