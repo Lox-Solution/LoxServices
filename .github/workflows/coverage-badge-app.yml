@@ -24,7 +24,7 @@ jobs:
         echo "DEVELOPMENT_SERVICE_ACCOUNT=dev" >> $GITHUB_ENV
         echo DEVELOPMENT_SERVICE_ACCOUNT: "${{ env.DEVELOPMENT_SERVICE_ACCOUNT }}"
     - name: Run tests and collect coverage
-      run: pytest --cov --cov-report=xml
+      run: pytest --cov=lox-services --cov-report=xml
     - name: Upload coverage reports to Codecov with GitHub Action
       uses: codecov/codecov-action@v3
       env:
