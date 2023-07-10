@@ -47,7 +47,6 @@ class Test_pdf_functions(unittest.TestCase):
         expected_csv_path = path_to_pdf.replace(".pdf", ".csv")
 
         csv_path = PDFtoCSV(path_to_pdf, first_page_to_read, area, columns, guess)
-        print(csv_path)
         self.assertEqual(
             csv_path, expected_csv_path
         )  # Check if the returned CSV path is correct
@@ -55,24 +54,53 @@ class Test_pdf_functions(unittest.TestCase):
 
         self.assertTrue(
             any(
-                "john" in str(row[0]).lower()
+                "alice" in str(row[0]).lower()
                 for _, row in dataframe_from_pdf.iterrows()
             ),
-            "The first column does not contain the word 'John'.",
+            "The first column does not contain the word 'Alice'.",
         )
 
     def test_PDFtoDf(self):
         "A List of dataframe must be returned from the PDF file"
-        first_page_to_read = 1
-        last_page_to_read = 1
-        area = []
-        columns = []
-        guess = False
+
+        # Case 1: area is a list of 4 elements
         list_dataframe_created = PDFtoDf(
-            PDF_PATH, first_page_to_read, last_page_to_read, area, columns, guess
+            PDF_PATH,
+            first_page_to_read=1,
+            last_page_to_read=1,
+            area=[],
+            columns=[],
+            guess=False,
         )
         self.assertEqual(
             all(isinstance(x, pd.DataFrame) for x in list_dataframe_created), True
+        )
+        self.assertTrue(
+            any(
+                "alice" in str(row[0]).lower()
+                for _, row in list_dataframe_created[0].iterrows()
+            ),
+            "The first column does not contain the word 'Alice'.",
+        )
+
+        # Case 2: area is a list of 4 lists
+        list_dataframe_created = PDFtoDf(
+            PDF_PATH,
+            first_page_to_read=1,
+            last_page_to_read=None,
+            area=[],
+            columns=[],
+            guess=True,
+        )
+        self.assertEqual(
+            all(isinstance(x, pd.DataFrame) for x in list_dataframe_created), True
+        )
+        self.assertTrue(
+            any(
+                "alice" in str(row[0]).lower()
+                for _, row in list_dataframe_created[0].iterrows()
+            ),
+            "The first column does not contain the word 'Alice'.",
         )
 
     def test_is_word_in_pdf(self):

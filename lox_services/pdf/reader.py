@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import PyPDF2
 import pandas as pd
@@ -97,7 +97,7 @@ def PDFtoCSV(
 def PDFtoDf(
     path_to_pdf: str,
     first_page_to_read: int,
-    last_page_to_read: int,
+    last_page_to_read: Optional[int],
     area: List[str],
     columns: List[str],
     guess: bool,
