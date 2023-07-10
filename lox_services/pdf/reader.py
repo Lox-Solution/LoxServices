@@ -37,7 +37,7 @@ def countNumberOfPagesOfPdf(path_to_pdf_file: str) -> int:
     """
     with open(path_to_pdf_file, "rb") as file:
         pdf_reader = PyPDF2.PdfReader(file)
-        return pdf_reader.getNumPages()
+        return len(pdf_reader.pages)
 
 
 def inchesToPDFUnits(tupleOfInches: Tuple[float]) -> Tuple[float]:
