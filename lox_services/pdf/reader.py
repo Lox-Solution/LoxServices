@@ -36,7 +36,7 @@ def countNumberOfPagesOfPdf(path_to_pdf_file: str) -> int:
     - The number of pages of the PDF file
     """
     with open(path_to_pdf_file, "rb") as file:
-        pdf_reader = PyPDF2.PdfFileReader(file)
+        pdf_reader = PyPDF2.PdfReader(file)
         return pdf_reader.getNumPages()
 
 
