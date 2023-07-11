@@ -82,7 +82,7 @@ class Test_encrypt_functions(unittest.TestCase):
         self.assertEqual(load_key(), bytes(FAKE_ENCRYPTION_KEY, "UTF-8"))
 
         # Case 2: Key is null
-        os.environ["ENCRYPTION_KEY"] = None
+        os.environ.pop("ENCRYPTION_KEY", None)
         with self.assertRaises(KeyError):
             load_key()
 
