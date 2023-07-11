@@ -49,10 +49,10 @@ class TestTranslations(unittest.TestCase):
     def test_get_translations_strict_mode(self):
         # Define test inputs
         language = "DE"
-        module = "ROOT"
+        module = TranslationModules.BILLING_EMAIL
 
         # Call the function with strict mode enabled
-        with self.assertRaises(Exception):
+        with self.assertRaises(FileNotFoundError):
             get_translations(language, module, strict=True)
 
 
