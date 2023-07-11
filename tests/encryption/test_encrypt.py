@@ -78,7 +78,16 @@ class Test_encrypt_functions(unittest.TestCase):
             key_encoded = generate_key()
 
     def test_load_key(self):
+        # Case 1: Key is loaded from environment variable
         self.assertEqual(load_key(), bytes(FAKE_ENCRYPTION_KEY, "UTF-8"))
+
+        # Case 2: Key is null
+        os.environ["ENCRYPTION_KEY"] = None
+        with self.assertRaises(KeyError):
+            load_key()
+
+        # Set back the key
+        os.environ["ENCRYPTION_KEY"] = FAKE_ENCRYPTION_KEY
 
     def test_encrypt_decrypt_msg(self):
         encrypted_msg = encrypt_message(FAKE_PASSWORD)
