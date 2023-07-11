@@ -67,11 +67,11 @@ def load_key() -> bytes:
     try:
         string_encryption_key = get_env_variable("ENCRYPTION_KEY")
         return bytes(string_encryption_key, encoding="utf-8")
-    except KeyError as keyError:
+    except ValueError as ValueError:
         print_error(
             "No encryption key found in the environment variables, please check your .env file or use generate_key function with pwd and salt."
         )
-        raise keyError
+        raise ValueError
 
 
 def encrypt_message(message: str):

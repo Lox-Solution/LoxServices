@@ -83,7 +83,7 @@ class Test_encrypt_functions(unittest.TestCase):
 
         # Case 2: Key is null
         os.environ.pop("ENCRYPTION_KEY", None)
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValueError):
             load_key()
 
         # Set back the key
