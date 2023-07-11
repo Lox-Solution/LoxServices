@@ -10,7 +10,7 @@ class TestTranslations(unittest.TestCase):
         # Define test inputs
         language = "FR"
 
-        # Call the function
+        # Case 1: Get translations for the billing email module
         translations = get_translations(language, TranslationModules.BILLING_EMAIL)
 
         # Assertions
@@ -18,6 +18,12 @@ class TestTranslations(unittest.TestCase):
         self.assertIsInstance(translations, dict)
         # Check if the dictionary is not empty
         self.assertTrue(len(translations) > 0)
+
+        # Case 2: Get translations for NL language
+        self.assertEqual(
+            get_translations("NL", TranslationModules.BILLING_EMAIL),
+            get_translations("EN", TranslationModules.BILLING_EMAIL),
+        )
 
     def test_get_translations_non_existing_language(self):
         # Define test inputs
