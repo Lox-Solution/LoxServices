@@ -24,22 +24,59 @@ os.environ["ENCRYPTION_KEY"] = FAKE_ENCRYPTION_KEY
 
 
 class Test_encrypt_functions(unittest.TestCase):
-    @patch('getpass.getpass')
-    @patch('os.environ')
+    @patch("getpass.getpass")
+    @patch("os.environ")
     def test_generate_key(self, mock_environ, mock_getpass):
-        mock_getpass.side_effect = ["password123", "password123", "somesalt", "somesalt"]
+        mock_getpass.side_effect = [
+            "password123",
+            "password123",
+            "somesalt",
+            "somesalt",
+        ]
         mock_environ.__setitem__ = MagicMock()
-
+        # Case 1: Passwords and salts are equals
         key_encoded = generate_key()
 
         mock_getpass.assert_called_with("Verify salt:")
         self.assertEqual(mock_getpass.call_count, 4)
-        mock_environ.__setitem__.assert_called_once_with("ENCRYPTION_KEY", str(key_encoded))
-        self.assertEqual(key_encoded, urlsafe_b64encode(scrypt(
-            "password123".encode('utf-8'), salt="somesalt".encode('utf-8'), n=16384, r=8, p=1, dklen=32
-        )))
+        mock_environ.__setitem__.assert_called_once_with(
+            "ENCRYPTION_KEY", str(key_encoded)
+        )
+        self.assertEqual(
+            key_encoded,
+            urlsafe_b64encode(
+                scrypt(
+                    "password123".encode("utf-8"),
+                    salt="somesalt".encode("utf-8"),
+                    n=16384,
+                    r=8,
+                    p=1,
+                    dklen=32,
+                )
+            ),
+        )
+        # Case 2: Passwords are not equals
+        mock_getpass.side_effect = [
+            "password123",
+            "wrong_password",
+            "somesalt",
+            "somesalt",
+        ]
+        mock_environ.__setitem__ = MagicMock()
+        with self.assertRaises(ValueError):
+            key_encoded = generate_key()
 
-        
+        # Case 3: Salts are not equals
+        mock_getpass.side_effect = [
+            "password123",
+            "password123",
+            "somesalt",
+            "wrong_salt",
+        ]
+        mock_environ.__setitem__ = MagicMock()
+        with self.assertRaises(ValueError):
+            key_encoded = generate_key()
+
     def test_load_key(self):
         self.assertEqual(load_key(), bytes(FAKE_ENCRYPTION_KEY, "UTF-8"))
 
@@ -48,7 +85,6 @@ class Test_encrypt_functions(unittest.TestCase):
         self.assertEqual(
             decrypt_message(encrypted_msg), decrypt_message(FAKE_ENCRYPTED_PASSWORD)
         )
-
 
     def test_replace_injection_keys(self):
         # Test message with injection keys
