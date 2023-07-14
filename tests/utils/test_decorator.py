@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from lox_services.utils.decorators import Perf, LogArguments, DataUsage, VirtualDisplay
@@ -47,6 +48,11 @@ class TestDecorators(unittest.TestCase):
         self.assertTrue(isinstance(decorated_function, Callable))
 
     def test_virtual_display_decorator(self):
+        # Case 1: Not in production
+        current_environment = os.environ.get("ENVIRONMENT")
+
+        os.environ["ENVIRONMENT"] = "development"
+
         # Define the decorated function using the VirtualDisplay decorator
         @VirtualDisplay
         def decorated_function():
@@ -57,6 +63,22 @@ class TestDecorators(unittest.TestCase):
 
         # Assert statements for VirtualDisplay decorator
         self.assertTrue(isinstance(decorated_function, Callable))
+
+        # Case 2: In production
+        os.environ["ENVIRONMENT"] = "production"
+
+        @VirtualDisplay
+        def decorated_function():
+            sample_function()
+
+        # Call the decorated function
+        decorated_function()
+
+        # Assert statements for VirtualDisplay decorator
+        self.assertTrue(isinstance(decorated_function, Callable))
+
+        # Reset the environment variable
+        os.environ["ENVIRONMENT"] = current_environment
 
 
 if __name__ == "__main__":
