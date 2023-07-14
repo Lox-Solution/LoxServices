@@ -108,10 +108,15 @@ class TestUtilsFunctions(unittest.TestCase):
         self.assertRaises(ValueError, is_file_or_folder_path, "path/to/invalid/folder/")
 
     def test_safe_mkdir(self):
+        # Case 1: Folder does exist
         test_dir = os.path.join(self.test_folder, "test_dir")
         safe_mkdir(test_dir)
         self.assertTrue(os.path.exists(test_dir))
         os.rmdir(test_dir)
+
+        # Case 2: Folder does not exist
+        with self.assertRaises(ValueError):
+            safe_mkdir("//wrong_path//")
 
     def test_safe_open(self):
         test_file = os.path.join(self.test_folder, "test.txt")
@@ -151,6 +156,10 @@ class TestUtilsFunctions(unittest.TestCase):
         self.assertFalse(string_search("I am alpha", ["beta", "gamma"], mode="right"))
         self.assertFalse(string_search("I am gamma", ["alpha", "beta"], mode="union"))
 
+        # Case: Invalid mode
+        with self.assertRaises(Exception):
+            string_search("alpha", ["I am alpha", "You are beta"], mode="invalid")
+
     def test_is_one_element_substring(self):
         self.assertTrue(
             is_one_element_substring("app", ["apple", "banana", "orange"])[0]
@@ -183,28 +192,89 @@ class TestUtilsFunctions(unittest.TestCase):
         safe_remove(test_file)
         self.assertFalse(os.path.exists(test_file))
 
+        # Case 2: File does not exist, no Exception should be raise
+        raised = False
+        try:
+            safe_remove("/path/to/nonexistent/file.txt")
+        except:
+            raised = True
+
+        self.assertFalse(raised)
+
     def test_get_folder_size(self):
         test_dir = os.path.join(self.test_folder, "test_dir")
         os.makedirs(test_dir)
         test_file = os.path.join(test_dir, "test.txt")
         with open(test_file, "w") as f:
             f.write("Test")
+
+        # Case 1: Folder does exist
         size = get_folder_size(test_dir)
         self.assertEqual(size, (4.0, "BYTES"))
+
+        # Case 3: tmp in exlcluded from the size
+        tmp_file = os.path.join(test_dir, "tmp")
+        with open(tmp_file, "w") as f:
+            f.write("Test")
+        size = get_folder_size(test_dir)
+        self.assertEqual(size, (4.0, "BYTES"))
+        os.remove(tmp_file)
+
+        # Case 4: Folder inside the folder and return human non readable
+        test_dir_2 = os.path.join(test_dir, "test_dir_2")
+        os.makedirs(test_dir_2)
+        test_file_dir_2 = os.path.join(test_dir_2, "test.txt")
+        with open(test_file_dir_2, "w") as f:
+            f.write("Test")
+
+        size = get_folder_size(test_dir, False)
+        self.assertEqual(size, 8.0)
+
+        size = get_folder_size(test_dir_2, False)
+        self.assertEqual(size, 4.0)
+        os.remove(test_file_dir_2)
+        os.rmdir(test_dir_2)
+
         os.remove(test_file)
         os.rmdir(test_dir)
 
     def test_convert_date_with_foreign_month_name(self):
+        # Case 1: Month name is in the list
         date = convert_date_with_foreign_month_name("2021", "jan", "15")
         self.assertEqual(date, datetime(2021, 1, 15))
+
+        # Case 2: Month name is not in the list
+        with self.assertRaises(Exception):
+            convert_date_with_foreign_month_name("2021", "invalid", "15")
 
     def test_format_snake_case_to_human_upper_case(self):
         formatted_string = format_snake_case_to_human_upper_case("hello_world")
         self.assertEqual(formatted_string, "Hello World")
 
     def test_format_amount_to_human_string(self):
+        # Case 1: Amount is a string
         formatted_amount = format_amount_to_human_string("120050.10", "€")
         self.assertEqual(formatted_amount, "€120,050.10 ")
+
+        # Case 2: Language is FR
+        formatted_amount = format_amount_to_human_string("120050.10", "FR", "€")
+        self.assertEqual(formatted_amount, "120,050.10 €")
+
+        # Case 3: Value is null
+        formatted_amount = format_amount_to_human_string(None, "€")
+        self.assertEqual(formatted_amount, "")
+
+        # Case 4: Value is null
+        formatted_amount = format_amount_to_human_string("wrong_amount", None, None)
+        self.assertEqual(formatted_amount, "wrong_amount")
+
+        # Case 5: Exception on the cents
+        formatted_amount = format_amount_to_human_string("1000")
+        self.assertEqual(formatted_amount, "€1,000.00 ")
+
+        # Case 5: Handle less than 2 cents digits
+        formatted_amount = format_amount_to_human_string("1000.0")
+        self.assertEqual(formatted_amount, "€1,000.00 ")
 
     def test_convert_sym_to_code(self):
         # Case 1: Currency symbol is in the list
@@ -274,13 +344,50 @@ class TestUtilsFunctions(unittest.TestCase):
 
         os.remove(test_file1)
         os.remove(test_file3)
+
+        # Case 3: Wrong folder path
+        deleted_files = remove_all_file_with_format_from_folder(
+            file_format="csv",
+            folder_path="wrong_path",
+            ignored_files=ignored_files,
+            recursive=False,
+        )
+        self.assertEqual(deleted_files, [])
+
+        # Case 4: Recursive
+        test_dir_2 = os.path.join(test_dir, "test_dir_2")
+        os.makedirs(test_dir_2)
+        file_dir_2 = os.path.join(test_dir, "test_dir_2_file.csv")
+        with open(file_dir_2, "w") as f:
+            f.write("Test dir 2")
+
+        deleted_files = remove_all_file_with_format_from_folder(
+            file_format="csv",
+            folder_path=test_dir,
+            ignored_files=ignored_files,
+            recursive=True,
+        )
+        self.assertEqual(deleted_files, [file_dir_2])
+
+        os.rmdir(test_dir_2)
         os.rmdir(test_dir)
 
     def test_remove_extra_comma_dot_from_float(self):
+        # Case 1: Thousand separator is dot
         number = remove_extra_comma_dot_from_float("1.789.423,45")
         self.assertEqual(number, 1789423.45)
+
+        # Case 2: Thousand separator is comma
         number = remove_extra_comma_dot_from_float("1,789,423.45")
         self.assertEqual(number, 1789423.45)
+
+        # Case 3: Only dot separators
+        number = remove_extra_comma_dot_from_float("1.789.423.00")
+        self.assertEqual(number, 1789423.0)
+
+        # Case 4: Only comma separators
+        number = remove_extra_comma_dot_from_float("1,789,423,00")
+        self.assertEqual(number, 1789423.0)
 
 
 if __name__ == "__main__":
