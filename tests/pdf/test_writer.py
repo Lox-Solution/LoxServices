@@ -12,13 +12,7 @@ class Test_writer_pdf_functions(unittest.TestCase):
     """
 
     def test_save_pdf_from_base_64(self):
-        """
-        Test the save_pdf_from_base_64 function.
-
-        This test case generates a Base64 string,
-        calls the function to save the PDF, and asserts that the saved file contents
-        match the original sample PDF content.
-        """
+        # Case 1: Create a temporary file to save the PDF
         pdf_data = b"%PDFDummyPDFContent"
         base64_data = b64encode(pdf_data).decode()
 
@@ -35,6 +29,10 @@ class Test_writer_pdf_functions(unittest.TestCase):
 
         # Clean up the temporary file
         Path(temp_file_path).unlink()
+
+        # Case 2: Raise an exception if the base64 data is not valid
+        with self.assertRaises(ValueError):
+            save_pdf_from_base_64("Not a base64 string", temp_file_path)
 
 
 if __name__ == "__main__":
