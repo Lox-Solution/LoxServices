@@ -4,7 +4,8 @@ from datetime import datetime
 from functools import reduce
 from pprint import pprint
 from time import perf_counter
-from typing import Callable
+import time
+from typing import Callable, Tuple, Type
 
 from pyvirtualdisplay import Display
 
@@ -90,3 +91,51 @@ def VirtualDisplay(function: Callable):
         return result
 
     return wrapper
+
+
+def retry(
+    max_attempts: int,
+    exceptions_handled: Tuple[Type[BaseException], ...] = Exception,
+    delay: int = 5,
+):
+    """
+    Decorator function that retries the decorated function for a maximum number of attempts.
+
+    Args:
+        max_attempts (int): Maximum number of attempts to retry the decorated function.
+        exceptions_handled (Tuple[Type[BaseException], ...], optional): Tuple of exception types to be handled. Defaults to Exception.
+        delay (int, optional): Delay in seconds between retries. Defaults to 5.
+
+    Returns:
+        function: Decorator function that retries the decorated function.
+
+    Raises:
+        BaseException: If the decorated function fails after the maximum number of attempts.
+
+    Usage:
+        @retry(max_attempts=3, exceptions_handled=(CustomException,), delay=2)
+        def my_function():
+            # Code to retry
+
+    """
+
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            attempts = 0
+            while attempts < max_attempts:
+                try:
+                    return func(*args, **kwargs)
+                except exceptions_handled as e:
+                    attempts += 1
+                    print(
+                        f"Attempt {attempts} failed fro function {func.__name__}: {e}"
+                    )
+                    time.sleep(delay)
+
+                    if attempts == max_attempts:
+                        print(f"Function failed after {max_attempts} attempts")
+                        raise e
+
+        return wrapper
+
+    return decorator

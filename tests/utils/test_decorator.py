@@ -1,7 +1,13 @@
 import os
 import unittest
 
-from lox_services.utils.decorators import Perf, LogArguments, DataUsage, VirtualDisplay
+from lox_services.utils.decorators import (
+    Perf,
+    LogArguments,
+    DataUsage,
+    VirtualDisplay,
+    retry,
+)
 from typing import Callable
 
 
@@ -68,17 +74,38 @@ class TestDecorators(unittest.TestCase):
         os.environ["ENVIRONMENT"] = "production"
 
         @VirtualDisplay
-        def decorated_function():
+        def decorated_function_2():
             sample_function()
 
         # Call the decorated function
-        decorated_function()
+        decorated_function_2()
 
         # Assert statements for VirtualDisplay decorator
-        self.assertTrue(isinstance(decorated_function, Callable))
+        self.assertTrue(isinstance(decorated_function_2, Callable))
 
         # Reset the environment variable
         os.environ["ENVIRONMENT"] = current_environment
+
+    def test_retry_decorator(self):
+        # Test variables
+        retries = 3
+        delay = 1
+
+        # Custom exception for testing
+        class CustomException(Exception):
+            pass
+
+        # Example function to be decorated
+        @retry(max_attempts=retries, exceptions_handled=(CustomException,), delay=delay)
+        def example_function():
+            raise CustomException("Example exception")
+
+        # Perform the test
+        with self.assertRaises(CustomException):
+            example_function()
+
+        # Assertion
+        self.assertEqual(example_function.__name__, "wrapper")
 
 
 if __name__ == "__main__":
