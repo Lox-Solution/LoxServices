@@ -88,8 +88,6 @@ def safe_mkdir(path: str) -> None:
             os.makedirs(os.path.dirname(path))
         elif path_type == "folder":
             os.makedirs(path)
-        else:
-            raise ValueError("The given path is neither a file nor a folder.")
     except FileExistsError:
         pass
 
