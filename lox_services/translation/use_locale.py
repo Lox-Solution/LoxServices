@@ -37,9 +37,3 @@ def use_locale(language_code: str, encoding: str = "UTF-8"):
         raise Exception(
             f"Locale '{language_code}' is installed but the current process is not aware of it. Please relauch command."
         ) from local_error
-
-
-if __name__ == "__main__":
-    use_locale("ru_RU")
-    month = datetime.datetime.today().strftime("%B").capitalize()
-    print(month)
