@@ -35,10 +35,6 @@ def generate_pdf_file_from_dataframe(
     - Raises an exception if there was a problem.
     """
 
-    if isinstance(dataframe, pd.Series):
-        print("The given parameter is a Series, converting to DataFrame...")
-        dataframe = dataframe.to_frame()
-
     html_string = dataframe_to_html_without_pandas_style(dataframe)
     html = HTML(string=html_string)
     css = CSS(os.path.join(os.path.dirname(__file__), "assets", "pdf_tables.css"))
