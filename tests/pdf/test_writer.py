@@ -4,6 +4,7 @@ import pandas as pd
 from base64 import b64encode
 from tempfile import NamedTemporaryFile
 from lox_services.pdf.writer import (
+    generate_pdf_file_from_html_css,
     save_pdf_from_base_64,
     dataframe_to_html_without_pandas_style,
     generate_pdf_file_from_dataframe,
@@ -73,6 +74,26 @@ class Test_writer_pdf_functions(unittest.TestCase):
         # Clean up the temporary file
         Path(file_path).unlink()
 
+    def test_generate_pdf_from_html_css(self):
+        
+        pdf_path = os.path.join(self.base_dir, "pdf_from_html_css.pdf")
+        css_path = os.path.join(self.base_dir, "dummy.css")
+        html_path = os.path.join(self.base_dir, "dummy.html")
+        
+        with open(html_path, "r") as file:
+            html = file.read()
+            
+        print(html)
+            
+        generate_pdf_file_from_html_css(
+            "",
+            html,
+            css_path,
+            pdf_path)
+        
+        self.assertTrue(os.path.exists(pdf_path))
+        
+        os.remove(pdf_path)
 
 if __name__ == "__main__":
     unittest.main()
