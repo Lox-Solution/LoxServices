@@ -196,4 +196,3 @@ def make_validate_country_code() -> Callable[[pd.DataFrame, str], None]:
 
 
 validate_country_code = make_validate_country_code()
-
