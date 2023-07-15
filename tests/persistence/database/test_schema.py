@@ -6,7 +6,6 @@ from lox_services.persistence.database.schema import (
     dates_invoices,
     dtypes_deliveries,
     na_deliveries,
-    dates_deliveries,
     dtypes_refunds,
     na_refunds,
     dates_refunds,
@@ -33,11 +32,6 @@ class TestDataType(unittest.TestCase):
         # Check that all values in the dictionary are not None
         for key, value in na_deliveries.items():
             self.assertIsNotNone(value)
-
-    def test_deliveries_dates(self):
-        # Check that all the values in dates_deliveries are in dtypes_deliveries
-        for date in dates_deliveries:
-            self.assertIn(date, dtypes_deliveries)
 
     def test_refunds_na(self):
         # Check that all values in the dictionary are not None

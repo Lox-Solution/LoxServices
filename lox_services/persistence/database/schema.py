@@ -81,8 +81,6 @@ na_deliveries = {
     "url": "",
 }
 
-dates_deliveries = ["date"]
-
 dtypes_refunds = {
     "company": str,
     "carrier": str,
