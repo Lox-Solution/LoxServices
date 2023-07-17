@@ -22,14 +22,12 @@ jobs:
         echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
         echo PYTHONPATH: "${{ env.PYTHONPATH }}"
 
-    - name: Set Environment Variables
+    - name: Run tests and collect coverage
+      run: pytest --cov=lox_services --cov-report=xml
       env:
         ENVIRONMENT: ${{ vars.ENVIRONMENT }}
         DEVELOPMENT_SERVICE_ACCOUNT: ${{ vars.DEVELOPMENT_SERVICE_ACCOUNT }}
         RUNS_REPORTS_DEV: ${{ vars.RUNS_REPORTS_DEV }}
-
-    - name: Run tests and collect coverage
-      run: pytest --cov=lox_services --cov-report=xml
 
     - name: Upload coverage reports to Codecov with GitHub Action
       uses: codecov/codecov-action@v3
