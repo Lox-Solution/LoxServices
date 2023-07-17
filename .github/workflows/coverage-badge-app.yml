@@ -19,14 +19,12 @@ jobs:
       run: |
         echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
         echo PYTHONPATH: "${{ env.PYTHONPATH }}"
-        echo "ENVIRONMENT=development" >> $GITHUB_ENV
-        echo ENVIRONMENT: "${{ env.ENVIRONMENT }}"
-        echo "DEVELOPMENT_SERVICE_ACCOUNT=dev" >> $GITHUB_ENV
-        echo DEVELOPMENT_SERVICE_ACCOUNT: "${{ env.DEVELOPMENT_SERVICE_ACCOUNT }}"
     - name: Run tests and collect coverage
       run: pytest --cov=lox_services --cov-report=xml
     - name: Upload coverage reports to Codecov with GitHub Action
       uses: codecov/codecov-action@v3
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        RUNS_REPORTS_DEV: ${{ vars.RUNS_REPORTS_DEV }}
+        RUNS_REPORTS_DEV: ${{ env.RUNS_REPORTS_DEV }}
+        ENVIRONMENT: ${{ env.ENVIRONMENT }}
+        DEVELOPMENT_SERVICE_ACCOUNT: ${{ env.DEVELOPMENT_SERVICE_ACCOUNT }}
