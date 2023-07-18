@@ -1,0 +1,38 @@
+name: API workflow
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Test python API
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Set PYTHONPATH
+      run: |
+        echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
+        echo PYTHONPATH: "${{ env.PYTHONPATH }}"
+
+    - name: Run tests and collect coverage
+      run: pytest --cov=lox_services --cov-report=xml
+      env:
+        ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+        DEVELOPMENT_SERVICE_ACCOUNT: ${{ vars.DEVELOPMENT_SERVICE_ACCOUNT }}
+        RUNS_REPORTS_DEV: ${{ vars.RUNS_REPORTS_DEV }}
+        BRIGHTDATA_USERNAME: ${{ secrets.BRIGHTDATA_USERNAME }}
+        BRIGHTDATA_PASSWORD: ${{ secrets.BRIGHTDATA_PASSWORD }}
+        BRIGHTDATA_API_TOKEN: ${{ secrets.BRIGHTDATA_API_TOKEN }}
+
+    - name: Upload coverage reports to Codecov with GitHub Action
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

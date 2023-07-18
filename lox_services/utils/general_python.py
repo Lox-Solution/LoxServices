@@ -88,8 +88,6 @@ def safe_mkdir(path: str) -> None:
             os.makedirs(os.path.dirname(path))
         elif path_type == "folder":
             os.makedirs(path)
-        else:
-            raise ValueError("The given path is neither a file nor a folder.")
     except FileExistsError:
         pass
 
@@ -192,7 +190,7 @@ def is_one_element_substring(
         if full_string and value == el:
             print(f"element {el} is equal to value {value}")
             return True, el
-        if not full_string and re.search(re.escape(el), value):
+        if not full_string and re.search(value, re.escape(el)):
             print(f"element {el} matches value {value}")
             return True, el
 

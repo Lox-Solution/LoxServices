@@ -1,5 +1,6 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
+import PyPDF2
 import pandas as pd
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfinterp import resolve1
@@ -35,9 +36,8 @@ def countNumberOfPagesOfPdf(path_to_pdf_file: str) -> int:
     - The number of pages of the PDF file
     """
     with open(path_to_pdf_file, "rb") as file:
-        parser = PDFParser(file)
-        document = PDFDocument(parser)
-        return resolve1(document.catalog["Pages"])["Count"]
+        pdf_reader = PyPDF2.PdfReader(file)
+        return len(pdf_reader.pages)
 
 
 def inchesToPDFUnits(tupleOfInches: Tuple[float]) -> Tuple[float]:
@@ -97,7 +97,7 @@ def PDFtoCSV(
 def PDFtoDf(
     path_to_pdf: str,
     first_page_to_read: int,
-    last_page_to_read: int,
+    last_page_to_read: Optional[int],
     area: List[str],
     columns: List[str],
     guess: bool,
@@ -154,7 +154,6 @@ def is_word_in_pdf(
     """
 
     df = PDFtoDf(pdf_path, first_page_to_read, last_page_to_read, [], [], False)[0]
-
     for column in df.columns:
         if df[column].str.contains(text_to_search).any():
             return True

@@ -47,9 +47,5 @@ def establish_sftp_connection(
         print("Authentication failed, please verify your credentials: %s")
     except paramiko.BadHostKeyException as badHostKeyException:
         print("Unable to verify server's host key: %s" % badHostKeyException)
-    except paramiko.SSHException as sshException:
-        print("Unable to establish SSH connection: %s" % sshException)
-    except socket.error as v:
-        e_code = v[0]
-        if e_code == errno.ECONNREFUSED:
-            print("Connection Refused")
+    except socket.error as socketException:
+        print("Connection didn't succeed: %s" % socketException)
