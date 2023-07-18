@@ -1,6 +1,11 @@
 name: API workflow
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "develop", "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
