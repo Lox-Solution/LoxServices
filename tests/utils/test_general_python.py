@@ -31,14 +31,12 @@ from lox_services.utils.general_python import (
     remove_all_file_with_format_from_folder,
     remove_extra_comma_dot_from_float,
 )
+from tests import OUTPUT_FOLDER
 
 
 class TestUtilsFunctions(unittest.TestCase):
     def setUp(self):
-        self.base_dir = os.path.join(
-            os.path.dirname(__file__),
-            "Files",
-        )
+        self.base_dir = OUTPUT_FOLDER
         self.test_folder = os.path.join(self.base_dir, "general_python")
 
         self.test_file = os.path.join(self.base_dir, "dummy.csv")

@@ -7,14 +7,14 @@ from lox_services.utils.formats import (
     image_to_base64,
     gzip_to_csv,
 )
+from tests import OUTPUT_FOLDER
 
 
 class TestConversionFunctions(unittest.TestCase):
     def setUp(self):
         """Set up the base directory of your repository."""
-        self.base_dir = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "Files"
-        )
+        self.base_dir = OUTPUT_FOLDER
+
         if not os.path.exists(self.base_dir):
             os.makedirs(self.base_dir)
 

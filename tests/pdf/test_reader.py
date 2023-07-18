@@ -13,11 +13,13 @@ from lox_services.pdf.reader import (
     inchesToPDFUnits,
     is_word_in_pdf,
 )
-
-PDF_PATH = os.path.join(os.path.dirname(__file__), "Files", "XXXXXDXXXXXXXX.pdf")
+from tests import OUTPUT_FOLDER
 
 
 class Test_pdf_functions(unittest.TestCase):
+    def setUp(self):
+        self.pdf_path = os.path.join(OUTPUT_FOLDER, "XXXXXDXXXXXXXX.pdf")
+
     def test_convertListOfInchesToListOfPdfUnits(self):
         "All values in list must be multiplied by 72"
         list_of_inches = [1, 1.5, 2]
@@ -29,7 +31,9 @@ class Test_pdf_functions(unittest.TestCase):
     def test_number_of_pages(self):
         "The number of page returned should be 1"
         number_of_page_in_the_pdf = 1
-        self.assertEqual(countNumberOfPagesOfPdf(PDF_PATH), number_of_page_in_the_pdf)
+        self.assertEqual(
+            countNumberOfPagesOfPdf(self.pdf_path), number_of_page_in_the_pdf
+        )
 
     def test_inchesToPDFUnits(self):
         "All values must be multiplied by 72"
@@ -38,7 +42,7 @@ class Test_pdf_functions(unittest.TestCase):
         self.assertEqual(inchesToPDFUnits(initial_tuple), final_tuple)
 
     def test_PDFtoCSV(self):
-        path_to_pdf = PDF_PATH
+        path_to_pdf = self.pdf_path
         first_page_to_read = 1
         area = []
         columns = []
@@ -65,7 +69,7 @@ class Test_pdf_functions(unittest.TestCase):
 
         # Case 1: area is a list of 4 elements
         list_dataframe_created = PDFtoDf(
-            PDF_PATH,
+            self.pdf_path,
             first_page_to_read=1,
             last_page_to_read=1,
             area=[],
@@ -85,7 +89,7 @@ class Test_pdf_functions(unittest.TestCase):
 
         # Case 2: area is a list of 4 lists
         list_dataframe_created = PDFtoDf(
-            PDF_PATH,
+            self.pdf_path,
             first_page_to_read=1,
             last_page_to_read=None,
             area=[],
@@ -108,9 +112,11 @@ class Test_pdf_functions(unittest.TestCase):
 
         word_existing_in_pdf = "Alice"
         word_non_existing_in_pdf = "Hello world"
-        self.assertEqual(is_word_in_pdf(PDF_PATH, 1, 1, word_existing_in_pdf), True)
         self.assertEqual(
-            is_word_in_pdf(PDF_PATH, 1, 1, word_non_existing_in_pdf), False
+            is_word_in_pdf(self.pdf_path, 1, 1, word_existing_in_pdf), True
+        )
+        self.assertEqual(
+            is_word_in_pdf(self.pdf_path, 1, 1, word_non_existing_in_pdf), False
         )
 
 

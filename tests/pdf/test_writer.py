@@ -11,6 +11,8 @@ from lox_services.pdf.writer import (
 )
 from pathlib import Path
 
+from tests import OUTPUT_FOLDER
+
 
 class Test_writer_pdf_functions(unittest.TestCase):
     """
@@ -18,10 +20,7 @@ class Test_writer_pdf_functions(unittest.TestCase):
     """
 
     def setUp(self):
-        self.base_dir = os.path.join(
-            os.path.dirname(__file__),
-            "Files",
-        )
+        self.base_dir = OUTPUT_FOLDER
 
         if not os.path.exists(self.base_dir):
             os.mkdir(self.base_dir)
