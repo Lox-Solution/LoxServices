@@ -29,3 +29,4 @@
 0.1.19 Fixed missing codes from pycountry package, added function to save to pdf from base 64
 0.1.20 Added function to find local chrome version, function to handle multiple brightdata requests and currency conversion table check
 0.1.21 Improved chromedriver service
+0.1.22 Added unit testing and implemented code coverage, added retry decorator
