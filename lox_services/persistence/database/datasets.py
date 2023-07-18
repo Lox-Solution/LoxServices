@@ -53,6 +53,7 @@ class Mapping_dataset(Enum):
     StatusMapping = "StatusMapping"
     TempAppend = "TempAppend"
     TempTable = "TempTable"
+    TempRefunds = "TempRefunds"
 
 
 class TestEnvironment_dataset(Enum):
