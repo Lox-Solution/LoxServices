@@ -6,7 +6,7 @@ It intercepts and captures all HTTP requests and responses made by the WebDriver
 """
 
 
-def run_simple_seleniumware_chromedriver():
+def run_simple_chromedriver():
     """Creates an instance of seleniumwire chrome driver."""
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
