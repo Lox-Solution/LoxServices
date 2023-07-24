@@ -133,7 +133,7 @@ class TestChromeVersion(unittest.TestCase):
                         version = get_chrome_version(self.dummy_fallback_value)
                         self.assertEqual(version, self.dummy_version_value)
 
-    def test_get_chrome_version_windows_folder(self):
+    def test_get_chrome_version_windows_folder_error(self):
         with patch(
             "lox_services.utils.chrome_version.get_platform"
         ) as mock_get_platform:
