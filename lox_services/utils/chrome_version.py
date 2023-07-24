@@ -1,6 +1,6 @@
 import os
 import re
-from sys import platform
+import sys
 
 from lox_services.utils.general_python import print_info
 
@@ -11,16 +11,13 @@ def extract_version_registry(output: str) -> str:
     Args:
         output (str): The output of the registry query.
     """
-    try:
-        google_version = ""
-        for letter in output[output.rindex("DisplayVersion    REG_SZ") + 24 :]:
-            if letter != "\n":
-                google_version += letter
-            else:
-                break
-        return google_version.strip()
-    except TypeError:
-        return
+    google_version = ""
+    for letter in output[output.rindex("DisplayVersion    REG_SZ") + 24 :]:
+        if letter != "\n":
+            google_version += letter
+        else:
+            break
+    return google_version.strip()
 
 
 def extract_version_folder() -> str:
@@ -44,7 +41,26 @@ def extract_version_folder() -> str:
                 if match and match.group():
                     # Found a Chrome version.
                     return match.group(0)
-    return None
+    raise RuntimeError("Chrome version not found.")
+
+
+def get_platform() -> str:
+    """Get the platform of the machine.
+
+    Raises:
+        RuntimeError: If the platform is not supported.
+
+    Returns:
+        str: The platform of the machine.
+    """
+    if sys.platform in ["linux", "linux2"]:
+        return "linux"
+    elif sys.platform == "darwin":
+        return "mac"
+    elif sys.platform in ["win32", "cygwin", "msys"]:
+        return "windows"
+    else:
+        raise RuntimeError("Platform not supported.")
 
 
 def get_chrome_version(fallback_version: int = 114) -> int:
@@ -58,9 +74,10 @@ def get_chrome_version(fallback_version: int = 114) -> int:
     """
     version = None
     install_path = None
+    platform_name = get_platform()
 
     try:
-        if platform == "linux" or platform == "linux2":
+        if platform_name == "linux":
             # Check the path of chrome and chromium in linux and return path for version
             install_paths = [
                 "/usr/bin/google-chrome",
@@ -72,12 +89,12 @@ def get_chrome_version(fallback_version: int = 114) -> int:
                     install_path = path
                     break
 
-        elif platform == "darwin":
+        elif platform_name == "mac":
             # OS X
             install_path = (
                 r"/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
             )
-        elif platform == "win32":
+        elif platform_name == "windows":
             # Windows...
             try:
                 # Try registry key.
@@ -107,5 +124,5 @@ def get_chrome_version(fallback_version: int = 114) -> int:
     return int(full_version.split(".")[0]) if full_version else fallback_version
 
 
-if __name__ == "__main__":
-    print(get_chrome_version())
+# if __name__ == "__main__":
+#     print(get_chrome_version())
