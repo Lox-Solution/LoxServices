@@ -1,9 +1,9 @@
 import os
 import re
-import subprocess
 from sys import platform
 
 from lox_services.utils.general_python import print_info
+
 
 def extract_version_registry(output: str) -> str:
     """Extracts the version of Chrome from the registry output for Windows machines.
