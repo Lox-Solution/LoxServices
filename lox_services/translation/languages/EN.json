@@ -14,7 +14,7 @@
   "invoice_number": "Invoice number",
   "address": "Address",
   "shipping_address": "Shipping address",
-  "billing_address": "Shipping address",
+  "billing_address": "Billing address",
   "company_address": "Company address",
   "zip_code": "ZipCode",
   "country": "Country",
