@@ -64,6 +64,19 @@ class TestSend(unittest.TestCase):
 
         # Assert the results
         self.assertEqual(len(emails), 0)
+
+    def send_email_without_attachment(self):
+        send_emails_from_loxsolution_account(
+            sender_email_address=self.sender_email,
+            receiver_email_addresses=self.receiver_emails,
+            cc_email_addresses=self.cc_email_addresses,
+            bcc_email_addresses=self.bcc_email_addresses,
+            subject=f"{self.subject} - {self.index}",
+            content=self.content,
+            attachments=[],
+        )
+        self.assertTrue(True)
+
     def test_invalid_sender_email(self):
         # Run the function with the test data and expect a ValueError
         with self.assertRaises(ValueError):
