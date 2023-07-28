@@ -11,14 +11,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: docker://devlox/airflow:lox-1.0
+      image: docker://devlox/airflow:lox-service-1
       credentials:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
     name: Test python API
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions/setup-python@v2
       with:
         python-version: '3.11'
@@ -43,6 +43,6 @@ jobs:
         BRIGHTDATA_API_TOKEN: ${{ secrets.BRIGHTDATA_API_TOKEN }}
 
     - name: Upload coverage reports to Codecov with GitHub Action
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
