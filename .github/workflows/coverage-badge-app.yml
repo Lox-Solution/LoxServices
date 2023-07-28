@@ -26,7 +26,8 @@ jobs:
       run: |
         echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
         echo PYTHONPATH: "${{ env.PYTHONPATH }}"
-
+    - name: Install software
+      run: sudo apt-get install -y chromium-browser
     - name: Run tests and collect coverage
       run: pytest --cov=lox_services --cov-report=xml
       env:
