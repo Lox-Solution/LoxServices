@@ -30,10 +30,7 @@ jobs:
         echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
         echo PYTHONPATH: "${{ env.PYTHONPATH }}"
     - name: Run tests and collect coverage
-      run: |
-        mv /__w/LoxServices/LoxServices /opt/airflow/LoxServices
-        cd opt/airflow
-        su lox -c 'pytest --cov=lox_services --cov-report=xml'
+      run: su lox -c 'pytest --cov=lox_services --cov-report=xml'
       env:
         ENVIRONMENT: ${{ vars.ENVIRONMENT }}
         DEVELOPMENT_SERVICE_ACCOUNT: ${{ vars.DEVELOPMENT_SERVICE_ACCOUNT }}
