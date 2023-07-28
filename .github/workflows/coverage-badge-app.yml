@@ -38,6 +38,8 @@ jobs:
         BRIGHTDATA_USERNAME: ${{ secrets.BRIGHTDATA_USERNAME }}
         BRIGHTDATA_PASSWORD: ${{ secrets.BRIGHTDATA_PASSWORD }}
         BRIGHTDATA_API_TOKEN: ${{ secrets.BRIGHTDATA_API_TOKEN }}
+        EMAILSENDER_GOOGLE_CLIENT_ID: ${{ secrets.EMAILSENDER_GOOGLE_CLIENT_ID }}
+        EMAILSENDER_GOOGLE_CLIENT_SECRET: ${{ secrets.EMAILSENDER_GOOGLE_CLIENT_SECRET }}
 
     - name: Upload coverage reports to Codecov with GitHub Action
       uses: codecov/codecov-action@v3
