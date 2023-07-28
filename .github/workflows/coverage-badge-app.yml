@@ -40,7 +40,7 @@ jobs:
         EMAILSENDER_GOOGLE_CLIENT_ID: ${{ secrets.EMAILSENDER_GOOGLE_CLIENT_ID }}
         EMAILSENDER_GOOGLE_CLIENT_SECRET: ${{ secrets.EMAILSENDER_GOOGLE_CLIENT_SECRET }}
         LOXTEAM_REFRESH_TOKEN: ${{ secrets.LOXTEAM_REFRESH_TOKEN }}
-
+        LOX_TEAM_EMAIL: ${{ secrets.LOX_TEAM_EMAIL }}
 
 
     - name: Upload coverage reports to Codecov with GitHub Action
