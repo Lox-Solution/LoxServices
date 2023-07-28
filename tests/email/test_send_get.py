@@ -32,7 +32,9 @@ class TestSend(unittest.TestCase):
         )
 
         # Call the function with mock data
-        emails = get_emails("Unittest", days=1, search={"subject": self.subject})
+        emails = get_emails(
+            "Unittest", days=1, search={"subject": self.expected_subject}
+        )
 
         # Assert the results
         self.assertEqual(len(emails), 1)
