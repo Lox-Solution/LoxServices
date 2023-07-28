@@ -22,15 +22,15 @@ jobs:
     - name: Switch user
       run: |
         su lox
-        whoami  # Print the current user
+        su lox -c 'whoami'  # Print the current user
     - name: Install dependencies
-      run: pip install --no-cache-dir -r requirements.txt
+      run: su lox -c 'pip install --no-cache-dir -r requirements.txt'
     - name: Set PYTHONPATH
       run: |
         echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
         echo PYTHONPATH: "${{ env.PYTHONPATH }}"
     - name: Run tests and collect coverage
-      run: pytest --cov=lox_services --cov-report=xml
+      run: su lox -c 'pytest --cov=lox_services --cov-report=xml'
       env:
         ENVIRONMENT: ${{ vars.ENVIRONMENT }}
         DEVELOPMENT_SERVICE_ACCOUNT: ${{ vars.DEVELOPMENT_SERVICE_ACCOUNT }}
