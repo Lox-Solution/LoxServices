@@ -95,31 +95,6 @@ def url_format_params(params: dict) -> str:
     return "&".join(param_fragments)
 
 
-def generate_permission_url(client_id, scope="https://mail.google.com/"):
-    params = {}
-    params["client_id"] = client_id
-    params["redirect_uri"] = REDIRECT_URI
-    params["scope"] = scope
-    params["response_type"] = "code"
-    return "%s?%s" % (_command_to_url("o/oauth2/auth"), url_format_params(params))
-
-
-def call_authorize_tokens(client_id, client_secret, authorization_code):
-    params = {}
-    params["client_id"] = client_id
-    params["client_secret"] = client_secret
-    params["code"] = authorization_code
-    params["redirect_uri"] = REDIRECT_URI
-    params["grant_type"] = "authorization_code"
-    request_url = _command_to_url("o/oauth2/token")
-    response = (
-        request.urlopen(request_url, parse.urlencode(params).encode("UTF-8"))
-        .read()
-        .decode("UTF-8")
-    )
-    return json.loads(response)
-
-
 def call_refresh_token(client_id, client_secret, refresh_token):
     params = {}
     params["client_id"] = client_id
@@ -140,20 +115,6 @@ def generate_oauth2_string(username, access_token, as_base64=False):
     if as_base64:
         auth_string = base64.b64encode(auth_string.encode("ascii")).decode("ascii")
     return auth_string
-
-
-def get_authorization(google_client_id, google_client_secret):
-    scope = "https://mail.google.com/"
-    print(
-        "Navigate to the following URL to auth:",
-        generate_permission_url(google_client_id, scope),
-    )
-    authorization_code = input("Enter verification code: ")
-    response = call_authorize_tokens(
-        google_client_id, google_client_secret, authorization_code
-    )
-    print(response["scope"], response["expires_in"])
-    return response["access_token"]
 
 
 def refresh_authorization(refresh_token: str) -> str:
