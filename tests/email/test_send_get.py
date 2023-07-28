@@ -23,6 +23,7 @@ class TestSend(unittest.TestCase):
         self.content = "This is a test email sent from the LoxServices unit tests."
         self.pdf_path = os.path.join(self.output_folder, self.pdf_name)
         self.expected_subject = f"{self.subject} - {self.index}"
+        self.label = "Unittest"
 
         if not os.path.exists(self.temp_output_folder):
             shutil.os.makedirs(self.temp_output_folder)
@@ -44,7 +45,7 @@ class TestSend(unittest.TestCase):
 
         # Call the function with mock data
         emails = get_emails(
-            "Unittest", days=1, search={"subject": self.expected_subject}
+            self.label, days=1, search={"subject": self.expected_subject}
         )
 
         # Assert the results
@@ -55,6 +56,14 @@ class TestSend(unittest.TestCase):
         file_names = download_attachments(emails[0], self.temp_output_folder)
         self.assertEqual(file_names[0], self.pdf_name)
 
+        # Case 2: Already downloaded file
+        # Call the function with mock data
+        emails = get_emails(
+            self.label, days=1, search={"subject": self.expected_subject}
+        )
+
+        # Assert the results
+        self.assertEqual(len(emails), 0)
     def test_invalid_sender_email(self):
         # Run the function with the test data and expect a ValueError
         with self.assertRaises(ValueError):
