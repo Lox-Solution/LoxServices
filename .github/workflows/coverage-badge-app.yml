@@ -32,7 +32,7 @@ jobs:
         echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
         echo PYTHONPATH: "${{ env.PYTHONPATH }}"
     - name: Run tests and collect coverage
-      run: su lox -c 'sudo pytest --cov=lox_services --cov-report=xml'
+      run: pytest --cov=lox_services --cov-report=xml
       env:
         ENVIRONMENT: ${{ vars.ENVIRONMENT }}
         DEVELOPMENT_SERVICE_ACCOUNT: ${{ vars.DEVELOPMENT_SERVICE_ACCOUNT }}
