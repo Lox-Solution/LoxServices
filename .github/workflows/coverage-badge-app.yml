@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Switch user
       run: |
-        su 50000
+        su lox
         whoami  # Print the current user
     - name: Install dependencies
       run: pip install --no-cache-dir -r requirements.txt
