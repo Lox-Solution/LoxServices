@@ -1,5 +1,6 @@
 import os
 import random
+import shutil
 import unittest
 from lox_services.email.send import send_emails_from_loxsolution_account
 from lox_services.email.get import get_emails, download_attachments
@@ -10,6 +11,7 @@ from email.message import Message
 class TestSend(unittest.TestCase):
     def setUp(self):
         self.output_folder = OUTPUT_FOLDER
+        self.temp_output_folder = os.path.join(self.output_folder, "temp")
         self.pdf_name = "XXXXXDXXXXXXXX.pdf"
         self.index = random.randint(0, 1000000)
         self.sender_email = "loxteam@loxsolution.com"
@@ -21,6 +23,13 @@ class TestSend(unittest.TestCase):
         self.content = "This is a test email sent from the LoxServices unit tests."
         self.pdf_path = os.path.join(self.output_folder, self.pdf_name)
         self.expected_subject = f"{self.subject} - {self.index}"
+
+        if not os.path.exists(self.temp_output_folder):
+            shutil.os.makedirs(self.temp_output_folder)
+
+    def tearDown(self):
+        if os.path.exists(self.temp_output_folder):
+            shutil.rmtree(self.temp_output_folder)
 
     def test_send_emails(self):
         send_emails_from_loxsolution_account(
@@ -43,7 +52,7 @@ class TestSend(unittest.TestCase):
         self.assertIsInstance(emails[0], Message)
         self.assertEqual(emails[0]["Subject"], self.expected_subject)
 
-        file_names = download_attachments(emails[0], self.output_folder)
+        file_names = download_attachments(emails[0], self.temp_output_folder)
         self.assertEqual(file_names[0], self.pdf_name)
 
     def test_invalid_sender_email(self):
