@@ -25,7 +25,7 @@ jobs:
         su lox -c 'whoami'  # Print the current user
     - name: Install dependencies and upgrade pip
       run: |
-        su lox -c '/usr/local/bin/python -m pip install --upgrade pip'
+        python -m pip install --upgrade pip
         su lox -c 'pip install --no-cache-dir -r requirements.txt'
     - name: Set PYTHONPATH
       run: |
