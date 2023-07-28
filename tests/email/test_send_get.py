@@ -58,12 +58,10 @@ class TestSend(unittest.TestCase):
 
         # Case 2: Already downloaded file
         # Call the function with mock data
-        emails = get_emails(
-            self.label, days=1, search={"subject": self.expected_subject}
-        )
+        file_names = download_attachments(emails[0], self.temp_output_folder)
 
         # Assert the results
-        self.assertEqual(len(emails), 0)
+        self.assertEqual(len(file_names), 0)
 
     def send_email_without_attachment(self):
         send_emails_from_loxsolution_account(
@@ -89,6 +87,9 @@ class TestSend(unittest.TestCase):
 
 
 class TestGet(unittest.TestCase):
+    def setUp(self):
+        self.label = "Unittest"
+
     def test_invalid_label(self):
         with self.assertRaises(ValueError):
             get_emails("wronglabel", days=1)
