@@ -9,6 +9,8 @@ from email.message import Message
 
 class TestSend(unittest.TestCase):
     def setUp(self):
+        self.output_folder = OUTPUT_FOLDER
+        self.pdf_name = "XXXXXDXXXXXXXX.pdf"
         self.index = random.randint(0, 1000000)
         self.sender_email = "loxteam@loxsolution.com"
         self.incorrect_sender_email = "dummy@dummy.com"
@@ -17,7 +19,7 @@ class TestSend(unittest.TestCase):
         self.bcc_email_addresses = ["loxteam@loxsolution.com"]
         self.subject = "Unit Testing LoxServices"
         self.content = "This is a test email sent from the LoxServices unit tests."
-        self.pdf_path = os.path.join(OUTPUT_FOLDER, "XXXXXDXXXXXXXX.pdf")
+        self.pdf_path = os.path.join(self.output_folder, self.pdf_name)
         self.expected_subject = f"{self.subject} - {self.index}"
 
     def test_send_emails(self):
