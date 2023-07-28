@@ -88,5 +88,15 @@ class TestSend(unittest.TestCase):
             )
 
 
+class TestGet(unittest.TestCase):
+    def test_invalid_label(self):
+        with self.assertRaises(ValueError):
+            get_emails("wronglabel", days=1)
+
+    def test_no_email(self):
+        emails = get_emails(self.label, days=1, search={"subject": "wrongsubject"})
+        self.assertEqual(len(emails), 0)
+
+
 if __name__ == "__main__":
     unittest.main()
