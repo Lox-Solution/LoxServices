@@ -30,37 +30,44 @@ class TestChromeDriver(unittest.TestCase):
         if os.path.exists(self.folder_path):
             shutil.rmtree(self.folder_path)
 
-    @VirtualDisplay
     def test_run_chromedriver(self):
-        driver = run_chromedriver(
-            download_folder=self.folder_path,
-            size_length=960,
-            size_width=960,
-        )
+        # Set the environment variable before calling the decorator
+        os.environ["ENVIRONMENT"] = "production"
 
-        wait = WebDriverWait(driver, 15)
+        # The @VirtualDisplay decorator will now use 'ENVIRONMENT' set to 'production'
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
 
-        driver.get("https://fastest.fish/test-files")
+            wait = WebDriverWait(driver, 15)
 
-        # Check that no file was downloaded
-        self.assertEqual(
-            sum(len(files) for _, _, files in os.walk(self.folder_path)), 0
-        )
+            driver.get("https://fastest.fish/test-files")
 
-        time.sleep(1)
-        # Download a very small file
-        wait_until_clickable_and_click(
-            wait=wait,
-            selector="#vue > table > tbody > tr:nth-child(1) > td:nth-child(1) > a",
-            timeout=15,
-            by=By.CSS_SELECTOR,
-        )
-        wait_for_end_of_download(self.folder_path, 15)
+            # Check that no file was downloaded
+            self.assertEqual(
+                sum(len(files) for _, _, files in os.walk(self.folder_path)), 0
+            )
 
-        # Check that one file was downloaded
-        self.assertEqual(
-            sum(len(files) for _, _, files in os.walk(self.folder_path)), 1
-        )
+            time.sleep(1)
+            # Download a very small file
+            wait_until_clickable_and_click(
+                wait=wait,
+                selector="#vue > table > tbody > tr:nth-child(1) > td:nth-child(1) > a",
+                timeout=15,
+                by=By.CSS_SELECTOR,
+            )
+            wait_for_end_of_download(self.folder_path, 15)
+
+            # Check that one file was downloaded
+            self.assertEqual(
+                sum(len(files) for _, _, files in os.walk(self.folder_path)), 1
+            )
+
+        inner_test_method(self)
 
     @VirtualDisplay
     def test_run_chromedriver_prodiction(self):
