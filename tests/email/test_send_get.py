@@ -54,7 +54,7 @@ class TestSend(unittest.TestCase):
         self.assertEqual(emails[0]["Subject"], self.expected_subject)
 
         file_names = download_attachments(emails[0], self.temp_output_folder)
-        self.assertEqual(file_names[0], self.csv_path)
+        self.assertEqual(file_names[0], self.csv_name)
 
         # Case 2: Already downloaded file
         # Call the function with mock data
