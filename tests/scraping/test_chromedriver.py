@@ -13,6 +13,7 @@ from lox_services.scraping.selenium_util import (
     wait_until_clickable_and_click,
 )
 from selenium.common.exceptions import WebDriverException
+from lox_services.utils.decorators import VirtualDisplay
 from tests import OUTPUT_FOLDER
 import undetected_chromedriver as undetected_webdriver
 from mock import patch
@@ -29,6 +30,7 @@ class TestChromeDriver(unittest.TestCase):
         if os.path.exists(self.folder_path):
             shutil.rmtree(self.folder_path)
 
+    @VirtualDisplay
     def test_run_chromedriver(self):
         driver = run_chromedriver(
             download_folder=self.folder_path,
@@ -60,6 +62,7 @@ class TestChromeDriver(unittest.TestCase):
             sum(len(files) for _, _, files in os.walk(self.folder_path)), 1
         )
 
+    @VirtualDisplay
     def test_run_chromedriver_prodiction(self):
         # Test that the first driver is closed when a second one is created
         driver1 = run_chromedriver(
@@ -87,6 +90,7 @@ class TestChromeDriver(unittest.TestCase):
         driver2.get("https://fastest.fish/test-files")
         self.assertIsInstance(driver2, undetected_webdriver.Chrome)
 
+    @VirtualDisplay
     def test_chromedriver_screenshot(self):
         with patch.dict(
             "os.environ",
