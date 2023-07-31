@@ -126,6 +126,40 @@ class TestGet(unittest.TestCase):
         # No fetch calls should be made
         self.assertEqual(mock_imap_ssl_client.fetch.call_count, 0)
 
+    @patch("imaplib.IMAP4_SSL")
+    def test_unknown_error_occurred(self, mock_imaplib):
+        # Mock the IMAP4_SSL instance and its methods
+        mock_imap_ssl_client = MagicMock()
+        mock_imap_ssl_client.select.return_value = (
+            "OK",
+            b"1",
+        )  # Mock one email in the mailbox
+
+        # Patch the authenticate method to avoid actual authentication
+        def mock_authenticate(x, y):
+            return True
+
+        mock_imap_ssl_client.authenticate = mock_authenticate
+
+        # Apply the mocked IMAP4_SSL instance
+        mock_imaplib.return_value = mock_imap_ssl_client
+
+        # Mock the search method to return the email
+        mock_imap_ssl_client.search.return_value = ("OK", [b"1"])
+
+        # Mock the fetch method to return an error status
+        mock_imap_ssl_client.fetch.return_value = ("BAD", [b""])
+
+        # Call the function under test
+        with self.assertRaises(Exception) as context:
+            get_emails("Carriers/Chronopost", 30, search={}, strict=False)
+
+        # Assert that the function raised an exception with the correct message
+        self.assertEqual(
+            str(context.exception),
+            "An unknown error occured while trying to fetch email body.",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
