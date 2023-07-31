@@ -398,6 +398,7 @@ def remove_duplicate_NestedAccountNumbers(dataframe: pd.DataFrame) -> pd.DataFra
         ]
     return dataframe
 
+
 def remove_duplicate_currency_conversion(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes already saved currency conversion dataframe"""
     sql_query = """
@@ -436,9 +437,9 @@ def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
         raise MissingColumnsException(", ".join(missing_columns))
     # Check value invoice_url
     for invoice_url in dataframe["invoice_url"].to_list():
-        if pd.isna(invoice_url):
-            raise ValueError("invoice_url should be defined for each row")
-        if not re.match(r"(https://storage.cloud.google.com).*", invoice_url):
+        if not pd.isna(invoice_url) and not re.match(
+            r"(https://storage.cloud.google.com).*", invoice_url
+        ):
             raise ValueError(f"invoice_url has to start by {INVOICE_BASE_URL}")
 
     # Check value is_original_invoice
