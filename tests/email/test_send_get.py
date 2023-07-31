@@ -8,7 +8,7 @@ from tests import OUTPUT_FOLDER
 from email.message import Message
 
 
-class TestSend(unittest.TestCase):
+class TestSendGet(unittest.TestCase):
     def setUp(self):
         self.output_folder = OUTPUT_FOLDER
         self.temp_output_folder = os.path.join(self.output_folder, "temp")
@@ -32,7 +32,7 @@ class TestSend(unittest.TestCase):
         if os.path.exists(self.temp_output_folder):
             shutil.rmtree(self.temp_output_folder)
 
-    def test_send_emails(self):
+    def test_send_get_emails(self):
         send_emails_from_loxsolution_account(
             sender_email_address=self.sender_email,
             receiver_email_addresses=self.receiver_emails,
