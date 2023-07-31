@@ -2,6 +2,7 @@ import os
 import random
 import shutil
 import unittest
+from unittest.mock import MagicMock, patch
 from lox_services.email.send import send_emails_from_loxsolution_account
 from lox_services.email.get import get_emails, download_attachments
 from tests import OUTPUT_FOLDER
@@ -43,7 +44,6 @@ class TestSendGet(unittest.TestCase):
             attachments=[self.csv_path],
         )
 
-        # Call the function with mock data
         emails = get_emails(
             self.label, days=1, search={"subject": self.expected_subject}
         )
@@ -97,6 +97,34 @@ class TestGet(unittest.TestCase):
     def test_no_email(self):
         emails = get_emails(self.label, days=1, search={"subject": "wrongsubject"})
         self.assertEqual(len(emails), 0)
+
+    @patch("imaplib.IMAP4_SSL")
+    def test_no_emails_found(self, mock_imaplib):
+        # Mock the IMAP4_SSL instance and its methods
+        mock_imap_ssl_client = MagicMock()
+        mock_imap_ssl_client.select.return_value = ("OK", b"0")  # Mock an empty mailbox
+
+        # Patch the authenticate method to avoid actual authentication
+        def mock_authenticate(x, y):
+            return True
+
+        mock_imap_ssl_client.authenticate = mock_authenticate
+
+        # Apply the mocked IMAP4_SSL instance
+        mock_imaplib.return_value = mock_imap_ssl_client
+
+        # Mock the search method to return an empty result
+        mock_imap_ssl_client.search.return_value = ("BAD", [b""])
+
+        # Call the function under test
+        result = get_emails("Carriers/Chronopost", 30, search={}, strict=False)
+
+        # Assert the function returns None when no emails are found
+        self.assertIsNone(result)
+        mock_imap_ssl_client.select.assert_called_once_with("Carriers/Chronopost")
+        mock_imap_ssl_client.search.assert_called_once()
+        # No fetch calls should be made
+        self.assertEqual(mock_imap_ssl_client.fetch.call_count, 0)
 
 
 if __name__ == "__main__":
