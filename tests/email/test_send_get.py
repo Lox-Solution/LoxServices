@@ -14,6 +14,7 @@ class TestSendGet(unittest.TestCase):
         self.output_folder = OUTPUT_FOLDER
         self.temp_output_folder = os.path.join(self.output_folder, "temp")
         self.csv_name = "dummy.csv"
+        self.html_name = "dummy.html"
         self.index = random.randint(0, 1000000)
         self.sender_email = "loxteam@loxsolution.com"
         self.incorrect_sender_email = "dummy@dummy.com"
@@ -23,6 +24,7 @@ class TestSendGet(unittest.TestCase):
         self.subject = "Unit Testing LoxServices"
         self.content = "This is a test email sent from the LoxServices unit tests."
         self.csv_path = os.path.join(self.output_folder, self.csv_name)
+        self.html_path = os.path.join(self.output_folder, self.html_name)
         self.expected_subject = f"{self.subject} - {self.index}"
         self.label = "Unittest"
 
@@ -41,7 +43,7 @@ class TestSendGet(unittest.TestCase):
             bcc_email_addresses=self.bcc_email_addresses,
             subject=f"{self.subject} - {self.index}",
             content=self.content,
-            attachments=[self.csv_path],
+            attachments=[self.csv_path, self.html_path],
         )
 
         emails = get_emails(
@@ -54,7 +56,8 @@ class TestSendGet(unittest.TestCase):
         self.assertEqual(emails[0]["Subject"], self.expected_subject)
 
         file_names = download_attachments(emails[0], self.temp_output_folder)
-        self.assertEqual(file_names[0], self.csv_name)
+        self.assertTrue(self.csv_name in file_names)
+        self.assertTrue(self.html_name in file_names)
 
         # Case 2: Already downloaded file
         # Call the function with mock data
