@@ -77,34 +77,37 @@ class TestChromeDriver(unittest.TestCase):
         # Test that the first driver is closed when a second one is created
 
         # Set the environment variable before calling the decorator
-        with patch.dict(
+        @VirtualDisplay
+        @patch.dict(
             "os.environ",
             {
                 "ENVIRONMENT": "production",
             },
-        ):
+        )
+        @patch(
+            "lox_services.config.env_variables.get_env_variable",
+            return_value="production",
+        )
+        def test_inner_method(self, mock_get_env_variable):
+            driver1 = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver2 = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
 
-            @VirtualDisplay
-            def inner_test_method(self):
-                driver1 = run_chromedriver(
-                    download_folder=self.folder_path,
-                    size_length=960,
-                    size_width=960,
-                )
-                driver2 = run_chromedriver(
-                    download_folder=self.folder_path,
-                    size_length=960,
-                    size_width=960,
-                )
+            # It is not possible to access the driver after it has been killed when the second has been created
+            with self.assertRaises(Exception):
+                driver1.get("https://fastest.fish/test-files")
 
-                # It is not possible to access the driver after it has been killed when the second has been created
-                with self.assertRaises(Exception):
-                    driver1.get("https://fastest.fish/test-files")
+            driver2.get("https://fastest.fish/test-files")
+            self.assertIsInstance(driver2, undetected_webdriver.Chrome)
 
-                driver2.get("https://fastest.fish/test-files")
-                self.assertIsInstance(driver2, undetected_webdriver.Chrome)
-
-            inner_test_method(self)
+        test_inner_method(self)
 
     def test_chromedriver_screenshot(self):
         # Set the environment variable before calling the decorator
