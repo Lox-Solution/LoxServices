@@ -28,8 +28,6 @@ jobs:
       run: |
         su lox -c 'sudo /usr/local/bin/python -m pip install --upgrade pip'
         su lox -c 'sudo pip install --no-cache-dir -r requirements.txt'
-        google-chrome --product-version
-        chromium-browser --product-version
     - name: Set PYTHONPATH
       run: |
         echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
