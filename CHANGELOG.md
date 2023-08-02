@@ -30,3 +30,4 @@
 0.1.20 Added function to find local chrome version, function to handle multiple brightdata requests and currency conversion table check
 0.1.21 Improved chromedriver service
 0.1.22 Added unit testing and implemented code coverage, added retry decorator
+0.1.23 Added badge to readme and missing translation for invoice generation, removed check on invoice_url value
