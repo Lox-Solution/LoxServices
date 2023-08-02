@@ -30,6 +30,8 @@ class TestChromeDriver(unittest.TestCase):
         if os.path.exists(self.folder_path):
             shutil.rmtree(self.folder_path)
 
+    # The @VirtualDisplay decorator will now use 'ENVIRONMENT' set to 'production'
+    @VirtualDisplay
     def test_run_chromedriver(self):
         # Set the environment variable before calling the decorator
         with patch.dict(
@@ -38,8 +40,6 @@ class TestChromeDriver(unittest.TestCase):
                 "ENVIRONMENT": "production",
             },
         ):
-            # The @VirtualDisplay decorator will now use 'ENVIRONMENT' set to 'production'
-            @VirtualDisplay
             def inner_test_method(self):
                 driver = run_chromedriver(
                     download_folder=self.folder_path,
