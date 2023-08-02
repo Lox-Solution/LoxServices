@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/Lox-Solution/LoxServices/branch/master/graph/badge.svg?token=MJJA66XGER)](https://codecov.io/gh/Lox-Solution/LoxServices)
+
 # LoxServices
 This README was exported from [this Notion page](https://www.notion.so/loxsolution/Python-private-packages-eeb51ca4b8bd471991c9d7ea01d68b50) the 19th of December 2022.
 ## Disclaimer
