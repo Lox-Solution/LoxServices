@@ -3,7 +3,7 @@ import random
 import shutil
 import unittest
 from unittest.mock import MagicMock, patch
-from lox_services.email.send import send_emails_from_loxsolution_account
+from lox_services.email.send import send_emails_from_loxsolution_account, send_email
 from lox_services.email.get import get_emails, download_attachments
 from tests import OUTPUT_FOLDER
 from email.message import Message
@@ -34,6 +34,50 @@ class TestSendGet(unittest.TestCase):
     def tearDown(self):
         if os.path.exists(self.temp_output_folder):
             shutil.rmtree(self.temp_output_folder)
+
+    @patch("smtplib.SMTP")
+    def test_send_email_success(self, mock_smtp):
+        # Mock the SMTP instance and its methods
+        smtp_instance = mock_smtp.return_value
+        smtp_instance.sendmail.return_value = {}
+
+        # Call the function that sends the email
+        result = send_email(
+            sender_email_address=self.sender_email,
+            sender_smtp_server="smtp.gmail.com",
+            sender_password="dummy",
+            receiver_email_address=self.receiver_emails[0],
+            cc_email_addresses=self.cc_email_addresses,
+            bcc_email_addresses=self.bcc_email_addresses,
+            subject=self.subject,
+            content=self.content,
+            attachments=[self.csv_path, self.html_path],
+        )
+
+        # Assert that the function returned successfully
+        self.assertEqual(result, True)
+
+    @patch("smtplib.SMTP")
+    def test_send_email_failure(self, mock_smtp):
+        # Mock the SMTP instance and its methods to simulate failure
+        smtp_instance = mock_smtp.return_value
+        smtp_instance.sendmail.side_effect = Exception("Connection error")
+
+        # Call the function that sends the email
+        result = send_email(
+            sender_email_address=self.sender_email,
+            sender_smtp_server="smtp.gmail.com",
+            sender_password="dummy",
+            receiver_email_address=self.receiver_emails[0],
+            cc_email_addresses=self.cc_email_addresses,
+            bcc_email_addresses=self.bcc_email_addresses,
+            subject=self.subject,
+            content=self.content,
+            attachments=[self.csv_path, self.html_path],
+        )
+
+        # Assert that the function returned False due to the failure
+        self.assertEqual(result, False)
 
     def test_send_get_emails(self):
         send_emails_from_loxsolution_account(
