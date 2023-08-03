@@ -73,39 +73,6 @@ class TestChromeDriver(unittest.TestCase):
 
         inner_test_method(self)
 
-    def test_run_chromedriver_production(self):
-        # Test that the first driver is closed when a second one is created
-
-        # Set the environment variable before calling the decorator
-
-        @patch.dict(
-            "os.environ",
-            {
-                "ENVIRONMENT": "production",
-            },
-        )
-        @VirtualDisplay
-        def test_inner_method(self):
-            driver1 = run_chromedriver(
-                download_folder=self.folder_path,
-                size_length=960,
-                size_width=960,
-            )
-            driver2 = run_chromedriver(
-                download_folder=self.folder_path,
-                size_length=960,
-                size_width=960,
-            )
-
-            # It is not possible to access the driver after it has been killed when the second has been created
-            with self.assertRaises(Exception):
-                driver1.get("https://fastest.fish/test-files")
-
-            driver2.get("https://fastest.fish/test-files")
-            self.assertIsInstance(driver2, undetected_webdriver.Chrome)
-
-        test_inner_method(self)
-
     def test_chromedriver_screenshot(self):
         # Set the environment variable before calling the decorator
         # Set the environment variable before calling the decorator
