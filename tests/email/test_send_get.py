@@ -3,7 +3,11 @@ import random
 import shutil
 import unittest
 from unittest.mock import MagicMock, patch
-from lox_services.email.send import send_emails_from_loxsolution_account, send_email
+from lox_services.email.send import (
+    ContentTypes,
+    send_emails_from_loxsolution_account,
+    send_email,
+)
 from lox_services.email.get import get_emails, download_attachments
 from tests import OUTPUT_FOLDER
 from email.message import Message
@@ -27,6 +31,7 @@ class TestSendGet(unittest.TestCase):
         self.html_path = os.path.join(self.output_folder, self.html_name)
         self.expected_subject = f"{self.subject} - {self.index}"
         self.label = "Unittest"
+        self.html_content = f"<html><body><h1>{self.content}</h1></body></html>"
 
         if not os.path.exists(self.temp_output_folder):
             shutil.os.makedirs(self.temp_output_folder)
@@ -79,6 +84,29 @@ class TestSendGet(unittest.TestCase):
         # Assert that the function returned False due to the failure
         self.assertEqual(result, False)
 
+    @patch("smtplib.SMTP")
+    def test_send_email_html_content(self, mock_smtp):
+        # Mock the SMTP instance and its methods
+        smtp_instance = mock_smtp.return_value
+        smtp_instance.sendmail.return_value = {}
+
+        # Call the function that sends the email
+        result = send_email(
+            sender_email_address=self.sender_email,
+            sender_smtp_server="smtp.gmail.com",
+            sender_password="dummy",
+            receiver_email_address=self.receiver_emails[0],
+            cc_email_addresses=self.cc_email_addresses,
+            bcc_email_addresses=self.bcc_email_addresses,
+            subject=self.subject,
+            content=self.html_content,
+            content_type=ContentTypes.HTML,
+            attachments=[self.csv_path, self.html_path],
+        )
+
+        # Assert that the function returned successfully
+        self.assertEqual(result, True)
+
     def test_send_get_emails(self):
         send_emails_from_loxsolution_account(
             sender_email_address=self.sender_email,
@@ -87,7 +115,7 @@ class TestSendGet(unittest.TestCase):
             bcc_email_addresses=self.bcc_email_addresses,
             subject=f"{self.subject} - {self.index}",
             content=self.content,
-            attachments=[self.csv_path, self.html_path],
+            attachments=[self.csv_path, self.html_path, None],
         )
 
         emails = get_emails(
@@ -109,18 +137,6 @@ class TestSendGet(unittest.TestCase):
 
         # Assert the results
         self.assertEqual(len(file_names), 0)
-
-    def send_email_without_attachment(self):
-        send_emails_from_loxsolution_account(
-            sender_email_address=self.sender_email,
-            receiver_email_addresses=self.receiver_emails,
-            cc_email_addresses=self.cc_email_addresses,
-            bcc_email_addresses=self.bcc_email_addresses,
-            subject=f"{self.subject} - {self.index}",
-            content=self.content,
-            attachments=[],
-        )
-        self.assertTrue(True)
 
     def test_invalid_sender_email(self):
         # Run the function with the test data and expect a ValueError
