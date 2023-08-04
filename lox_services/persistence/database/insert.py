@@ -435,12 +435,14 @@ def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
     )
     if missing_columns:
         raise MissingColumnsException(", ".join(missing_columns))
-    # Check value invoice_url
-    for invoice_url in dataframe["invoice_url"].to_list():
-        if not pd.isna(invoice_url) and not re.match(
-            r"(https://storage.cloud.google.com).*", invoice_url
-        ):
-            raise ValueError(f"invoice_url has to start by {INVOICE_BASE_URL}")
+
+    if "invoice_url" in dataframe.columns:
+        # Check value invoice_url
+        for invoice_url in dataframe["invoice_url"].to_list():
+            if not pd.isna(invoice_url) and not re.match(
+                r"(https://storage.cloud.google.com).*", invoice_url
+            ):
+                raise ValueError(f"invoice_url has to start by {INVOICE_BASE_URL}")
 
     # Check value is_original_invoice
     is_original_invoice_wrong_values = dataframe[
