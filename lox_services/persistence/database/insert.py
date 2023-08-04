@@ -431,6 +431,8 @@ def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
             "tracking_number",
             "data_source",
             "is_original_invoice",
+            "quantity",
+            "net_amount",
         }.difference(set(dataframe.columns))
     )
     if missing_columns:
