@@ -62,12 +62,20 @@ class TestUtils(unittest.TestCase):
     def clear_cookie_banner(self, driver, wait):
         wait_until_page_loaded(driver)
         # Clear the cookie banner
-        wait_until_clickable_and_click(
-            wait,
-            "body > div.fc-consent-root > div.fc-dialog-container > div.fc-dialog.fc-choice-dialog > div.fc-footer-buttons-container > div.fc-footer-buttons > button.fc-button.fc-cta-consent.fc-primary-button > p",
-            DEFAULT_TIMEOUT,
-            DEFAULT_SELECTOR_TYPE,
-        )
+        try:
+            wait_until_clickable_and_click(
+                wait,
+                "body > div.fc-consent-root > div.fc-dialog-container > div.fc-dialog.fc-choice-dialog > div.fc-footer-buttons-container > div.fc-footer-buttons > button.fc-button.fc-cta-consent.fc-primary-button > p",
+                DEFAULT_TIMEOUT,
+                DEFAULT_SELECTOR_TYPE,
+            )
+        except:
+            wait_until_clickable_and_click(
+                wait,
+                "#qc-cmp2-ui > div.qc-cmp2-footer.qc-cmp2-footer-overlay.qc-cmp2-footer-scrolled > div > button.sc-ifAKCX.ljEJIv",
+                DEFAULT_TIMEOUT,
+                DEFAULT_SELECTOR_TYPE,
+            )
         time.sleep(0.5)
 
     def ups_clear_cookie_banner(self, driver, wait):
