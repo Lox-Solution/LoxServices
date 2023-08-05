@@ -28,6 +28,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support import ui
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
+from lox_services.utils.decorators import VirtualDisplay
+from mock import patch
+
 DEFAULT_TIMEOUT = 5
 DEFAULT_WRONG_CSS_SELECTOR = ".wrong_selector"
 DEFAULT_RIGHT_CSS_SELECTOR = "#fname"
@@ -37,6 +40,13 @@ DEFAULT_TEXT_TO_WRITE = "some text"
 
 
 class TestUtils(unittest.TestCase):
+    @patch.dict(
+        "os.environ",
+        {
+            "ENVIRONMENT": "production",
+        },
+    )
+    @VirtualDisplay
     def setUp(self):
         self.folder_path = Path(os.getcwd()) / "tests" / "scraping" / "download_folder"
         self.folder_path.mkdir(parents=True, exist_ok=True)
@@ -82,23 +92,25 @@ class TestUtils(unittest.TestCase):
         wait_until_page_loaded(driver=self.driver)
         self.assertTrue(True)
 
-    # def test_wait_for_end_of_download(self):
-    #     # Test case for successful download completion
-    #     downloaded_file = os.path.join(self.folder_path, "temp_file.csv")
-    #     with open(downloaded_file, "w") as f:
-    #         f.write("Download,Completed")
-    #     seconds = wait_for_end_of_download(self.folder_path, DEFAULT_TIMEOUT)
+    def test_wait_for_end_of_download(self):
+        # Test case for successful download completion
+        downloaded_file = os.path.join(self.folder_path, "temp_file.csv")
+        with open(downloaded_file, "w") as f:
+            f.write("Download,Completed")
+        seconds = wait_for_end_of_download(self.folder_path, DEFAULT_TIMEOUT)
 
-    #     self.assertLess(seconds, DEFAULT_TIMEOUT)
+        self.assertLess(seconds, DEFAULT_TIMEOUT)
 
-    # Test case for download not completed within timeout
-    # partially_downloaded_file = os.path.join(self.folder_path, 'temp_file.crdownload')
-    # with open(partially_downloaded_file, 'w') as f:
-    #     f.write('Download,Not,Completed')
+        # Test case for download not completed within timeout
+        partially_downloaded_file = os.path.join(
+            self.folder_path, "temp_file.crdownload"
+        )
+        with open(partially_downloaded_file, "w") as f:
+            f.write("Download,Not,Completed")
 
-    # seconds = wait_for_end_of_download(self.folder_path, DEFAULT_TIMEOUT)
+        seconds = wait_for_end_of_download(self.folder_path, DEFAULT_TIMEOUT)
 
-    # self.assertEqual(seconds, DEFAULT_TIMEOUT)
+        self.assertEqual(seconds, DEFAULT_TIMEOUT)
 
     def test_safe_find_element(self):
         element = safe_find_element(
