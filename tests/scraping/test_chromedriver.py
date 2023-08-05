@@ -98,6 +98,26 @@ class TestChromeDriver(unittest.TestCase):
 
             inner_test_method(self)
 
+    def test_chromedriver_exception(self):
+        # Set the environment variable before calling the decorator
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            with self.assertRaises(Exception):
+                run_chromedriver(
+                    download_folder=self.folder_path,
+                    size_length=960,
+                    size_width=960,
+                    version=1,
+                )
+
+            inner_test_method(self)
+
 
 if __name__ == "__main__":
     unittest.main()
