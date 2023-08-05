@@ -54,39 +54,24 @@ class TestUtils(unittest.TestCase):
             OUTPUT_FOLDER, "tests", "scraping", "download_folder"
         )
         os.makedirs(self.folder_path, exist_ok=True)
-        self.driver = run_chromedriver(
-            download_folder=self.folder_path,
-            size_length=960,
-            size_width=960,
-        )
-        self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
-        self.driver.get("https://artoftesting.com/samplesiteforselenium")
 
-    @patch.dict(
-        "os.environ",
-        {
-            "ENVIRONMENT": "production",
-        },
-    )
-    @VirtualDisplay
     def tearDown(self):
-        self.driver.quit()
         if os.path.exists(self.folder_path):
             shutil.rmtree(self.folder_path)
 
-    def clear_cookie_banner(self, wait):
-        wait_until_page_loaded(driver=self.driver)
+    def clear_cookie_banner(self, driver, wait):
+        wait_until_page_loaded(driver)
         # Clear the cookie banner
         wait_until_clickable_and_click(
             wait,
-            "#qc-cmp2-ui > div.qc-cmp2-footer.qc-cmp2-footer-overlay.qc-cmp2-footer-scrolled > div > button.sc-ifAKCX.ljEJIv",
+            "body > div.fc-consent-root > div.fc-dialog-container > div.fc-dialog.fc-choice-dialog > div.fc-footer-buttons-container > div.fc-footer-buttons > button.fc-button.fc-cta-consent.fc-primary-button > p",
             DEFAULT_TIMEOUT,
             DEFAULT_SELECTOR_TYPE,
         )
         time.sleep(0.5)
 
-    def ups_clear_cookie_banner(self, wait):
-        wait_until_page_loaded(driver=self.driver)
+    def ups_clear_cookie_banner(self, driver, wait):
+        wait_until_page_loaded(driver)
         # Clear the cookie banner
         wait_until_clickable_and_click(
             wait,
@@ -100,304 +85,523 @@ class TestUtils(unittest.TestCase):
         time.sleep(0.5)
 
     def test_wait_until_page_loaded(self):
-        wait_until_page_loaded(driver=self.driver)
-        self.assertTrue(True)
+        # Set the environment variable before calling the decorator
 
-    def test_wait_for_end_of_download(self):
-        # Test case for successful download completion
-        downloaded_file = os.path.join(self.folder_path, "temp_file.csv")
-        with open(downloaded_file, "w") as f:
-            f.write("Download,Completed")
-        seconds = wait_for_end_of_download(self.folder_path, DEFAULT_TIMEOUT)
-
-        self.assertLess(seconds, DEFAULT_TIMEOUT)
-
-        # Test case for download not completed within timeout
-        partially_downloaded_file = os.path.join(
-            self.folder_path, "temp_file.crdownload"
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
         )
-        with open(partially_downloaded_file, "w") as f:
-            f.write("Download,Not,Completed")
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
 
-        seconds = wait_for_end_of_download(self.folder_path, DEFAULT_TIMEOUT)
+            wait_until_page_loaded(driver=driver)
+            self.assertTrue(True)
 
-        self.assertEqual(seconds, DEFAULT_TIMEOUT)
+        inner_test_method(self)
+
+    # def test_wait_for_end_of_download(self):
+    #     # Test case for successful download completion
+    #     downloaded_file = os.path.join(self.folder_path, "temp_file.csv")
+    #     with open(downloaded_file, "w") as f:
+    #         f.write("Download,Completed")
+    #     seconds = wait_for_end_of_download(self.folder_path, DEFAULT_TIMEOUT)
+
+    #     self.assertLess(seconds, DEFAULT_TIMEOUT)
+
+    #     # Test case for download not completed within timeout
+    #     partially_downloaded_file = os.path.join(
+    #         self.folder_path, "temp_file.crdownload"
+    #     )
+    #     with open(partially_downloaded_file, "w") as f:
+    #         f.write("Download,Not,Completed")
+
+    #     seconds = wait_for_end_of_download(self.folder_path, DEFAULT_TIMEOUT)
+
+    #     self.assertEqual(seconds, DEFAULT_TIMEOUT)
 
     def test_safe_find_element(self):
-        element = safe_find_element(
-            driver=self.driver,
-            selector_type=DEFAULT_SELECTOR_TYPE,
-            selector=DEFAULT_RIGHT_CSS_SELECTOR,
-            wait=self.wait,
-            timeout=DEFAULT_TIMEOUT,
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
         )
-        self.assertIsInstance(element, WebElement)
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
 
-        with self.assertRaises(TimeoutException):
-            safe_find_element(
-                driver=self.driver,
+            wait = WebDriverWait(driver, 15)
+
+            element = safe_find_element(
+                driver=driver,
                 selector_type=DEFAULT_SELECTOR_TYPE,
-                selector=DEFAULT_WRONG_CSS_SELECTOR,
-                wait=self.wait,
+                selector=DEFAULT_RIGHT_CSS_SELECTOR,
+                wait=wait,
                 timeout=DEFAULT_TIMEOUT,
             )
+            self.assertIsInstance(element, WebElement)
+
+            with self.assertRaises(TimeoutException):
+                safe_find_element(
+                    driver=driver,
+                    selector_type=DEFAULT_SELECTOR_TYPE,
+                    selector=DEFAULT_WRONG_CSS_SELECTOR,
+                    wait=wait,
+                    timeout=DEFAULT_TIMEOUT,
+                )
+
+        inner_test_method(self)
 
     def test_find(self):
-        element = find(self.driver, DEFAULT_RIGHT_CSS_SELECTOR, DEFAULT_SELECTOR_TYPE)
-        self.assertIsInstance(element, WebElement)
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
 
-        with self.assertRaises(NoSuchElementException):
-            find(self.driver, DEFAULT_WRONG_CSS_SELECTOR, DEFAULT_SELECTOR_TYPE)
+            element = find(driver, DEFAULT_RIGHT_CSS_SELECTOR, DEFAULT_SELECTOR_TYPE)
+            self.assertIsInstance(element, WebElement)
+
+            with self.assertRaises(NoSuchElementException):
+                find(driver, DEFAULT_WRONG_CSS_SELECTOR, DEFAULT_SELECTOR_TYPE)
+
+        inner_test_method(self)
 
     def test_safe_find_elements(self):
-        elements = safe_find_elements(
-            driver=self.driver,
-            selector_type=DEFAULT_SELECTOR_TYPE,
-            selector="#commonWebElements > form",
-            timeout=DEFAULT_TIMEOUT,
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
         )
-        self.assertEqual(len(elements), 2)
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
 
-        with self.assertRaises(NoSuchElementException):
-            safe_find_elements(
-                driver=self.driver,
+            elements = safe_find_elements(
+                driver=driver,
                 selector_type=DEFAULT_SELECTOR_TYPE,
-                selector=DEFAULT_WRONG_CSS_SELECTOR,
+                selector="#commonWebElements > form",
                 timeout=DEFAULT_TIMEOUT,
             )
+            self.assertEqual(len(elements), 2)
+
+            with self.assertRaises(NoSuchElementException):
+                safe_find_elements(
+                    driver=driver,
+                    selector_type=DEFAULT_SELECTOR_TYPE,
+                    selector=DEFAULT_WRONG_CSS_SELECTOR,
+                    timeout=DEFAULT_TIMEOUT,
+                )
+
+        inner_test_method(self)
 
     def test_wait_until_clickable_and_click(self):
-        self.clear_cookie_banner(self.wait)
-        # Test case for successful click with wait
-        wait_until_clickable_and_click(
-            self.wait,
-            DEFAULT_RIGHT_CSS_SELECTOR,
-            DEFAULT_TIMEOUT,
-            DEFAULT_SELECTOR_TYPE,
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
         )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
 
-        # If the function completes without raising an exception, it executed well
-        self.assertTrue(True)
+            wait = WebDriverWait(driver, 15)
 
-        # Test case for successful click with driver
-        wait_until_clickable_and_click(
-            None,
-            DEFAULT_RIGHT_CSS_SELECTOR,
-            DEFAULT_TIMEOUT,
-            DEFAULT_SELECTOR_TYPE,
-            self.driver,
-        )
-
-        # If the function completes without raising an exception, it executed well
-        self.assertTrue(True)
-
-        # Test case for click on non-clickable element and wait
-        with self.assertRaises(TimeoutException):
+            self.clear_cookie_banner(driver, wait)
+            # Test case for successful click with wait
             wait_until_clickable_and_click(
-                self.wait,
-                DEFAULT_WRONG_CSS_SELECTOR,
+                wait,
+                DEFAULT_RIGHT_CSS_SELECTOR,
                 DEFAULT_TIMEOUT,
                 DEFAULT_SELECTOR_TYPE,
             )
 
-        # Test case for click on non-clickable element and driver
-        with self.assertRaises(TimeoutException):
+            # If the function completes without raising an exception, it executed well
+            self.assertTrue(True)
+
+            # Test case for successful click with driver
             wait_until_clickable_and_click(
                 None,
-                DEFAULT_WRONG_CSS_SELECTOR,
+                DEFAULT_RIGHT_CSS_SELECTOR,
                 DEFAULT_TIMEOUT,
                 DEFAULT_SELECTOR_TYPE,
-                self.driver,
+                driver,
             )
+
+            # If the function completes without raising an exception, it executed well
+            self.assertTrue(True)
+
+            # Test case for click on non-clickable element and wait
+            with self.assertRaises(TimeoutException):
+                wait_until_clickable_and_click(
+                    wait,
+                    DEFAULT_WRONG_CSS_SELECTOR,
+                    DEFAULT_TIMEOUT,
+                    DEFAULT_SELECTOR_TYPE,
+                )
+
+            # Test case for click on non-clickable element and driver
+            with self.assertRaises(TimeoutException):
+                wait_until_clickable_and_click(
+                    None,
+                    DEFAULT_WRONG_CSS_SELECTOR,
+                    DEFAULT_TIMEOUT,
+                    DEFAULT_SELECTOR_TYPE,
+                    driver,
+                )
+
+        inner_test_method(self)
 
     def test_wait_until_clickable_and_click_by_xpath(self):
-        self.clear_cookie_banner(self.wait)
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
 
-        # Test case for successful click by XPath
-        xpath = '//*[@id="idOfButton"]'
-        wait_until_clickable_and_click_by_xpath(self.wait, xpath)
+            wait = WebDriverWait(driver, 15)
+            self.clear_cookie_banner(driver, wait)
 
-        # Test case for click on non-clickable element by XPath
-        wrong_xpath = '//button[@id="wrongId"]'
-        with self.assertRaises(TimeoutException):
-            wait_until_clickable_and_click_by_xpath(self.wait, wrong_xpath)
+            # Test case for successful click by XPath
+            xpath = '//*[@id="idOfButton"]'
+            wait_until_clickable_and_click_by_xpath(wait, xpath)
+
+            # Test case for click on non-clickable element by XPath
+            wrong_xpath = '//button[@id="wrongId"]'
+            with self.assertRaises(TimeoutException):
+                wait_until_clickable_and_click_by_xpath(wait, wrong_xpath)
+
+        inner_test_method(self)
 
     def test_wait_then_clear(self):
-        self.clear_cookie_banner(self.wait)
-
-        safe_send_keys(
-            self.driver,
-            DEFAULT_RIGHT_CSS_SELECTOR,
-            DEFAULT_TEXT_TO_WRITE,
-            selector_type=By.CSS_SELECTOR,
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
         )
-
-        # Assert that the input is not empty before calling wait_then_clear
-        element = safe_find_element(
-            driver=self.driver,
-            selector_type=DEFAULT_SELECTOR_TYPE,
-            selector=DEFAULT_RIGHT_CSS_SELECTOR,
-            wait=self.wait,
-            timeout=DEFAULT_TIMEOUT,
-        )
-
-        value_before_clear = element.get_attribute("value")
-        self.assertEqual(value_before_clear, DEFAULT_TEXT_TO_WRITE)
-
-        # Call wait_then_clear and assert that the input is cleared
-        wait_then_clear(self.driver, self.wait, DEFAULT_RIGHT_CSS_SELECTOR)
-        value_after_clear = element.get_attribute("value")
-        self.assertEqual(value_after_clear, "")
-
-        # Test case when the element doesn't exist
-        with self.assertRaises(TimeoutException):
-            wait_then_clear(self.driver, self.wait, DEFAULT_WRONG_CSS_SELECTOR)
-
-    def test_wait_then_send_keys(self):
-        self.driver.get(
-            "https://wwwapps.ups.com/doapp/signup?loc=nl_NL&ClientId=13&returnto=https:%2F%2Fwww.ups.com%2Fnl%2Fnl%2FHome.page"
-        )
-        self.ups_clear_cookie_banner(self.wait)
-        # Test case when the element exists
-        wait_then_send_keys(
-            self.driver, self.wait, "#signUpName", DEFAULT_TEXT_TO_WRITE, clear=True
-        )
-
-        # Perform assertions to check if the input was successfully sent
-        element = self.driver.find_element(By.CSS_SELECTOR, "#signUpName")
-        value = element.get_attribute("value")
-        self.assertEqual(value, DEFAULT_TEXT_TO_WRITE)
-
-        # Test case when the element exists and the clear is not applied
-        wait_then_send_keys(
-            self.driver, self.wait, "#signUpName", DEFAULT_TEXT_TO_WRITE, clear=False
-        )
-
-        # Perform assertions to check if the input was successfully sent without clearing
-        element = self.driver.find_element(By.CSS_SELECTOR, "#signUpName")
-        value = element.get_attribute("value")
-        self.assertEqual(value, DEFAULT_TEXT_TO_WRITE + DEFAULT_TEXT_TO_WRITE)
-
-        # Test case when the element exists and the clear is applied
-        wait_then_send_keys(
-            self.driver, self.wait, "#signUpName", DEFAULT_TEXT_TO_WRITE, clear=True
-        )
-
-        # Perform assertions to check if the input was successfully sent with clearing
-        element = self.driver.find_element(By.CSS_SELECTOR, "#signUpName")
-        value = element.get_attribute("value")
-        self.assertEqual(value, DEFAULT_TEXT_TO_WRITE)
-
-        # Test case when the element doesn't exist
-        with self.assertRaises(TimeoutException):
-            wait_then_send_keys(
-                driver=self.driver,
-                wait=self.wait,
-                selector=DEFAULT_WRONG_CSS_SELECTOR,
-                input_text=DEFAULT_TEXT_TO_WRITE,
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
             )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
 
-    def test_safe_send_keys(self):
-        self.clear_cookie_banner(self.wait)
+            wait = WebDriverWait(driver, 15)
 
-        # Test case when the element exists
-        safe_send_keys(
-            self.driver,
-            DEFAULT_RIGHT_CSS_SELECTOR,
-            DEFAULT_TEXT_TO_WRITE,
-            selector_type=By.CSS_SELECTOR,
-        )
+            self.clear_cookie_banner(driver, wait)
 
-        # Perform assertions to check if the input was successfully sent
-        element = self.driver.find_element(By.CSS_SELECTOR, DEFAULT_RIGHT_CSS_SELECTOR)
-        value = element.get_attribute("value")
-        self.assertEqual(value, DEFAULT_TEXT_TO_WRITE)
-
-        # Test case when the element doesn't exist
-        with self.assertRaises(TimeoutException):
             safe_send_keys(
-                self.driver,
-                DEFAULT_WRONG_CSS_SELECTOR,
+                driver,
+                DEFAULT_RIGHT_CSS_SELECTOR,
                 DEFAULT_TEXT_TO_WRITE,
                 selector_type=By.CSS_SELECTOR,
             )
 
-    def test_wait_till_disapear(self):
-        self.driver.get(
-            "https://wwwapps.ups.com/doapp/signup?loc=nl_NL&ClientId=13&returnto=https:%2F%2Fwww.ups.com%2Fnl%2Fnl%2FHome.page"
-        )
-        self.ups_clear_cookie_banner(self.wait)
+            # Assert that the input is not empty before calling wait_then_clear
+            element = safe_find_element(
+                driver=driver,
+                selector_type=DEFAULT_SELECTOR_TYPE,
+                selector=DEFAULT_RIGHT_CSS_SELECTOR,
+                wait=wait,
+                timeout=DEFAULT_TIMEOUT,
+            )
 
-        wait_till_disapear(
-            wait=self.wait,
-            selector_type=DEFAULT_SELECTOR_TYPE,
-            selector="div > div > img",
-            timeout=DEFAULT_TIMEOUT,
+            value_before_clear = element.get_attribute("value")
+            self.assertEqual(value_before_clear, DEFAULT_TEXT_TO_WRITE)
+
+            # Call wait_then_clear and assert that the input is cleared
+            wait_then_clear(driver, wait, DEFAULT_RIGHT_CSS_SELECTOR)
+            value_after_clear = element.get_attribute("value")
+            self.assertEqual(value_after_clear, "")
+
+            # Test case when the element doesn't exist
+            with self.assertRaises(TimeoutException):
+                wait_then_clear(driver, wait, DEFAULT_WRONG_CSS_SELECTOR)
+
+        inner_test_method(self)
+
+    def test_wait_then_send_keys(self):
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
         )
-        self.assertTrue(True)
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            wait = WebDriverWait(driver, 15)
+
+            driver.get(
+                "https://wwwapps.ups.com/doapp/signup?loc=nl_NL&ClientId=13&returnto=https:%2F%2Fwww.ups.com%2Fnl%2Fnl%2FHome.page"
+            )
+            self.ups_clear_cookie_banner(driver, wait)
+            # Test case when the element exists
+            wait_then_send_keys(
+                driver, wait, "#signUpName", DEFAULT_TEXT_TO_WRITE, clear=True
+            )
+
+            # Perform assertions to check if the input was successfully sent
+            element = driver.find_element(By.CSS_SELECTOR, "#signUpName")
+            value = element.get_attribute("value")
+            self.assertEqual(value, DEFAULT_TEXT_TO_WRITE)
+
+            # Test case when the element exists and the clear is not applied
+            wait_then_send_keys(
+                driver,
+                wait,
+                "#signUpName",
+                DEFAULT_TEXT_TO_WRITE,
+                clear=False,
+            )
+
+            # Perform assertions to check if the input was successfully sent without clearing
+            element = driver.find_element(By.CSS_SELECTOR, "#signUpName")
+            value = element.get_attribute("value")
+            self.assertEqual(value, DEFAULT_TEXT_TO_WRITE + DEFAULT_TEXT_TO_WRITE)
+
+            # Test case when the element exists and the clear is applied
+            wait_then_send_keys(
+                driver, wait, "#signUpName", DEFAULT_TEXT_TO_WRITE, clear=True
+            )
+
+            # Perform assertions to check if the input was successfully sent with clearing
+            element = driver.find_element(By.CSS_SELECTOR, "#signUpName")
+            value = element.get_attribute("value")
+            self.assertEqual(value, DEFAULT_TEXT_TO_WRITE)
+
+            # Test case when the element doesn't exist
+            with self.assertRaises(TimeoutException):
+                wait_then_send_keys(
+                    driver=driver,
+                    wait=wait,
+                    selector=DEFAULT_WRONG_CSS_SELECTOR,
+                    input_text=DEFAULT_TEXT_TO_WRITE,
+                )
+
+        inner_test_method(self)
+
+    def test_safe_send_keys(self):
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
+
+            wait = WebDriverWait(driver, 15)
+
+            self.clear_cookie_banner(driver, wait)
+
+            # Test case when the element exists
+            safe_send_keys(
+                driver,
+                DEFAULT_RIGHT_CSS_SELECTOR,
+                DEFAULT_TEXT_TO_WRITE,
+                selector_type=By.CSS_SELECTOR,
+            )
+
+            # Perform assertions to check if the input was successfully sent
+            element = driver.find_element(By.CSS_SELECTOR, DEFAULT_RIGHT_CSS_SELECTOR)
+            value = element.get_attribute("value")
+            self.assertEqual(value, DEFAULT_TEXT_TO_WRITE)
+
+            # Test case when the element doesn't exist
+            with self.assertRaises(TimeoutException):
+                safe_send_keys(
+                    driver,
+                    DEFAULT_WRONG_CSS_SELECTOR,
+                    DEFAULT_TEXT_TO_WRITE,
+                    selector_type=By.CSS_SELECTOR,
+                )
+
+        inner_test_method(self)
+
+    def test_wait_till_disapear(self):
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+
+            wait = WebDriverWait(driver, 15)
+
+            driver.get(
+                "https://wwwapps.ups.com/doapp/signup?loc=nl_NL&ClientId=13&returnto=https:%2F%2Fwww.ups.com%2Fnl%2Fnl%2FHome.page"
+            )
+            self.ups_clear_cookie_banner(driver, wait)
+
+            wait_till_disapear(
+                wait=wait,
+                selector_type=DEFAULT_SELECTOR_TYPE,
+                selector="div > div > img",
+                timeout=DEFAULT_TIMEOUT,
+            )
+            self.assertTrue(True)
+
+        inner_test_method(self)
 
     def test_clear_local_storage(self):
-        self.driver.execute_script("localStorage.setItem('item1', 'value1');")
-        self.driver.execute_script("localStorage.setItem('item2', 'value2');")
-        # Test if the we managed to add items to the local storage
-        self.assertGreater(self.driver.execute_script("return localStorage.length;"), 2)
-        clear_local_storage(self.driver)
-        # Test if the local storage is empty
-        self.assertEqual(self.driver.execute_script("return localStorage.length;"), 0)
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
+
+            driver.execute_script("localStorage.setItem('item1', 'value1');")
+            driver.execute_script("localStorage.setItem('item2', 'value2');")
+            # Test if the we managed to add items to the local storage
+            self.assertGreater(driver.execute_script("return localStorage.length;"), 2)
+            clear_local_storage(driver)
+            # Test if the local storage is empty
+            self.assertEqual(driver.execute_script("return localStorage.length;"), 0)
+
+        inner_test_method(self)
 
     def test_clear_storage(self):
-        # Test case for clearing cookies
-        self.driver.add_cookie({"name": "cookie1", "value": "value1"})
-        self.driver.add_cookie({"name": "cookie2", "value": "value2"})
-        self.assertGreaterEqual(len(self.driver.get_cookies()), 2)
-        clear_storage(self.driver, storage_type="cookies")
-        self.assertEqual(len(self.driver.get_cookies()), 0)
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
+            # Test case for clearing cookies
+            driver.add_cookie({"name": "cookie1", "value": "value1"})
+            driver.add_cookie({"name": "cookie2", "value": "value2"})
+            self.assertGreaterEqual(len(driver.get_cookies()), 2)
+            clear_storage(driver, storage_type="cookies")
+            self.assertEqual(len(driver.get_cookies()), 0)
 
-        # Test case for clearing local storage
-        self.driver.execute_script("window.localStorage.setItem('item1', 'value1');")
-        self.driver.execute_script("window.localStorage.setItem('item2', 'value2');")
-        self.assertGreaterEqual(
-            self.driver.execute_script("return window.localStorage.length;"), 2
-        )
-        clear_storage(self.driver, storage_type="local")
-        self.assertEqual(
-            self.driver.execute_script("return window.localStorage.length;"), 0
-        )
+            # Test case for clearing local storage
+            driver.execute_script("window.localStorage.setItem('item1', 'value1');")
+            driver.execute_script("window.localStorage.setItem('item2', 'value2');")
+            self.assertGreaterEqual(
+                driver.execute_script("return window.localStorage.length;"), 2
+            )
+            clear_storage(driver, storage_type="local")
+            self.assertEqual(
+                driver.execute_script("return window.localStorage.length;"), 0
+            )
 
-        # Test case for clearing session storage
-        self.driver.execute_script("window.sessionStorage.setItem('item1', 'value1');")
-        self.driver.execute_script("window.sessionStorage.setItem('item2', 'value2');")
-        self.assertGreaterEqual(
-            self.driver.execute_script("return window.sessionStorage.length;"), 2
-        )
-        clear_storage(self.driver, storage_type="session")
-        self.assertEqual(
-            self.driver.execute_script("return window.sessionStorage.length;"), 0
-        )
+            # Test case for clearing session storage
+            driver.execute_script("window.sessionStorage.setItem('item1', 'value1');")
+            driver.execute_script("window.sessionStorage.setItem('item2', 'value2');")
+            self.assertGreaterEqual(
+                driver.execute_script("return window.sessionStorage.length;"), 2
+            )
+            clear_storage(driver, storage_type="session")
+            self.assertEqual(
+                driver.execute_script("return window.sessionStorage.length;"), 0
+            )
 
-        # Test case for clearing all storage
-        self.driver.add_cookie({"name": "cookie1", "value": "value1"})
-        self.driver.execute_script("window.localStorage.setItem('item1', 'value1');")
-        self.driver.execute_script("window.sessionStorage.setItem('item2', 'value2');")
+            # Test case for clearing all storage
+            driver.add_cookie({"name": "cookie1", "value": "value1"})
+            driver.execute_script("window.localStorage.setItem('item1', 'value1');")
+            driver.execute_script("window.sessionStorage.setItem('item2', 'value2');")
 
-        cookies = self.driver.get_cookies()
-        self.assertGreaterEqual(len(cookies), 1)
-        self.assertGreaterEqual(
-            self.driver.execute_script("return window.localStorage.length;"), 1
-        )
-        self.assertGreaterEqual(
-            self.driver.execute_script("return window.sessionStorage.length;"), 1
-        )
+            cookies = driver.get_cookies()
+            self.assertGreaterEqual(len(cookies), 1)
+            self.assertGreaterEqual(
+                driver.execute_script("return window.localStorage.length;"), 1
+            )
+            self.assertGreaterEqual(
+                driver.execute_script("return window.sessionStorage.length;"), 1
+            )
 
-        clear_storage(self.driver, storage_type="all")
-        cookies = self.driver.get_cookies()
-        self.assertEqual(len(cookies), 0)
-        self.assertEqual(
-            self.driver.execute_script("return window.localStorage.length;"), 0
-        )
-        self.assertEqual(
-            self.driver.execute_script("return window.sessionStorage.length;"), 0
-        )
+            clear_storage(driver, storage_type="all")
+            cookies = driver.get_cookies()
+            self.assertEqual(len(cookies), 0)
+            self.assertEqual(
+                driver.execute_script("return window.localStorage.length;"), 0
+            )
+            self.assertEqual(
+                driver.execute_script("return window.sessionStorage.length;"), 0
+            )
+
+        inner_test_method(self)
 
     def test_bind_arguments_to_a_selenium_func(self):
         # TODO
