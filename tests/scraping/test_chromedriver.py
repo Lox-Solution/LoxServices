@@ -96,7 +96,7 @@ class TestChromeDriver(unittest.TestCase):
             with self.assertRaises(WebDriverException):
                 wait_until_clickable_and_click(wait, "wrong_selector", 5)
 
-            inner_test_method(self)
+        inner_test_method(self)
 
     def test_chromedriver_exception(self):
         # Set the environment variable before calling the decorator
@@ -116,7 +116,7 @@ class TestChromeDriver(unittest.TestCase):
                     version=1,
                 )
 
-            inner_test_method(self)
+        inner_test_method(self)
 
 
 if __name__ == "__main__":
