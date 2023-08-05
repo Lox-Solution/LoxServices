@@ -62,6 +62,13 @@ class TestUtils(unittest.TestCase):
         self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
         self.driver.get("https://artoftesting.com/samplesiteforselenium")
 
+    @patch.dict(
+        "os.environ",
+        {
+            "ENVIRONMENT": "production",
+        },
+    )
+    @VirtualDisplay
     def tearDown(self):
         self.driver.quit()
         if os.path.exists(self.folder_path):
