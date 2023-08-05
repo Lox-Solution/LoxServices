@@ -38,10 +38,14 @@ DEFAULT_TEXT_TO_WRITE = "some text"
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
-        self.driver = uc.Chrome()
-        self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
         self.folder_path = Path(os.getcwd()) / "tests" / "scraping" / "download_folder"
         self.folder_path.mkdir(parents=True, exist_ok=True)
+        self.driver = run_chromedriver(
+            download_folder=self.folder_path,
+            size_length=960,
+            size_width=960,
+        )
+        self.wait = WebDriverWait(self.driver, DEFAULT_TIMEOUT)
         self.driver.get("https://artoftesting.com/samplesiteforselenium")
 
     def tearDown(self):
