@@ -31,6 +31,8 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from lox_services.utils.decorators import VirtualDisplay
 from mock import patch
 
+from tests import OUTPUT_FOLDER
+
 DEFAULT_TIMEOUT = 5
 DEFAULT_WRONG_CSS_SELECTOR = ".wrong_selector"
 DEFAULT_RIGHT_CSS_SELECTOR = "#fname"
@@ -48,8 +50,10 @@ class TestUtils(unittest.TestCase):
     )
     @VirtualDisplay
     def setUp(self):
-        self.folder_path = Path(os.getcwd()) / "tests" / "scraping" / "download_folder"
-        self.folder_path.mkdir(parents=True, exist_ok=True)
+        self.folder_path = os.path.join(
+            OUTPUT_FOLDER, "tests", "scraping", "download_folder"
+        )
+        os.makedirs(self.folder_path, exist_ok=True)
         self.driver = run_chromedriver(
             download_folder=self.folder_path,
             size_length=960,
