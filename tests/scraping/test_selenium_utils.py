@@ -59,25 +59,6 @@ class TestUtils(unittest.TestCase):
         if os.path.exists(self.folder_path):
             shutil.rmtree(self.folder_path)
 
-    def clear_cookie_banner(self, driver, wait):
-        wait_until_page_loaded(driver)
-        # Clear the cookie banner
-        try:
-            wait_until_clickable_and_click(
-                wait,
-                "body > div.fc-consent-root > div.fc-dialog-container > div.fc-dialog.fc-choice-dialog > div.fc-footer-buttons-container > div.fc-footer-buttons > button.fc-button.fc-cta-consent.fc-primary-button > p",
-                DEFAULT_TIMEOUT,
-                DEFAULT_SELECTOR_TYPE,
-            )
-        except:
-            wait_until_clickable_and_click(
-                wait,
-                "#qc-cmp2-ui > div.qc-cmp2-footer.qc-cmp2-footer-overlay.qc-cmp2-footer-scrolled > div > button.sc-ifAKCX.ljEJIv",
-                DEFAULT_TIMEOUT,
-                DEFAULT_SELECTOR_TYPE,
-            )
-        time.sleep(0.5)
-
     def ups_clear_cookie_banner(self, driver, wait):
         wait_until_page_loaded(driver)
         # Clear the cookie banner
@@ -231,148 +212,144 @@ class TestUtils(unittest.TestCase):
 
         inner_test_method(self)
 
-    # def test_wait_until_clickable_and_click(self):
-    #     @patch.dict(
-    #         "os.environ",
-    #         {
-    #             "ENVIRONMENT": "production",
-    #         },
-    #     )
-    #     @VirtualDisplay
-    #     def inner_test_method(self):
-    #         driver = run_chromedriver(
-    #             download_folder=self.folder_path,
-    #             size_length=960,
-    #             size_width=960,
-    #         )
-    #         driver.get("https://artoftesting.com/samplesiteforselenium")
+    def test_wait_until_clickable_and_click(self):
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
 
-    #         wait = WebDriverWait(driver, 15)
+            wait = WebDriverWait(driver, 15)
 
-    #         self.clear_cookie_banner(driver, wait)
-    #         # Test case for successful click with wait
-    #         wait_until_clickable_and_click(
-    #             wait,
-    #             DEFAULT_RIGHT_CSS_SELECTOR,
-    #             DEFAULT_TIMEOUT,
-    #             DEFAULT_SELECTOR_TYPE,
-    #         )
+            # Test case for successful click with wait
+            wait_until_clickable_and_click(
+                wait,
+                DEFAULT_RIGHT_CSS_SELECTOR,
+                DEFAULT_TIMEOUT,
+                DEFAULT_SELECTOR_TYPE,
+            )
 
-    #         # If the function completes without raising an exception, it executed well
-    #         self.assertTrue(True)
+            # If the function completes without raising an exception, it executed well
+            self.assertTrue(True)
 
-    #         # Test case for successful click with driver
-    #         wait_until_clickable_and_click(
-    #             None,
-    #             DEFAULT_RIGHT_CSS_SELECTOR,
-    #             DEFAULT_TIMEOUT,
-    #             DEFAULT_SELECTOR_TYPE,
-    #             driver,
-    #         )
+            # Test case for successful click with driver
+            wait_until_clickable_and_click(
+                None,
+                DEFAULT_RIGHT_CSS_SELECTOR,
+                DEFAULT_TIMEOUT,
+                DEFAULT_SELECTOR_TYPE,
+                driver,
+            )
 
-    #         # If the function completes without raising an exception, it executed well
-    #         self.assertTrue(True)
+            # If the function completes without raising an exception, it executed well
+            self.assertTrue(True)
 
-    #         # Test case for click on non-clickable element and wait
-    #         with self.assertRaises(TimeoutException):
-    #             wait_until_clickable_and_click(
-    #                 wait,
-    #                 DEFAULT_WRONG_CSS_SELECTOR,
-    #                 DEFAULT_TIMEOUT,
-    #                 DEFAULT_SELECTOR_TYPE,
-    #             )
+            # Test case for click on non-clickable element and wait
+            with self.assertRaises(TimeoutException):
+                wait_until_clickable_and_click(
+                    wait,
+                    DEFAULT_WRONG_CSS_SELECTOR,
+                    DEFAULT_TIMEOUT,
+                    DEFAULT_SELECTOR_TYPE,
+                )
 
-    #         # Test case for click on non-clickable element and driver
-    #         with self.assertRaises(TimeoutException):
-    #             wait_until_clickable_and_click(
-    #                 None,
-    #                 DEFAULT_WRONG_CSS_SELECTOR,
-    #                 DEFAULT_TIMEOUT,
-    #                 DEFAULT_SELECTOR_TYPE,
-    #                 driver,
-    #             )
+            # Test case for click on non-clickable element and driver
+            with self.assertRaises(TimeoutException):
+                wait_until_clickable_and_click(
+                    None,
+                    DEFAULT_WRONG_CSS_SELECTOR,
+                    DEFAULT_TIMEOUT,
+                    DEFAULT_SELECTOR_TYPE,
+                    driver,
+                )
 
-    #     inner_test_method(self)
+        inner_test_method(self)
 
-    # def test_wait_until_clickable_and_click_by_xpath(self):
-    #     @patch.dict(
-    #         "os.environ",
-    #         {
-    #             "ENVIRONMENT": "production",
-    #         },
-    #     )
-    #     @VirtualDisplay
-    #     def inner_test_method(self):
-    #         driver = run_chromedriver(
-    #             download_folder=self.folder_path,
-    #             size_length=960,
-    #             size_width=960,
-    #         )
-    #         driver.get("https://artoftesting.com/samplesiteforselenium")
+    def test_wait_until_clickable_and_click_by_xpath(self):
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
 
-    #         wait = WebDriverWait(driver, 15)
-    #         self.clear_cookie_banner(driver, wait)
+            wait = WebDriverWait(driver, 15)
 
-    #         # Test case for successful click by XPath
-    #         xpath = '//*[@id="idOfButton"]'
-    #         wait_until_clickable_and_click_by_xpath(wait, xpath)
+            # Test case for successful click by XPath
+            xpath = '//*[@id="idOfButton"]'
+            wait_until_clickable_and_click_by_xpath(wait, xpath)
 
-    #         # Test case for click on non-clickable element by XPath
-    #         wrong_xpath = '//button[@id="wrongId"]'
-    #         with self.assertRaises(TimeoutException):
-    #             wait_until_clickable_and_click_by_xpath(wait, wrong_xpath)
+            # Test case for click on non-clickable element by XPath
+            wrong_xpath = '//button[@id="wrongId"]'
+            with self.assertRaises(TimeoutException):
+                wait_until_clickable_and_click_by_xpath(wait, wrong_xpath)
 
-    #     inner_test_method(self)
+        inner_test_method(self)
 
-    # def test_wait_then_clear(self):
-    #     @patch.dict(
-    #         "os.environ",
-    #         {
-    #             "ENVIRONMENT": "production",
-    #         },
-    #     )
-    #     @VirtualDisplay
-    #     def inner_test_method(self):
-    #         driver = run_chromedriver(
-    #             download_folder=self.folder_path,
-    #             size_length=960,
-    #             size_width=960,
-    #         )
-    #         driver.get("https://artoftesting.com/samplesiteforselenium")
+    def test_wait_then_clear(self):
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
 
-    #         wait = WebDriverWait(driver, 15)
+            wait = WebDriverWait(driver, 15)
 
-    #         self.clear_cookie_banner(driver, wait)
+            safe_send_keys(
+                driver,
+                DEFAULT_RIGHT_CSS_SELECTOR,
+                DEFAULT_TEXT_TO_WRITE,
+                selector_type=By.CSS_SELECTOR,
+            )
 
-    #         safe_send_keys(
-    #             driver,
-    #             DEFAULT_RIGHT_CSS_SELECTOR,
-    #             DEFAULT_TEXT_TO_WRITE,
-    #             selector_type=By.CSS_SELECTOR,
-    #         )
+            # Assert that the input is not empty before calling wait_then_clear
+            element = safe_find_element(
+                driver=driver,
+                selector_type=DEFAULT_SELECTOR_TYPE,
+                selector=DEFAULT_RIGHT_CSS_SELECTOR,
+                wait=wait,
+                timeout=DEFAULT_TIMEOUT,
+            )
 
-    #         # Assert that the input is not empty before calling wait_then_clear
-    #         element = safe_find_element(
-    #             driver=driver,
-    #             selector_type=DEFAULT_SELECTOR_TYPE,
-    #             selector=DEFAULT_RIGHT_CSS_SELECTOR,
-    #             wait=wait,
-    #             timeout=DEFAULT_TIMEOUT,
-    #         )
+            value_before_clear = element.get_attribute("value")
+            self.assertEqual(value_before_clear, DEFAULT_TEXT_TO_WRITE)
 
-    #         value_before_clear = element.get_attribute("value")
-    #         self.assertEqual(value_before_clear, DEFAULT_TEXT_TO_WRITE)
+            # Call wait_then_clear and assert that the input is cleared
+            wait_then_clear(driver, wait, DEFAULT_RIGHT_CSS_SELECTOR)
+            value_after_clear = element.get_attribute("value")
+            self.assertEqual(value_after_clear, "")
 
-    #         # Call wait_then_clear and assert that the input is cleared
-    #         wait_then_clear(driver, wait, DEFAULT_RIGHT_CSS_SELECTOR)
-    #         value_after_clear = element.get_attribute("value")
-    #         self.assertEqual(value_after_clear, "")
+            # Test case when the element doesn't exist
+            with self.assertRaises(TimeoutException):
+                wait_then_clear(driver, wait, DEFAULT_WRONG_CSS_SELECTOR)
 
-    #         # Test case when the element doesn't exist
-    #         with self.assertRaises(TimeoutException):
-    #             wait_then_clear(driver, wait, DEFAULT_WRONG_CSS_SELECTOR)
-
-    #     inner_test_method(self)
+        inner_test_method(self)
 
     def test_wait_then_send_keys(self):
         @patch.dict(
@@ -439,49 +416,49 @@ class TestUtils(unittest.TestCase):
 
         inner_test_method(self)
 
-    # def test_safe_send_keys(self):
-    #     @patch.dict(
-    #         "os.environ",
-    #         {
-    #             "ENVIRONMENT": "production",
-    #         },
-    #     )
-    #     @VirtualDisplay
-    #     def inner_test_method(self):
-    #         driver = run_chromedriver(
-    #             download_folder=self.folder_path,
-    #             size_length=960,
-    #             size_width=960,
-    #         )
-    #         driver.get("https://artoftesting.com/samplesiteforselenium")
+    def test_safe_send_keys(self):
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
 
-    #         wait = WebDriverWait(driver, 15)
+            wait = WebDriverWait(driver, 15)
 
-    #         self.clear_cookie_banner(driver, wait)
+            self.clear_cookie_banner(driver, wait)
 
-    #         # Test case when the element exists
-    #         safe_send_keys(
-    #             driver,
-    #             DEFAULT_RIGHT_CSS_SELECTOR,
-    #             DEFAULT_TEXT_TO_WRITE,
-    #             selector_type=By.CSS_SELECTOR,
-    #         )
+            # Test case when the element exists
+            safe_send_keys(
+                driver,
+                DEFAULT_RIGHT_CSS_SELECTOR,
+                DEFAULT_TEXT_TO_WRITE,
+                selector_type=By.CSS_SELECTOR,
+            )
 
-    #         # Perform assertions to check if the input was successfully sent
-    #         element = driver.find_element(By.CSS_SELECTOR, DEFAULT_RIGHT_CSS_SELECTOR)
-    #         value = element.get_attribute("value")
-    #         self.assertEqual(value, DEFAULT_TEXT_TO_WRITE)
+            # Perform assertions to check if the input was successfully sent
+            element = driver.find_element(By.CSS_SELECTOR, DEFAULT_RIGHT_CSS_SELECTOR)
+            value = element.get_attribute("value")
+            self.assertEqual(value, DEFAULT_TEXT_TO_WRITE)
 
-    #         # Test case when the element doesn't exist
-    #         with self.assertRaises(TimeoutException):
-    #             safe_send_keys(
-    #                 driver,
-    #                 DEFAULT_WRONG_CSS_SELECTOR,
-    #                 DEFAULT_TEXT_TO_WRITE,
-    #                 selector_type=By.CSS_SELECTOR,
-    #             )
+            # Test case when the element doesn't exist
+            with self.assertRaises(TimeoutException):
+                safe_send_keys(
+                    driver,
+                    DEFAULT_WRONG_CSS_SELECTOR,
+                    DEFAULT_TEXT_TO_WRITE,
+                    selector_type=By.CSS_SELECTOR,
+                )
 
-    #     inner_test_method(self)
+        inner_test_method(self)
 
     def test_wait_till_disapear(self):
         @patch.dict(
