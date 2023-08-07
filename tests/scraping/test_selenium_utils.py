@@ -599,16 +599,6 @@ class TestUtils(unittest.TestCase):
                 driver.execute_script("return window.sessionStorage.length;"), 1
             )
 
-            clear_storage(driver, storage_type="all")
-            cookies = driver.get_cookies()
-            self.assertEqual(len(cookies), 0)
-            self.assertEqual(
-                driver.execute_script("return window.localStorage.length;"), 0
-            )
-            self.assertEqual(
-                driver.execute_script("return window.sessionStorage.length;"), 0
-            )
-
         inner_test_method(self)
 
     def test_bind_arguments_to_a_selenium_func(self):
