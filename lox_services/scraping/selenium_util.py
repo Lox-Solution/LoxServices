@@ -20,6 +20,27 @@ from selenium import webdriver
 from lox_services.utils.general_python import print_error, print_success
 
 
+def get_value_or_empty_string(
+    driver: webdriver.Chrome, selector_type: By, selector: str
+):
+    """
+    Retrieve the inner text of an HTML element specified by the given selector.
+
+    Parameters:
+        driver (webdriver.Chrome): The Chrome web driver used to interact with the web page.
+        selector_type (By): The type of selector used to locate the HTML element.
+                            It can be one of the By constants defined in the Selenium library.
+        selector (str): The selector string used to identify the HTML element.
+
+    Returns:
+        str: The inner text of the specified HTML element if found, or an empty string if not found.
+    """
+    try:
+        return driver.find_element(selector_type, selector).get_attribute("innerText")
+    except NoSuchElementException:
+        return ""
+
+
 def wait_until_page_loaded(driver: webdriver.Chrome, timeout: int = 10):
     """Wait for webpage to completely load.
     ## Arguments:
