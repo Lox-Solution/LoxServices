@@ -563,6 +563,7 @@ class TestUtils(unittest.TestCase):
                 "ENVIRONMENT": "production",
             },
         )
+        @VirtualDisplay
         def inner_test_method(self):
             driver = run_chromedriver(
                 download_folder=self.folder_path,
