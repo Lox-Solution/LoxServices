@@ -175,6 +175,16 @@ class TestUtils(unittest.TestCase):
             )
             self.assertIsInstance(element, WebElement)
 
+            # Case without a wait
+            element = safe_find_element(
+                driver=driver,
+                selector_type=DEFAULT_SELECTOR_TYPE,
+                selector=DEFAULT_RIGHT_CSS_SELECTOR,
+                wait=None,
+                timeout=DEFAULT_TIMEOUT,
+            )
+            self.assertIsInstance(element, WebElement)
+
             with self.assertRaises(TimeoutException):
                 safe_find_element(
                     driver=driver,
