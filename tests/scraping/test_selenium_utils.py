@@ -637,8 +637,38 @@ class TestUtils(unittest.TestCase):
         inner_test_method(self)
 
     def test_bind_arguments_to_a_selenium_func(self):
-        # TODO
-        return
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+
+            driver.get("https://artoftesting.com/samplesiteforselenium")
+
+            wait = WebDriverWait(driver, 15)
+
+            # Assuming bind_arguments_to_a_selenium_func expects 'driver' as an argument
+
+            safe_find_element_bind = bind_arguments_to_a_selenium_func(
+                safe_find_element,
+                driver=driver,  # Pass 'driver' argument explicitly here
+                wait=wait,
+                default_type=DEFAULT_SELECTOR_TYPE,
+            )
+
+            element = safe_find_element_bind(selector=DEFAULT_RIGHT_CSS_SELECTOR)
+
+            self.assertIsInstance(element, WebElement)
+
+        inner_test_method(self)
 
 
 if __name__ == "__main__":
