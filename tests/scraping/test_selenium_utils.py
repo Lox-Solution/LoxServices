@@ -126,6 +126,13 @@ class TestUtils(unittest.TestCase):
             wait_until_page_loaded(driver=driver)
             self.assertTrue(True)
 
+            # Case where the page is not loaded within the timeout
+            with patch.object(driver, "execute_script", return_value="loading"):
+                with self.assertRaises(TimeoutException):
+                    wait_until_page_loaded(
+                        driver, timeout=2
+                    )  # Using a small timeout for testing
+
         inner_test_method(self)
 
     # def test_wait_for_end_of_download(self):
