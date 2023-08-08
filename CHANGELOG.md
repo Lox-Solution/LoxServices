@@ -32,3 +32,4 @@
 0.1.22 Added unit testing and implemented code coverage, added retry decorator
 0.1.23 Added badge to readme and missing translation for invoice generation, removed check on invoice_url value
 0.1.24 Added selenium wire chromedriver, fixed client invoices data quality check
+0.1.25 Added unit test on email and chromedriver, new selenium_utils function, turned of coverage patch
