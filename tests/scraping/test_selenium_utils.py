@@ -9,6 +9,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from lox_services.scraping.chromedriver import run_chromedriver
 import undetected_chromedriver as uc
 from lox_services.scraping.selenium_util import (
+    get_value_or_empty_string,
     wait_until_page_loaded,
     wait_for_end_of_download,
     safe_find_element,
@@ -72,6 +73,37 @@ class TestUtils(unittest.TestCase):
             wait, "#consent_prompt_submit", DEFAULT_TIMEOUT, DEFAULT_SELECTOR_TYPE
         )
         time.sleep(0.5)
+
+    def test_get_value_or_empty_string(self):
+        # Set the environment variable before calling the decorator
+
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+            driver.get("https://artoftesting.com/samplesiteforselenium")
+            wait_until_page_loaded(driver)
+
+            output_text = get_value_or_empty_string(driver, By.CSS_SELECTOR, "#idOfDiv")
+
+            self.assertEqual(output_text, "This is sample text!")
+
+            output_text = get_value_or_empty_string(
+                driver, By.CSS_SELECTOR, DEFAULT_WRONG_CSS_SELECTOR
+            )
+
+            self.assertEqual(output_text, "")
+
+        inner_test_method(self)
 
     def test_wait_until_page_loaded(self):
         # Set the environment variable before calling the decorator
@@ -521,7 +553,6 @@ class TestUtils(unittest.TestCase):
                 "ENVIRONMENT": "production",
             },
         )
-        @VirtualDisplay
         def inner_test_method(self):
             driver = run_chromedriver(
                 download_folder=self.folder_path,
