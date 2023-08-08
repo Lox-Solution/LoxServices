@@ -281,40 +281,6 @@ def wait_till_disapear(
     wait.until(EC.invisibility_of_element_located((selector_type, selector)))
 
 
-def random_speed(average: float, threshold: float) -> float:
-    """Generates a random value in the interval [ average-threshold ; average+threshold ].
-    ## Arguments
-    - `average`: The middle of the possible interval.
-    - `threshold`: The max and min distance from the average.
-
-    ## Returns
-    - The random value.
-    """
-    if average < threshold:
-        average = threshold
-    return round(random.uniform(average - threshold, average + threshold), 3)
-
-
-class JamesBond:
-    def __init__(self):
-        self.clicking_speed = round(random.uniform(2, 4), 2)
-        self.typing_speed = round(
-            random.uniform(self.clicking_speed / 2, self.clicking_speed), 2
-        )
-        print(f"James average clicking time: {self.clicking_speed} sec.")
-        print(f"James average typing time: {self.typing_speed} sec.")
-
-    def click(self):
-        sleep_time = random_speed(self.clicking_speed, 0.5)
-        # print(sleep_time)
-        time.sleep(sleep_time)
-
-    def type(self):
-        sleep_time = random_speed(self.typing_speed, 0.2)
-        # print(sleep_time)
-        time.sleep(sleep_time)
-
-
 def clear_local_storage(driver: webdriver.Chrome):
     driver.execute_script("window.localStorage.clear();")
 
