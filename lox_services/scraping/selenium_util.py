@@ -172,11 +172,6 @@ def safe_find_elements(
         return driver.find_elements(selector_type, selector)
     except TimeoutException as timeout_exception:
         raise NoSuchElementException from timeout_exception
-    except NoSuchElementException as no_such_element:
-        raise NoSuchElementException from no_such_element
-    except:
-        print_error("An unknown error occurred in Utils.selenium.")
-        raise
 
 
 def wait_until_clickable_and_click(
