@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from lox_services.persistence.database.query_handlers import select
+from lox_services.utils.enums import BQParameterType
 from lox_services.utils.general_python import print_error, print_success
 
 # ------InvoicesData Dataset-------
@@ -112,6 +113,70 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame) -> pd.DataFrame:
     )
     print("Result:\n", dataframe)
     return dataframe
+
+
+def remove_duplicate_deliveries(dataframe: pd.DataFrame) -> pd.DataFrame:
+    """
+    Removes duplicate rows from the provided DataFrame based on certain criteria.
+
+    This function checks for duplicate deliveries in the input DataFrame by comparing
+    the combination of tracking number, status, and formatted datetime. If duplicates
+    are found, they are removed from the DataFrame. The function also ensures that the
+    datetime column is formatted correctly for comparison.
+
+    Args:
+        dataframe (pd.DataFrame): The input DataFrame containing delivery data.
+
+    Returns:
+        pd.DataFrame: A DataFrame with duplicate deliveries removed, if any.
+    """
+    print("Checks for duplicate rows in db..")
+    if dataframe.empty:
+        return dataframe
+
+    dataframe = dataframe.dropna(subset=["tracking_number", "status", "date_time"])
+
+    # make sure datetime column is in same string format than the one on BigQuery.
+    dataframe["formated_datetime"] = pd.to_datetime(
+        dataframe["date_time"].astype(str), errors="ignore"
+    ).dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    dataframe["concat_values"] = (
+        dataframe["tracking_number"].astype(str)
+        + dataframe["status"].astype(str)
+        + dataframe["formated_datetime"].astype(str)
+    )
+
+    sql_query = """
+        SELECT
+            tracking_number || status || date_time as concat_values
+        FROM
+            `developmentproject-269810.InvoicesData.Deliveries`
+        WHERE
+        tracking_number || status || date_time IN UNNEST(@concat_values)
+    """
+    deliveries_already_in_db = select(
+        sql_query,
+        print_query=False,
+        parameters=[
+            (
+                "concat_values",
+                BQParameterType.STRING,
+                dataframe["concat_values"].unique().tolist(),
+            )
+        ],
+    )
+
+    if deliveries_already_in_db.empty:
+        print("Nothing to delete")
+        return dataframe.drop(columns=["concat_values", "formated_datetime"])
+
+    else:
+        original_length = len(dataframe.index)
+        duplicate_values = deliveries_already_in_db["concat_values"].unique().tolist()
+        dataframe = dataframe.loc[~dataframe["concat_values"].isin(duplicate_values)]
+        print(original_length - len(dataframe.index), "Rows removed.")
+        return dataframe.drop(columns=["concat_values", "formated_datetime"])
 
 
 def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFrame:
