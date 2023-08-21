@@ -30,6 +30,7 @@ from lox_services.persistence.database.remove_duplicates import (
     remove_duplicate_NestedAccountNumbers,
     remove_duplicate_client_invoice_data,
     remove_duplicate_currency_conversion,
+    remove_duplicate_deliveries,
     remove_duplicate_invoices,
     remove_duplicate_invoices_from_client_to_carrier,
     remove_duplicate_refunds,
@@ -125,6 +126,8 @@ def insert_dataframe_into_database(
         if table.name == "ClientInvoicesData":
             dataframe = remove_duplicate_client_invoice_data(dataframe)
             dataframe = client_invoice_data_quality_check(dataframe)
+        if table.name == "Deliveries":
+            dataframe = remove_duplicate_deliveries(dataframe)
 
     elif isinstance(table, LoxData_dataset):
         dataset = "LoxData"
