@@ -18,6 +18,25 @@ from lox_services.utils.general_python import (
 )
 
 
+def production_environment_only(function: Callable):
+    """Decorator to ensure that a function is only ran in production environment.
+
+    Args:
+        func (function): Function to be decorated.
+    """
+
+    def wrapper(*args, **kwargs):
+        if get_env_variable("ENVIRONMENT") != "production":
+            print(
+                "Claiming script was not run in production environment. This should not happen."
+            )
+            raise RuntimeError("Ran in non-production environment.")
+        else:
+            return function(*args, **kwargs)
+
+    return wrapper
+
+
 def Perf(function: Callable):
     """Prints the performance of the decorated function."""
 
