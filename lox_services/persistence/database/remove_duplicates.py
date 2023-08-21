@@ -151,7 +151,7 @@ def remove_duplicate_deliveries(dataframe: pd.DataFrame) -> pd.DataFrame:
         SELECT
             tracking_number || status || date_time as concat_values
         FROM
-            `developmentproject-269810.InvoicesData.Deliveries`
+            InvoicesData.Deliveries
         WHERE
         tracking_number || status || date_time IN UNNEST(@concat_values)
     """
