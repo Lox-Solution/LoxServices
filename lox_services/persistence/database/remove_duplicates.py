@@ -130,10 +130,10 @@ def remove_duplicate_deliveries(dataframe: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: A DataFrame with duplicate deliveries removed, if any.
     """
-    print("Checks for duplicate rows in db..")
     if dataframe.empty:
         return dataframe
 
+    print("Checks for duplicate rows in db..")
     dataframe = dataframe.dropna(subset=["tracking_number", "status", "date_time"])
 
     # make sure datetime column is in same string format than the one on BigQuery.
@@ -167,16 +167,13 @@ def remove_duplicate_deliveries(dataframe: pd.DataFrame) -> pd.DataFrame:
         ],
     )
 
-    if deliveries_already_in_db.empty:
-        print("Nothing to delete")
-        return dataframe.drop(columns=["concat_values", "formated_datetime"])
-
-    else:
-        original_length = len(dataframe.index)
+    original_length = len(dataframe.index)
+    if not deliveries_already_in_db.empty:
         duplicate_values = deliveries_already_in_db["concat_values"].unique().tolist()
         dataframe = dataframe.loc[~dataframe["concat_values"].isin(duplicate_values)]
-        print(original_length - len(dataframe.index), "Rows removed.")
-        return dataframe.drop(columns=["concat_values", "formated_datetime"])
+
+    print(f"Number of rows removed:", original_length - len(dataframe.index))
+    return dataframe.drop(columns=["concat_values", "formated_datetime"])
 
 
 def remove_duplicate_client_invoice_data(dataframe: pd.DataFrame) -> pd.DataFrame:
