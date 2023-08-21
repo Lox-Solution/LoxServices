@@ -1,11 +1,6 @@
 """Contains all datasets of the database"""
-import os
 from enum import Enum
 from typing import Union
-
-from google.cloud.bigquery import Client
-
-from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
 
 
 class InvoicesData_dataset(Enum):
