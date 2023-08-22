@@ -27,9 +27,9 @@ def production_environment_only(function: Callable):
 
     def wrapper(*args, **kwargs):
         if get_env_variable("ENVIRONMENT") != "production":
-            print("Claiming script was ran non-production. This should not happen.")
+            print("This function should only be ran in production environment.")
             raise RuntimeError(
-                "Claiming script was ran non-production. This should not happen."
+                "This function should only be ran in production environment."
             )
         else:
             return function(*args, **kwargs)
