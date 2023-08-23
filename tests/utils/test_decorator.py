@@ -1,5 +1,7 @@
 import os
 import unittest
+from unittest.mock import patch
+from lox_services.config.env_variables import get_env_variable
 
 from lox_services.utils.decorators import (
     Perf,
@@ -7,7 +9,9 @@ from lox_services.utils.decorators import (
     DataUsage,
     VirtualDisplay,
     retry,
+    production_environment_only,
 )
+
 from typing import Callable
 
 
@@ -17,6 +21,33 @@ def sample_function():
 
 
 class TestDecorators(unittest.TestCase):
+    @patch.dict(
+        "os.environ",
+        {
+            "ENVIRONMENT": "production",
+        },
+    )
+    def test_production_environment(self):
+        @production_environment_only
+        def sample_function2():
+            return "Expected result"
+
+        result = sample_function2()
+        self.assertEqual(result, "Expected result")
+
+    @patch.dict(
+        "os.environ",
+        {
+            "ENVIRONMENT": "development",
+        },
+    )
+    def test_production_environment_in_dev(self):
+        @production_environment_only
+        def sample_function2():
+            return "Expected result"
+
+        self.assertRaises(RuntimeError, sample_function2)
+
     def test_perf_decorator(self):
         # Define the decorated function using the Perf decorator
         @Perf
