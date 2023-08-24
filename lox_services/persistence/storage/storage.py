@@ -157,3 +157,51 @@ def push_and_delete_run_output_folder(run_folder: str, destination_folder: str):
 
     os.remove(archives_path)
     shutil.rmtree(run_folder)
+
+
+def delete_file_from_storage(
+    bucket_name: str,
+    blob_name: str,
+):
+    """Removes file specified from the given bucket in Google Cloud Storage.
+    ## Arguments
+    - `bucket_name`: The name of the bucket where file is.
+    - `source_file`: The path to the file to remove.
+
+    ## Example
+        >>> delete_file_from_storage("invoices_clients", "Helloprint/Invoices/UPS/1Z1234567890.pdf")
+
+    ## Returns
+    Nothing
+    """
+    bucket_name = use_environment_bucket(bucket_name)
+    storage_client = Client()
+
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+    if blob.exists():
+        print(f"Removing {blob_name} from storage.")
+        blob.delete()
+
+
+def delete_file_from_url(url: str):
+    """
+    Deletes a file from storage based on the provided URL.
+
+    Args:
+        url (str): The URL of the file to be deleted from storage.
+
+    ## Example
+        >>> delete_file_from_url("https://storage.cloud.google.com/invoices_clients/Helloprint/Invoices/UPS/1Z1234567890.pdf")
+
+    Returns:
+        None
+    """
+
+    url = urllib.parse.unquote(url)
+    path = url.split("cloud.google.com/")[1].rsplit("?authuser", 1)[0]
+
+    bucket = path.split("/")[0]
+    blob = path.split("/", 1)[1]
+
+    delete_file_from_storage(bucket_name=bucket, blob_name=blob)

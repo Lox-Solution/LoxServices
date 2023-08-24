@@ -459,7 +459,7 @@ def remove_all_file_with_format_from_folder(
                     recursive=True,
                 )
 
-        elif obj.endswith(extension) and obj not in ignored_files:
+        elif obj.lower().endswith(extension) and obj not in ignored_files:
             os.remove(obj_path)
             deleted_files.append(obj_path)
 
