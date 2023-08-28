@@ -2,12 +2,11 @@ import os
 import shutil
 import time
 import unittest
-from pathlib import Path
+from enum import Enum
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from lox_services.scraping.chromedriver import run_chromedriver
-import undetected_chromedriver as uc
 from lox_services.scraping.selenium_util import (
     get_value_or_empty_string,
     wait_until_page_loaded,
@@ -43,6 +42,9 @@ DEFAULT_TEXT_TO_WRITE = "some text"
 
 
 class TestUtils(unittest.TestCase):
+    class TestEnum(Enum):
+        RIGHT_BUTTON = DEFAULT_RIGHT_CSS_SELECTOR
+
     @patch.dict(
         "os.environ",
         {
@@ -126,6 +128,13 @@ class TestUtils(unittest.TestCase):
             wait_until_page_loaded(driver=driver)
             self.assertTrue(True)
 
+            # Case where the page is not loaded within the timeout
+            with patch.object(driver, "execute_script", return_value="loading"):
+                with self.assertRaises(TimeoutException):
+                    wait_until_page_loaded(
+                        driver, timeout=2
+                    )  # Using a small timeout for testing
+
         inner_test_method(self)
 
     # def test_wait_for_end_of_download(self):
@@ -185,6 +194,16 @@ class TestUtils(unittest.TestCase):
             )
             self.assertIsInstance(element, WebElement)
 
+            # Case without a Enum
+            element = safe_find_element(
+                driver=driver,
+                selector_type=DEFAULT_SELECTOR_TYPE,
+                selector=self.TestEnum.RIGHT_BUTTON,
+                wait=None,
+                timeout=DEFAULT_TIMEOUT,
+            )
+            self.assertIsInstance(element, WebElement)
+
             with self.assertRaises(TimeoutException):
                 safe_find_element(
                     driver=driver,
@@ -213,6 +232,10 @@ class TestUtils(unittest.TestCase):
             driver.get("https://artoftesting.com/samplesiteforselenium")
 
             element = find(driver, DEFAULT_RIGHT_CSS_SELECTOR, DEFAULT_SELECTOR_TYPE)
+            self.assertIsInstance(element, WebElement)
+
+            # Test with Enum
+            element = find(driver, self.TestEnum.RIGHT_BUTTON, DEFAULT_SELECTOR_TYPE)
             self.assertIsInstance(element, WebElement)
 
             with self.assertRaises(NoSuchElementException):
@@ -313,6 +336,17 @@ class TestUtils(unittest.TestCase):
                     DEFAULT_SELECTOR_TYPE,
                     driver,
                 )
+
+            # Test case for Enum values
+            wait_until_clickable_and_click(
+                wait,
+                self.TestEnum.RIGHT_BUTTON,
+                DEFAULT_TIMEOUT,
+                DEFAULT_SELECTOR_TYPE,
+            )
+
+            # If the function completes without raising an exception, it executed well
+            self.assertTrue(True)
 
         inner_test_method(self)
 
@@ -603,8 +637,38 @@ class TestUtils(unittest.TestCase):
         inner_test_method(self)
 
     def test_bind_arguments_to_a_selenium_func(self):
-        # TODO
-        return
+        @patch.dict(
+            "os.environ",
+            {
+                "ENVIRONMENT": "production",
+            },
+        )
+        @VirtualDisplay
+        def inner_test_method(self):
+            driver = run_chromedriver(
+                download_folder=self.folder_path,
+                size_length=960,
+                size_width=960,
+            )
+
+            driver.get("https://artoftesting.com/samplesiteforselenium")
+
+            wait = WebDriverWait(driver, 15)
+
+            # Assuming bind_arguments_to_a_selenium_func expects 'driver' as an argument
+
+            safe_find_element_bind = bind_arguments_to_a_selenium_func(
+                safe_find_element,
+                driver=driver,  # Pass 'driver' argument explicitly here
+                wait=wait,
+                default_type=DEFAULT_SELECTOR_TYPE,
+            )
+
+            element = safe_find_element_bind(selector=DEFAULT_RIGHT_CSS_SELECTOR)
+
+            self.assertIsInstance(element, WebElement)
+
+        inner_test_method(self)
 
 
 if __name__ == "__main__":

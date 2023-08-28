@@ -190,7 +190,7 @@ def is_one_element_substring(
         if full_string and value == el:
             print(f"element {el} is equal to value {value}")
             return True, el
-        if not full_string and re.search(value, re.escape(el)):
+        if not full_string and re.search(re.escape(value), re.escape(el)):
             print(f"element {el} matches value {value}")
             return True, el
 
@@ -459,7 +459,7 @@ def remove_all_file_with_format_from_folder(
                     recursive=True,
                 )
 
-        elif obj.endswith(extension) and obj not in ignored_files:
+        elif obj.lower().endswith(extension) and obj not in ignored_files:
             os.remove(obj_path)
             deleted_files.append(obj_path)
 
