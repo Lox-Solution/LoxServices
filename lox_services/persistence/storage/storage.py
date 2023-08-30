@@ -2,7 +2,7 @@
 import os
 import shutil
 import urllib
-from typing import Union
+from typing import Union, List
 
 from google.api_core.page_iterator import HTTPIterator
 from google.api_core import exceptions
@@ -10,6 +10,7 @@ from google.cloud.storage import Client, Blob
 
 
 from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
+from lox_services.persistence.storage import storage
 from lox_services.persistence.storage.constants import OUTPUT_FOLDER_BUCKET
 from lox_services.persistence.storage.utils import use_environment_bucket
 from lox_services.utils.general_python import print_info, print_success, safe_mkdir
@@ -33,6 +34,22 @@ def get_bucket_content(bucket_name: str, prefix: str) -> HTTPIterator:
     storage_client = Client()
     blobs = storage_client.list_blobs(bucket_name, prefix=prefix)
     return blobs
+
+
+def get_all_blobs_from_bucket(bucket_name: str) -> List[str]:
+    """
+    Retrieve all client invoices from a Google Cloud Storage bucket.
+
+    Returns:
+        list[str]: A list of all blob names in the bucket.
+    """
+    blobs = []
+
+    blobs: list[Blob] = storage.get_bucket_content(bucket_name, "")
+
+    # Extract the names of the blobs and store them in a separate list
+
+    return [blob.name for blob in blobs]
 
 
 def blob_exists_in_bucket(bucket_name: str, blob_name: str):
