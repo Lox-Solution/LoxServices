@@ -222,3 +222,29 @@ def delete_file_from_url(url: str):
     blob = path.split("/", 1)[1]
 
     delete_file_from_storage(bucket_name=bucket, blob_name=blob)
+
+
+def delete_multiple_files_from_storage(
+    bucket_name: str,
+    blob_names: List[str],
+):
+    """Removes existing files specified from the given bucket in Google Cloud Storage.
+    ## Arguments
+    - `bucket_name`: The name of the bucket where file is.
+    - `source_file`: The path to the file to remove.
+
+    ## Example
+        >>> delete_file_from_storage("invoices_clients", "Helloprint/Invoices/UPS/1Z1234567890.pdf")
+
+    ## Returns
+    Nothing
+    """
+    bucket_name = use_environment_bucket(bucket_name)
+    storage_client = Client()
+
+    bucket = storage_client.bucket(bucket_name)
+
+    # Make sure that the blobs exist before deleting them
+    to_delete = [x for x in blob_names if x in get_all_blobs_from_bucket(bucket_name)]
+
+    bucket.delete_blobs(to_delete)
