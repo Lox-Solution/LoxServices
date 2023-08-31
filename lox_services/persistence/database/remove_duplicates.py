@@ -1,3 +1,4 @@
+from typing import Any, List
 import numpy as np
 import pandas as pd
 
@@ -6,6 +7,9 @@ from lox_services.utils.enums import BQParameterType
 from lox_services.utils.general_python import print_error, print_success
 
 # ------InvoicesData Dataset-------
+CHUNK_SIZE = (
+    50000  # max length of a list that can be passed in argument in a sql request
+)
 
 
 def remove_duplicate_invoices(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -147,32 +151,45 @@ def remove_duplicate_deliveries(dataframe: pd.DataFrame) -> pd.DataFrame:
         + dataframe["formated_datetime"].astype(str)
     )
 
+    tracking_numbers_to_check = dataframe["tracking_number"].unique().tolist()
+
     sql_query = """
         SELECT
             tracking_number || status || date_time as concat_values
         FROM
             InvoicesData.Deliveries
         WHERE
-        tracking_number || status || date_time IN UNNEST(@concat_values)
+        tracking_number IN UNNEST(@tracking_numbers)
     """
-    deliveries_already_in_db = select(
-        sql_query,
-        print_query=False,
-        parameters=[
-            (
-                "concat_values",
-                BQParameterType.STRING,
-                dataframe["concat_values"].unique().tolist(),
-            )
-        ],
-    )
 
+    tn_lists = [
+        tracking_numbers_to_check[i : i + CHUNK_SIZE]
+        for i in range(0, len(tracking_numbers_to_check), CHUNK_SIZE)
+    ]
+    deliveries_already_in_db = pd.DataFrame(columns=["concat_values"])
+    for tn_list in tn_lists:
+        deliveries_already_in_db = pd.concat(
+            [
+                deliveries_already_in_db,
+                select(
+                    sql_query,
+                    print_query=False,
+                    parameters=[
+                        (
+                            "tracking_numbers",
+                            BQParameterType.STRING,
+                            tn_list,
+                        )
+                    ],
+                ),
+            ]
+        )
     original_length = len(dataframe.index)
     if not deliveries_already_in_db.empty:
         duplicate_values = deliveries_already_in_db["concat_values"].unique().tolist()
         dataframe = dataframe.loc[~dataframe["concat_values"].isin(duplicate_values)]
 
-    print(f"Number of rows removed:", original_length - len(dataframe.index))
+    print("Number of rows removed:", original_length - len(dataframe.index))
     return dataframe.drop(columns=["concat_values", "formated_datetime"])
 
 
