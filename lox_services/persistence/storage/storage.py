@@ -17,6 +17,26 @@ from lox_services.utils.general_python import print_info, print_success, safe_mk
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(SERVICE_ACCOUNT_PATH)
 
 
+def process_gcloud_url(url: str) -> str:
+    """
+    Process a Google Cloud Storage URL to extract the blob url.
+
+    Args:
+        url (str): The URL to be processed.
+
+    Returns:
+        str: The extracted portion of the URL.
+    """
+
+    url = urllib.parse.unquote(url)
+
+    # Extract the path
+    path = url.split("cloud.google.com/")[1].rsplit("?authuser", 1)[0]
+
+    blob = path.split("/", 1)[1]
+    return blob
+
+
 def get_bucket_content(bucket_name: str, prefix: str) -> HTTPIterator:
     """Gets all file names in the given bucket.
     ## Arguments
