@@ -3,7 +3,7 @@ import os
 import re
 import shutil
 import urllib
-from typing import Union
+from typing import Union, List
 
 from google.api_core.page_iterator import HTTPIterator
 from google.api_core import exceptions
@@ -16,6 +16,26 @@ from lox_services.persistence.storage.utils import use_environment_bucket
 from lox_services.utils.general_python import print_info, print_success, safe_mkdir
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(SERVICE_ACCOUNT_PATH)
+
+
+def process_gcloud_url(url: str) -> str:
+    """
+    Process a Google Cloud Storage URL to extract the blob url.
+
+    Args:
+        url (str): The URL to be processed.
+
+    Returns:
+        str: The extracted portion of the URL.
+    """
+
+    url = urllib.parse.unquote(url)
+
+    # Extract the path
+    path = url.split("cloud.google.com/")[1].rsplit("?authuser", 1)[0]
+
+    blob = path.split("/", 1)[1]
+    return blob
 
 
 def get_bucket_content(bucket_name: str, prefix: str) -> HTTPIterator:
@@ -34,6 +54,22 @@ def get_bucket_content(bucket_name: str, prefix: str) -> HTTPIterator:
     storage_client = Client()
     blobs = storage_client.list_blobs(bucket_name, prefix=prefix)
     return blobs
+
+
+def get_all_blobs_from_bucket(bucket_name: str) -> List[str]:
+    """
+    Retrieve all client invoices from a Google Cloud Storage bucket.
+
+    Returns:
+        list[str]: A list of all blob names in the bucket.
+    """
+    blobs = []
+
+    blobs: list[Blob] = storage.get_bucket_content(bucket_name, "")
+
+    # Extract the names of the blobs and store them in a separate list
+
+    return [blob.name for blob in blobs]
 
 
 def blob_exists_in_bucket(bucket_name: str, blob_name: str):
@@ -227,3 +263,27 @@ def delete_file_from_url(url: str):
     blob = path.split("/", 1)[1]
 
     delete_file_from_storage(bucket_name=bucket, blob_name=blob)
+
+
+def delete_multiple_files_from_storage(
+    bucket_name: str,
+    blob_names: List[str],
+):
+    """Removes existing files specified from the given bucket in Google Cloud Storage.
+    ## Arguments
+    - `bucket_name`: The bucket's name where the files are stored.
+    - `blob_names`: List of files to be deleted.
+
+    ## Example
+        >>> delete_multiple_files_from_storage("invoices_clients", ["Helloprint/Invoices/UPS/1Z1234567890.pdf"])
+
+    """
+    bucket_name = use_environment_bucket(bucket_name)
+    storage_client = Client()
+
+    bucket = storage_client.bucket(bucket_name)
+
+    # Make sure that the blobs exist before deleting them
+    to_delete = [x for x in blob_names if x in get_all_blobs_from_bucket(bucket_name)]
+
+    bucket.delete_blobs(to_delete)
