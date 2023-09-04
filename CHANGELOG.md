@@ -36,3 +36,4 @@
 0.1.26 Added quality check on deliveries, decorator for production functions only and google storage file removal
 0.1.27 Hotfix on remove_duplicate_deliveries function
 0.1.28 Hotfix on selenium wire 
+0.1.29 Hotfix on selenium wire 
