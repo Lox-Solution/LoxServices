@@ -15,7 +15,7 @@ def run_simple_chromedriver():
     options.add_argument("--incognito")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--headless")
+    options.add_argument("--headless=new")
 
     return uc.Chrome(
         seleniumwire_options={},
