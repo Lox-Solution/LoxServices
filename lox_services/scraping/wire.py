@@ -9,7 +9,14 @@ It intercepts and captures all HTTP requests and responses made by the WebDriver
 def run_simple_chromedriver():
     """Creates an instance of seleniumwire chrome driver."""
     options = webdriver.ChromeOptions()
+
+    options.add_argument("--no-first-run --no-service-autorun --password-store=basic")
+    options.add_argument("--disable-popup-blocking")
+    options.add_argument("--incognito")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--headless")
+
     return uc.Chrome(
         seleniumwire_options={},
         options=options,
