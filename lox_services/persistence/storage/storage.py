@@ -65,7 +65,7 @@ def get_all_blobs_from_bucket(bucket_name: str) -> List[str]:
     """
     blobs = []
 
-    blobs: list[Blob] = storage.get_bucket_content(bucket_name, "")
+    blobs: list[Blob] = get_bucket_content(bucket_name, "")
 
     # Extract the names of the blobs and store them in a separate list
 
