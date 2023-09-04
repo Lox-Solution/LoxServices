@@ -236,7 +236,6 @@ def delete_multiple_files_from_storage(
     ## Example
         >>> delete_file_from_storage("invoices_clients", "Helloprint/Invoices/UPS/1Z1234567890.pdf")
 
-    ## Returns
     Nothing
     """
     bucket_name = use_environment_bucket(bucket_name)
