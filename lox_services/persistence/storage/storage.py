@@ -230,7 +230,7 @@ def delete_multiple_files_from_storage(
 ):
     """Removes existing files specified from the given bucket in Google Cloud Storage.
     ## Arguments
-    - `bucket_name`: The name of the bucket where file is.
+    - `bucket_name`: The bucket's name where the files are stored.
     - `blob_names`: List of files to be deleted.
 
     ## Example
