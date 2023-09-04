@@ -1,5 +1,6 @@
 """All functions related to Google Cloud Storage"""
 import os
+import re
 import shutil
 import urllib
 from typing import Union
@@ -123,7 +124,8 @@ def download_file_from_url(
 
     bucket = path.split("/")[0]
     blob = path.split("/", 1)[1]
-    file_name = blob.rsplit("/", 1)[1]
+    file_name = remove_timestamp_from_file_name(blob.rsplit("/", 1)[1])
+
     output_path = os.path.join(output_folder, file_name)
 
     if os.path.exists(output_path) and skip_if_existing:
@@ -182,6 +184,26 @@ def delete_file_from_storage(
     if blob.exists():
         print(f"Removing {blob_name} from storage.")
         blob.delete()
+
+
+def remove_timestamp_from_file_name(file_name: str) -> str:
+    """
+    Removes a timestamp from a file name string if one is present.
+
+    Args:
+        file_name (str): The input file name string containing a timestamp.
+
+    Returns:
+        str: The file name with the timestamp removed.
+    """
+
+    # Define a regular expression pattern to match the date format
+    date_pattern = r"\d{2}:\d{2}:\d{2}-"
+
+    # Use the re.sub function to remove the date pattern from the input string
+    result = re.sub(date_pattern, "", file_name)
+
+    return result
 
 
 def delete_file_from_url(url: str):
