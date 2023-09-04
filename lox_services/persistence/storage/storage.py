@@ -10,7 +10,6 @@ from google.cloud.storage import Client, Blob
 
 
 from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
-from lox_services.persistence.storage import storage
 from lox_services.persistence.storage.constants import OUTPUT_FOLDER_BUCKET
 from lox_services.persistence.storage.utils import use_environment_bucket
 from lox_services.utils.general_python import print_info, print_success, safe_mkdir
