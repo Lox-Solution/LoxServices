@@ -234,7 +234,7 @@ def delete_multiple_files_from_storage(
     - `source_file`: The path to the file to remove.
 
     ## Example
-        >>> delete_file_from_storage("invoices_clients", "Helloprint/Invoices/UPS/1Z1234567890.pdf")
+        >>> delete_multiple_files_from_storage("invoices_clients", ["Helloprint/Invoices/UPS/1Z1234567890.pdf"])
 
     """
     bucket_name = use_environment_bucket(bucket_name)
