@@ -34,3 +34,5 @@
 0.1.24 Added selenium wire chromedriver, fixed client invoices data quality check
 0.1.25 Added unit test on email and chromedriver, new selenium_utils function, turned of coverage patch
 0.1.26 Added quality check on deliveries, decorator for production functions only and google storage file removal
+0.1.27 Hotfix on remove_duplicate_deliveries function
+0.1.28 Hotfix on selenium wire 
