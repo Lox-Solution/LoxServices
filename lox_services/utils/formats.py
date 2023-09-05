@@ -1,5 +1,7 @@
-import base64
+import io
 import gzip
+import base64
+import pandas as pd
 from json import loads
 from typing import Dict
 
@@ -27,3 +29,25 @@ def gzip_to_csv(infile, tofile):
     with open(infile, "rb") as inf, open(tofile, "w", encoding="utf8") as tof:
         decom_str = gzip.decompress(inf.read()).decode("utf-8")
         tof.write(decom_str)
+
+
+def decode_base64_to_dataframe(base64_string: str) -> pd.DataFrame:
+    """
+    Decode a Base64-encoded CSV string and return it as a Pandas DataFrame.
+
+    Args:
+        base64_string (str): A Base64-encoded CSV string.
+
+    Returns:
+        pd.DataFrame: A Pandas DataFrame containing the data from the CSV string.
+    """
+    try:
+        # Decoding the Base64 content
+        decoded_csv = base64.b64decode(base64_string).decode("utf-8")
+
+        # Converting the decoded CSV string to a DataFrame
+        df = pd.read_csv(io.StringIO(decoded_csv))
+
+        return df
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
