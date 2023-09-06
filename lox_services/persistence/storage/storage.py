@@ -18,26 +18,6 @@ from lox_services.utils.general_python import print_info, print_success, safe_mk
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(SERVICE_ACCOUNT_PATH)
 
 
-def process_file_name_from_url(url: str) -> str:
-    """
-    Process a Google Cloud Storage URL to extract the blob file name.
-
-    Args:
-        url (str): The URL to be processed.
-
-    Returns:
-        str: The file name of the blob.
-    """
-
-    url = urllib.parse.unquote(url)
-    path = url.split("cloud.google.com/")[1].rsplit("?authuser", 1)[0]
-
-    blob = path.split("/", 1)[1]
-    file_name = remove_timestamp_from_file_name(blob.rsplit("/", 1)[1])
-
-    return file_name
-
-
 def process_gcloud_url(url: str) -> str:
     """
     Process a Google Cloud Storage URL to extract the blob url.
@@ -261,6 +241,26 @@ def remove_timestamp_from_file_name(file_name: str) -> str:
     result = re.sub(date_pattern, "", file_name)
 
     return result
+
+
+def process_file_name_from_url(url: str) -> str:
+    """
+    Process a Google Cloud Storage URL to extract the blob file name.
+
+    Args:
+        url (str): The URL to be processed.
+
+    Returns:
+        str: The file name of the blob.
+    """
+
+    url = urllib.parse.unquote(url)
+    path = url.split("cloud.google.com/")[1].rsplit("?authuser", 1)[0]
+
+    blob = path.split("/", 1)[1]
+    file_name = remove_timestamp_from_file_name(blob.rsplit("/", 1)[1])
+
+    return file_name
 
 
 def delete_file_from_url(url: str):
