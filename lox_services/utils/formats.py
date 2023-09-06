@@ -4,6 +4,7 @@ import base64
 import pandas as pd
 from json import loads
 from typing import Dict
+from lox_services.utils.general_python import print_error
 
 
 def json_file_to_python_dictionary(file_path: str) -> Dict[str, str]:
@@ -50,4 +51,5 @@ def decode_base64_to_dataframe(base64_string: str) -> pd.DataFrame:
 
         return df
     except Exception as e:
-        print(f"An error occurred: {str(e)}")
+        print_error("Error while decoding Base64 string to DataFrame.")
+        raise e
