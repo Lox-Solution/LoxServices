@@ -83,14 +83,14 @@ class TestConversionFunctions(unittest.TestCase):
 
     def test_decode_base64_to_dataframe(self):
         # Sample Base64-encoded CSV string
-        base64_string = "c3RyaW5nLCJ0eXBlIjoic3RyaW5nIiwibmFtZSI6ImV4YW1wbGUiLCJhZGRyZXNzIjoiY29tcGxlaW5nIHRoZSBkZWNvZGluZyJ9"
+        base64_string = "ImhleSIsICJteSIsICJuYW1lIiwgImlzIiwgIm1lbHZpbCIKInRoaXMiLCAiaXMiLCAidGhlIiwgImZpcnN0IiwgInJvdyI="
 
         # Call the function
         result_df = decode_base64_to_dataframe(base64_string)
 
         # Assertions
         self.assertIsInstance(result_df, pd.DataFrame)
-        self.assertEqual(result_df.shape, (1, 3))
+        self.assertEqual(result_df.shape, (1, 5))
 
         wrong_base64_string = "notBase64EncodedString"
 
