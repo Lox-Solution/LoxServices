@@ -163,10 +163,11 @@ def download_file_from_url(
 
     bucket = path.split("/")[0]
     blob = path.split("/", 1)[1]
+
     if output_file_name:
         output_path = os.path.join(output_folder, output_file_name)
     else:
-        file_name = remove_timestamp_from_file_name(blob.rsplit("/", 1)[1])
+        file_name = process_file_name_from_url(url)
         output_path = os.path.join(output_folder, file_name)
 
     if os.path.exists(output_path) and skip_if_existing:
@@ -245,6 +246,26 @@ def remove_timestamp_from_file_name(file_name: str) -> str:
     result = re.sub(date_pattern, "", file_name)
 
     return result
+
+
+def process_file_name_from_url(url: str) -> str:
+    """
+    Process a Google Cloud Storage URL to extract the blob file name.
+
+    Args:
+        url (str): The URL to be processed.
+
+    Returns:
+        str: The file name of the blob.
+    """
+
+    url = urllib.parse.unquote(url)
+    path = url.split("cloud.google.com/")[1].rsplit("?authuser", 1)[0]
+
+    blob = path.split("/", 1)[1]
+    file_name = remove_timestamp_from_file_name(blob.rsplit("/", 1)[1])
+
+    return file_name
 
 
 def delete_file_from_url(url: str):
