@@ -151,7 +151,10 @@ def upload_file(
 
 
 def download_file_from_url(
-    url: str, output_folder: str, skip_if_existing: bool = False
+    url: str,
+    output_folder: str,
+    skip_if_existing: bool = False,
+    output_file_name: str = None,
 ):
     "Download file from storage by the storage url associated"
     url = urllib.parse.unquote(url)
@@ -161,9 +164,11 @@ def download_file_from_url(
     bucket = path.split("/")[0]
     blob = path.split("/", 1)[1]
 
-    file_name = process_file_name_from_url(url)
-
-    output_path = os.path.join(output_folder, file_name)
+    if output_file_name:
+        output_path = os.path.join(output_folder, output_file_name)
+    else:
+        file_name = process_file_name_from_url(url)
+        output_path = os.path.join(output_folder, file_name)
 
     if os.path.exists(output_path) and skip_if_existing:
         return
