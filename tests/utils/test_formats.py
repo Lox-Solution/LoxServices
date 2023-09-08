@@ -2,7 +2,9 @@ import gzip
 import os
 import re
 import unittest
+import pandas as pd
 from lox_services.utils.formats import (
+    decode_base64_to_dataframe,
     json_file_to_python_dictionary,
     image_to_base64,
     gzip_to_csv,
@@ -78,6 +80,23 @@ class TestConversionFunctions(unittest.TestCase):
         os.remove(infile)
 
         os.remove(tofile)
+
+    def test_decode_base64_to_dataframe(self):
+        # Sample Base64-encoded CSV string
+        base64_string = "ImhleSIsICJteSIsICJuYW1lIiwgImlzIiwgIm1lbHZpbCIKInRoaXMiLCAiaXMiLCAidGhlIiwgImZpcnN0IiwgInJvdyI="
+
+        # Call the function
+        result_df = decode_base64_to_dataframe(base64_string)
+
+        # Assertions
+        self.assertIsInstance(result_df, pd.DataFrame)
+        self.assertEqual(result_df.shape, (1, 5))
+
+        wrong_base64_string = "notBase64EncodedString"
+
+        # Call the function
+        with self.assertRaises(Exception):
+            result_df = decode_base64_to_dataframe(wrong_base64_string)
 
 
 if __name__ == "__main__":

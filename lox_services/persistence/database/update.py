@@ -6,10 +6,10 @@ from lox_services.persistence.database.constants import BQ_CURRENT_DATETIME
 from lox_services.persistence.database.query_handlers import update
 
 
-def _generate_set_field(row, where, set_and_where):
+def _generate_set_field(row: pd.Series, where, set_and_where):
     """Generates the set field of a update SQL query"""
     result = ""
-    for name, values in row.iteritems():
+    for name, values in row.items():
         if isinstance(values, str):
             # make sure that the value doesn't contains special characters
             values = values.replace("\n", " ").replace("\r", "")
