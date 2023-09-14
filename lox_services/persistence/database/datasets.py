@@ -13,6 +13,7 @@ class InvoicesData_dataset(Enum):
     InvoicesSave = "InvoicesSave"
     Refunds = "Refunds"
     ClaimHistory = "ClaimHistory"
+    CarrierData = "CarrierData"
 
 
 class InvoicesDataLake_dataset(Enum):
@@ -68,6 +69,11 @@ class TestEnvironment_dataset(Enum):
 class Utils_dataset(Enum):
     "Class that represents the classes present in Utils dataset"
     CurrencyConversion = "CurrencyConversion"
+
+
+class CarrierData_dataset(Enum):
+    "Class that represents the classes present in CarrierData dataset"
+    PackageInformation = "PackageInformation"
 
 
 DatasetTypeAlias = Union[
