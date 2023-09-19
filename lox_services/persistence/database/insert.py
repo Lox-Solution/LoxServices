@@ -158,7 +158,7 @@ def insert_dataframe_into_database(
         if table.name == "PackageInformation":
             dataframe = remove_duplicate_package_information(dataframe)
             # Check that required columns are not null and country codes are valid
-            dataframe = quality_check_package_info(dataframe)
+            quality_check_package_info(dataframe)
 
     else:
         raise TypeError("'table' param must be an instance of one of the tables Enum.")
