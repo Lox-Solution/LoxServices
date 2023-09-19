@@ -13,6 +13,38 @@ from lox_services.persistence.config import SERVICE_ACCOUNT_PATH
 from lox_services.utils.general_python import print_error
 
 
+def quality_check_package_info(df: pd.DataFrame) -> None:
+    """Checks that the dataframe columns of carrier, company, tracking_number, label_creation_datetime and insert_datetime are not null.
+    Also checks that country_code_sender and country_code_receiver are valid ISO-3166-2 country codes.
+
+    ## Arguments
+        - `df`: Dataframe that we want to check
+
+    ## Raises
+        - `Exception`: If one of the columns is missing, or if the country codes are not valid
+    """
+    df = df.copy()
+
+    required_columns = [
+        "carrier",
+        "company",
+        "tracking_number",
+        "label_creation_datetime",
+        "insert_datetime",
+    ]
+
+    # Check that required columns are present and there are no null values
+    for column in required_columns:
+        if column not in df.columns:
+            raise KeyError(f"Required column: {column} is missing")
+
+        if df[column].isnull().any():
+            raise ValueError(f"Column {column} contains null values")
+
+    # Check that the country codes are valid, will raise an exception if not
+    validate_country_code(df, ["country_code_receiver", "country_code_sender"])
+
+
 def generate_id(columns: list) -> str:
     """Generates an id with column names
     ## Arguments
