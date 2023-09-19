@@ -355,9 +355,6 @@ def remove_duplicate_currency_conversion(dataframe: pd.DataFrame) -> pd.DataFram
     """
     already_saved_entries = select(sql_query, False)["existing_entry"].to_list()
     if already_saved_entries:
-        print(
-            f"Currency conversion entries {already_saved_entries} are already saved in table."
-        )
         dataframe = dataframe.loc[
             ~(
                 dataframe["date"].astype(str)
@@ -381,9 +378,6 @@ def remove_duplicate_package_information(dataframe: pd.DataFrame) -> pd.DataFram
     """
     already_saved_entries = select(sql_query, False)["existing_entry"].to_list()
     if already_saved_entries:
-        print(
-            f"Package information entries {already_saved_entries} are already saved in table."
-        )
         dataframe = dataframe.loc[
             ~(
                 dataframe["carrier"]
