@@ -70,6 +70,11 @@ class Utils_dataset(Enum):
     CurrencyConversion = "CurrencyConversion"
 
 
+class CarrierData_dataset(Enum):
+    "Class that represents the classes present in CarrierData dataset"
+    PackageInformation = "PackageInformation"
+
+
 DatasetTypeAlias = Union[
     InvoicesData_dataset,
     Mapping_dataset,

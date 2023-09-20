@@ -20,6 +20,7 @@ from lox_services.persistence.database.datasets import (
     DatasetTypeAlias,
     UserData_dataset,
     Utils_dataset,
+    CarrierData_dataset,
 )
 from lox_services.persistence.database.quality_checks import (
     client_invoice_data_quality_check,
@@ -33,8 +34,10 @@ from lox_services.persistence.database.remove_duplicates import (
     remove_duplicate_deliveries,
     remove_duplicate_invoices,
     remove_duplicate_invoices_from_client_to_carrier,
+    remove_duplicate_package_information,
     remove_duplicate_refunds,
 )
+from lox_services.persistence.database.utils import quality_check_package_info
 from lox_services.utils.general_python import print_error, print_success
 
 # pylint: disable=line-too-long
@@ -150,6 +153,13 @@ def insert_dataframe_into_database(
         dataset = "Utils"
         if table.name == "CurrencyConversion":
             dataframe = remove_duplicate_currency_conversion(dataframe)
+    elif isinstance(table, CarrierData_dataset):
+        dataset = "CarrierData"
+        if table.name == "PackageInformation":
+            dataframe = remove_duplicate_package_information(dataframe)
+            # Check that required columns are not null and country codes are valid
+            quality_check_package_info(dataframe)
+
     else:
         raise TypeError("'table' param must be an instance of one of the tables Enum.")
 

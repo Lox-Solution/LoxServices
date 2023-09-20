@@ -310,6 +310,7 @@ def delete_multiple_files_from_storage(
     bucket = storage_client.bucket(bucket_name)
 
     # Make sure that the blobs exist before deleting them
-    to_delete = [x for x in blob_names if x in get_all_blobs_from_bucket(bucket_name)]
+    all_blobs = get_all_blobs_from_bucket(bucket_name)
+    to_delete = [x for x in blob_names if x in all_blobs]
 
     bucket.delete_blobs(to_delete)
