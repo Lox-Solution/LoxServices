@@ -39,3 +39,4 @@
 0.1.29 Hotfix on selenium wire
 0.2.0 Added timestamp removal, bulk blob removal form storage, base64 to dataframe transformation and updated reason refunds
 0.3.0 Added package information validation function
+0.3.1 Removed chromedriver tests, update datasets enums
