@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # To run with: source activate.sh
-source venv/bin/activate
+source lox-env/bin/activate
 
 pip install -r requirements.txt # > /dev/null
 
