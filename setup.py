@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="lox_services",
-    version="0.3.1",
+    version="1.0.0",
     author="Lox Solution",
     author_email="natasa.zekic@loxsolution.com",
     description="A package with Lox services",
@@ -16,6 +16,7 @@ setup(
     license="MIT",
     packages=find_packages(),
     include_package_data=True,
+    python_requires='>=3.8, <=3.11.*',
     install_requires=[
         "google-cloud == 0.34.0",
         "google-cloud-storage == 2.11.0",
@@ -27,10 +28,13 @@ setup(
         "requests == 2.31.0",
         "selenium == 4.12.0",
         "undetected-chromedriver == 3.1.3",
+        "selenium-wire == 5.1.0",
+        "xvfbwrapper == 0.2.9", 
         "numpy == 1.26.0",
         "pandas == 2.1.1",
         "lxml == 4.9.3",
         "cryptography == 41.0.4",
+        "tabula-py == 2.2.0",
         "paramiko == 3.3.1",
         "PyVirtualDisplay == 3.0",
         "mimesis == 11.1.0",
