@@ -14,7 +14,7 @@ import lxml.html
 import pandas as pd
 
 from lox_services.config.env_variables import get_env_variable
-from lox_services.email.utils import (
+from lox_services.emails.utils import (
     generate_oauth2_string,
     refresh_authorization,
     get_google_client_id,

@@ -2,7 +2,7 @@
 import unittest
 from unittest.mock import patch
 
-from lox_services.email.utils import (
+from lox_services.emails.utils import (
     _command_to_url,
     extract_emails_from_string,
     get_google_client_id,
