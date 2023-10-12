@@ -111,8 +111,8 @@ env.bak/
 venv.bak/
 lox-env/
 
-# VSCode project settings
-.vscode/
+# IDE - VSCode
+.vscode/settings.json
 
 # Spyder project settings
 .spyderproject
