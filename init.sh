@@ -31,4 +31,15 @@ if [ -z "$python_path" ]; then
     exit 1
 fi
 
+# Check if virtualenv is installed
+if ! [ -x "$(command -v virtualenv)" ]; then
+    echo "virtualenv not found, installing..."
+    
+    # Get the corresponding pip version
+    pip_path="${python_path/pthon/pip}"
+    
+    # Use --user to avoid permission issues
+    "$pip_path" install --user virtualenv || { echo "Failed to install virtualenv, please try manually"; exit 1; }
+fi
+
 virtualenv -p "$python_path" lox-env # if this command doesn't work, make sure to install virtualenv on your machine
