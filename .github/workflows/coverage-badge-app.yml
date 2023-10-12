@@ -25,7 +25,6 @@ jobs:
           python-version: "3.11"
       - name: Switch user
         run: |
-          python --version
           su lox
           su lox -c 'whoami'  # Print the current user
 
