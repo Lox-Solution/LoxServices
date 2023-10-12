@@ -7,7 +7,7 @@ from email import policy
 from email.message import Message
 from typing import List, TypedDict
 from lox_services.config.env_variables import get_env_variable
-from lox_services.email.utils import generate_oauth2_string, refresh_authorization
+from lox_services.emails.utils import generate_oauth2_string, refresh_authorization
 from lox_services.utils.general_python import print_info, print_success, safe_mkdir
 
 

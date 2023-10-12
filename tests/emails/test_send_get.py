@@ -3,12 +3,12 @@ import random
 import shutil
 import unittest
 from unittest.mock import MagicMock, patch
-from lox_services.email.send import (
+from lox_services.emails.send import (
     ContentTypes,
     send_emails_from_loxsolution_account,
     send_email,
 )
-from lox_services.email.get import get_emails, download_attachments
+from lox_services.emails.get import get_emails, download_attachments
 from tests import OUTPUT_FOLDER
 from email.message import Message
 

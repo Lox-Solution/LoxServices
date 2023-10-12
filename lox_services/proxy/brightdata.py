@@ -2,7 +2,7 @@ import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, List, Sequence, Tuple
 from tqdm import tqdm
-
+import time
 import requests
 import urllib3
 
@@ -26,16 +26,35 @@ class BrightDataProxyManager:
     ### PRIVATE ###
 
     @staticmethod
-    def _handle_web_api_response(response: requests.Response):
-        response_status = response.status_code
-        if 200 <= response_status < 300:
-            return response.text
+    def _get_ip_list(self, country: str = None):
+        if country:
+            url = f"https://luminati.io/api/zone/route_ips?zone={self.zones[0]}&country={country}"
         else:
-            error_message = f"{response_status} - {response.text}"
-            if error_message == "401 - Customer not found":
-                error_message = "Your BrightData API token is not up to date. Create or refresh it via https://brightdata.com/cp/setting. Then add the token to your .env file."
-            print_error(error_message)
-            raise Exception(f"Bright Data returned an error: {error_message}")
+            url = f"https://luminati.io/api/zone/route_ips?zone={self.zones[0]}"
+
+        MAX_RETRIES = 3
+        WAIT_TIME = 5  # seconds
+
+        retry_count = 0
+        while retry_count < MAX_RETRIES:
+            response = requests.get(url=url, headers=self.request_header)
+
+            response_status = response.status_code
+
+            if 200 <= response_status < 300:
+                return response.text.split("\n")
+            elif response_status == 429:
+                retry_count += 1
+                time.sleep(WAIT_TIME)
+            else:
+                error_message = f"{response_status} - {response.text}"
+                if error_message == "401 - Customer not found":
+                    error_message = "Your BrightData API token is not up to date. Create or refresh it via https://brightdata.com/cp/setting. Then add the token to your .env file."
+                print_error(error_message)
+                raise Exception(f"Bright Data returned an error: {error_message}")
+
+        if retry_count == MAX_RETRIES:
+            raise Exception("Unable to get the IP list from Bright Data - 429 error.")
 
     @staticmethod
     def _excecute_request_with_retry(
@@ -93,11 +112,7 @@ class BrightDataProxyManager:
                 result += AVAILABLE_IPS_PER_COUNTRY.get(country)
 
             else:
-                response = requests.get(
-                    url=f"https://luminati.io/api/zone/route_ips?zone={self.zones[0]}&country={country}",
-                    headers=self.request_header,
-                )
-                ip_list = self._handle_web_api_response(response).split("\n")
+                ip_list = self._get_ip_list(self, country)
                 AVAILABLE_IPS_PER_COUNTRY[country] = ip_list
                 result += ip_list
 
@@ -106,11 +121,7 @@ class BrightDataProxyManager:
 
     def _get_all_available_ips(self):
         """Gets all available IPs. Limited to 20k."""
-        response = requests.get(
-            url=f"https://luminati.io/api/zone/route_ips?zone={self.zones[0]}",
-            headers=self.request_header,
-        )
-        ip_list = self._handle_web_api_response(response).split("\n")
+        ip_list = self._get_ip_list(self)
         print_success(f"{len(ip_list)} IPs available.")
         return ip_list
 

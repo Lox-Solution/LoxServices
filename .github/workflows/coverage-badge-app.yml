@@ -2,47 +2,47 @@ name: API workflow
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "develop", "master" ]
+    branches: ["develop", "master"]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: docker://devlox/airflow:lox-service-1.0
+      image: docker://loxsolutions/airflow:lox-service-1
       credentials:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
     name: Test python API
     steps:
-    - uses: actions/checkout@v3
-    - name: Switch user
-      run: |
-        su lox
-        su lox -c 'whoami'  # Print the current user
+      - uses: actions/checkout@v3
+      - name: Switch user
+        run: |
+          su lox
+          su lox -c 'whoami'  # Print the current user
 
-    - name: Install dependencies and upgrade pip
-      run: |
-        su lox -c 'sudo /usr/local/bin/python -m pip install --upgrade pip'
-        su lox -c 'sudo pip install --no-cache-dir -r requirements.txt'
-    - name: Set PYTHONPATH
-      run: |
-        echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
-        echo PYTHONPATH: "${{ env.PYTHONPATH }}"
-    - name: Run tests and collect coverage
-      run: pytest --cov=lox_services --cov-report=xml
-      env:
-        ENVIRONMENT: ${{ vars.ENVIRONMENT }}
-        DEVELOPMENT_SERVICE_ACCOUNT: ${{ vars.DEVELOPMENT_SERVICE_ACCOUNT }}
-        RUNS_REPORTS_TEST: ${{ vars.RUNS_REPORTS_TEST }}
-        BRIGHTDATA_USERNAME: ${{ secrets.BRIGHTDATA_USERNAME }}
-        BRIGHTDATA_PASSWORD: ${{ secrets.BRIGHTDATA_PASSWORD }}
-        BRIGHTDATA_API_TOKEN: ${{ secrets.BRIGHTDATA_API_TOKEN }}
+      - name: Install dependencies and upgrade pip
+        run: |
+          su lox -c 'sudo /usr/local/bin/python -m pip install --upgrade pip'
+          su lox -c 'sudo pip install --no-cache-dir -r requirements.txt'
+      - name: Set PYTHONPATH
+        run: |
+          echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
+          echo PYTHONPATH: "${{ env.PYTHONPATH }}"
+      - name: Run tests and collect coverage
+        run: pytest --cov=lox_services --cov-report=xml
+        env:
+          ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+          DEVELOPMENT_SERVICE_ACCOUNT: ${{ vars.DEVELOPMENT_SERVICE_ACCOUNT }}
+          RUNS_REPORTS_TEST: ${{ vars.RUNS_REPORTS_TEST }}
+          BRIGHTDATA_USERNAME: ${{ secrets.BRIGHTDATA_USERNAME }}
+          BRIGHTDATA_PASSWORD: ${{ secrets.BRIGHTDATA_PASSWORD }}
+          BRIGHTDATA_API_TOKEN: ${{ secrets.BRIGHTDATA_API_TOKEN }}
 
-    - name: Upload coverage reports to Codecov with GitHub Action
-      uses: codecov/codecov-action@v3
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

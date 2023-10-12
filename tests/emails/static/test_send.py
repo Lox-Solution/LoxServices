@@ -1,7 +1,7 @@
 import os
 import unittest
 import requests
-from lox_services.email.static.send import send_email_via_postmark
+from lox_services.emails.static.send import send_email_via_postmark
 from tests import OUTPUT_FOLDER
 
 
