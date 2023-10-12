@@ -106,7 +106,12 @@ def init_chromedriver(
     }
     options = webdriver.ChromeOptions()
     options.add_experimental_option("prefs", prefs)
-
+    try:
+        options.binary_location = get_env_variable(
+            "CHROME_BINARY_LOCATION"
+        )  # check if a binary location is specified in .env
+    except ValueError:
+        pass
     options.add_argument("--no-first-run --no-service-autorun --password-store=basic")
     options.add_argument("--disable-popup-blocking")
     options.add_argument("--incognito")
