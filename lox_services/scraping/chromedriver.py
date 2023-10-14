@@ -118,6 +118,7 @@ def init_chromedriver(
     options.add_argument(f"--window-size={size_length},{size_width}")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.headless = False
 
     return ChromeWithPrefs(version_main=version, options=options)
 
