@@ -110,11 +110,15 @@ def init_chromedriver(
     options.add_argument("--no-first-run --no-service-autorun --password-store=basic")
     options.add_argument("--disable-popup-blocking")
     options.add_argument("--incognito")
+
+    # Remove the popup that ask to download the file
+    # https://stackoverflow.com/questions/77093248/chromedriver-version-117-forces-save-as-dialog-how-to-bypass-selenium-jav
+    options.add_argument("--disable-features=DownloadBubble,DownloadBubbleV2")
+
     options.add_argument(f"--window-size={size_length},{size_width}")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
-    # Chnage the the version here to match version on main VM
     return ChromeWithPrefs(version_main=version, options=options)
 
 
