@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="lox_services",
-    version="1.0.2",
+    version="1.0.3",
     author="Lox Solution",
     author_email="natasa.zekic@loxsolution.com",
     description="A package with Lox services",
@@ -27,7 +27,7 @@ setup(
         "weasyprint == 52.5",
         "requests == 2.31.0",
         "selenium == 4.12.0",
-        "undetected-chromedriver == 3.1.3",
+        "undetected-chromedriver == 3.5.3",
         "selenium-wire == 5.1.0",
         "xvfbwrapper == 0.2.9",
         "numpy == 1.26.0",

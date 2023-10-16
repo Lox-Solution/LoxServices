@@ -43,3 +43,4 @@
 1.0.0 Transition from Python 3.8 to 3.11
 1.0.1 Hotfix on chromedriver incognito mode
 1.0.2 Hotfix on python versions required
+1.0.3 Align the requirements and the setup packages
