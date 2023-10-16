@@ -42,3 +42,4 @@
 0.3.1 Removed chromedriver tests, update datasets enums
 1.0.0 Transition from Python 3.8 to 3.11
 1.0.1 Hotfix on chromedriver incognito mode
+1.0.2 Hotfix on python versions required
