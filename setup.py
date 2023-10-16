@@ -16,7 +16,7 @@ setup(
     license="MIT",
     packages=find_packages(),
     include_package_data=True,
-    python_requires=">=3.8, <=3.11.*",
+    python_requires=">=3.8, <=3.11",
     install_requires=[
         "google-cloud == 0.34.0",
         "google-cloud-storage == 2.11.0",
