@@ -44,3 +44,4 @@
 1.0.1 Hotfix on chromedriver incognito mode
 1.0.2 Hotfix on python versions required
 1.0.3 Align the requirements and the setup packages
+1.0.4 Hotfix resizing chromedriver

@@ -120,12 +120,14 @@ def init_chromedriver(
     # https://stackoverflow.com/questions/77093248/chromedriver-version-117-forces-save-as-dialog-how-to-bypass-selenium-jav
     options.add_argument("--disable-features=DownloadBubble,DownloadBubbleV2")
 
-    options.add_argument(f"--window-size={size_length},{size_width}")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.headless = False
 
-    return ChromeWithPrefs(version_main=version, options=options)
+    driver = ChromeWithPrefs(version_main=version, options=options)
+    driver.set_window_size(size_length, size_width)
+
+    return driver
 
 
 def shutdown_current_instances():
