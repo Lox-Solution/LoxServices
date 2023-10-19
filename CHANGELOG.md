@@ -46,3 +46,4 @@
 1.0.3 Align the requirements and the setup packages
 1.0.4 Hotfix resizing chromedriver
 1.0.5 Hotfix allowing Colissimo specific translation
+1.0.6 Hotfix allowing seleniumwire to run
