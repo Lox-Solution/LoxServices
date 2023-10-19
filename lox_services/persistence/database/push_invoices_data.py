@@ -1,7 +1,7 @@
 """All functions to save invoice data into the database"""
 import os
 from enum import Enum
-from typing import Mapping, List, Tuple
+from typing import Mapping, List, Sequence, Tuple, Union
 
 import pandas as pd
 import numpy as np
@@ -62,12 +62,32 @@ def process_postal_and_country_cols(df: pd.DataFrame) -> pd.DataFrame:
         df.columns.isin({"postal_code_receiver", "postal_code_sender"})
     ].tolist()
     # In case postal_code_receiver falsely gets interpreted as a float
-    df[postal_code_cols] = (
-        df[postal_code_cols]
-        .apply(lambda col: col.str.removesuffix(".0"))
+    df[postal_code_cols] = df[postal_code_cols].apply(
+        lambda col: col.str.removesuffix(".0")
     )
 
     validate_country_code(df, ["country_code_receiver", "country_code_sender"])
+    return df
+
+
+def translate_country_codes(
+    df: pd.DataFrame, country_code_col: Union[str, Sequence[str]]
+) -> pd.DataFrame:
+    # Carrier-specific translations
+    carrier_translations = {
+        "Colissimo": {"HO": "HU"}
+        # Add other carriers and translations as needed
+    }
+
+    if isinstance(country_code_col, str):
+        country_code_col = [country_code_col]
+
+    for col in country_code_col:
+        if col in df.columns:
+            for carrier, translations in carrier_translations.items():
+                mask = (df["carrier"] == carrier) & (df[col].isin(translations.keys()))
+                df.loc[mask, col] = df.loc[mask, col].map(translations)
+
     return df
 
 
@@ -101,15 +121,22 @@ def push_run_to_database(
     invoice_path = os.path.join(run_output_folder, Files.INVOICES.value)
     if os.path.exists(invoice_path):
         # Read the invoice file and check the datetime format
-        df_invoice: pd.DataFrame = pd.read_csv(
-            invoice_path,
-            infer_datetime_format=date_format,
-            header=0,
-            dtype={
-                "postal_code_receiver": "string[pyarrow]",
-                "postal_code_sender": "string[pyarrow]",
-            },
-        ).pipe(process_postal_and_country_cols)
+        df_invoice: pd.DataFrame = (
+            pd.read_csv(
+                invoice_path,
+                infer_datetime_format=date_format,
+                header=0,
+                dtype={
+                    "postal_code_receiver": "string[pyarrow]",
+                    "postal_code_sender": "string[pyarrow]",
+                },
+            )
+            .pipe(
+                translate_country_codes,
+                country_code_col=["country_code_receiver", "country_code_sender"],
+            )
+            .pipe(process_postal_and_country_cols)
+        )
 
         if not df_invoice.empty:
             df_invoice = process_df(df_invoice, dtypes_invoices, na_invoices)
@@ -129,7 +156,6 @@ def push_run_to_database(
             header=0,
         )
         if not df_deliveries.empty:
-
             df_deliveries = process_df(
                 df_deliveries, dtypes_deliveries, na_deliveries, format_time_cols=True
             )
