@@ -56,8 +56,7 @@ def process_df(
 
 
 def process_postal_and_country_cols(df: pd.DataFrame) -> pd.DataFrame:
-    """Remove faux floating point conversion and validate country code columns in the
-    dataframe."""
+    """Remove faux floating point conversion in the dataframe."""
     postal_code_cols = df.columns[
         df.columns.isin({"postal_code_receiver", "postal_code_sender"})
     ].tolist()
@@ -66,7 +65,6 @@ def process_postal_and_country_cols(df: pd.DataFrame) -> pd.DataFrame:
         lambda col: col.str.removesuffix(".0")
     )
 
-    validate_country_code(df, ["country_code_receiver", "country_code_sender"])
     return df
 
 

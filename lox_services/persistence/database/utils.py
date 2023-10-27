@@ -41,9 +41,6 @@ def quality_check_package_info(df: pd.DataFrame) -> None:
         if df[column].isnull().any():
             raise ValueError(f"Column {column} contains null values")
 
-    # Check that the country codes are valid, will raise an exception if not
-    validate_country_code(df, ["country_code_receiver", "country_code_sender"])
-
 
 def generate_id(columns: list) -> str:
     """Generates an id with column names
