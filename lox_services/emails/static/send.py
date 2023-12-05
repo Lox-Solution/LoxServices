@@ -61,7 +61,7 @@ def send_email_via_postmark(
                 {
                     "Name": os.path.basename(attachment),
                     "Content": base64.b64encode(file.read()).decode("utf-8"),
-                    "ContentType": "application/text",
+                    "ContentType": "application/json",
                 }
             )
 
@@ -87,6 +87,7 @@ def send_email_via_postmark(
         url="https://api.postmarkapp.com/email/withTemplate",
         headers={
             "Accept": "application/json",
+            "Content-Type": "application/json",
             "X-Postmark-Server-Token": postmark_api_token,
         },
         data=body,
