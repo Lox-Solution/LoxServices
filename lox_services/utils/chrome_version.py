@@ -63,7 +63,7 @@ def get_platform() -> str:
         raise RuntimeError("Platform not supported.")
 
 
-def get_chrome_version(fallback_version: int = 118) -> int:
+def get_chrome_version(fallback_version: int = 119) -> int:
     """Get the version of Chrome installed on the machine.
 
     Args:
