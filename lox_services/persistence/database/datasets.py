@@ -47,6 +47,9 @@ class Mapping_dataset(Enum):
     ClaimStatuses = "ClaimStatuses"
     StatusMapping = "StatusMapping"
 
+class RecordedActivity_dataset(Enum):
+    "Class that represents the classes present in RecordedActivity dataset"
+    ClientDataRequests = "ClientDataRequests"
 
 class TestEnvironment_dataset(Enum):
     "Class that represents the classes present in TestEnvironment dataset"

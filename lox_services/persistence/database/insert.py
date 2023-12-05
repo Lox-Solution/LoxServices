@@ -21,6 +21,7 @@ from lox_services.persistence.database.datasets import (
     UserData_dataset,
     Utils_dataset,
     CarrierData_dataset,
+    RecordedActivity_dataset
 )
 from lox_services.persistence.database.quality_checks import (
     client_invoice_data_quality_check,
@@ -159,7 +160,8 @@ def insert_dataframe_into_database(
             dataframe = remove_duplicate_package_information(dataframe)
             # Check that required columns are not null and country codes are valid
             quality_check_package_info(dataframe)
-
+    elif isinstance(table, RecordedActivity_dataset):
+        dataset = "RecordedActivity"
     else:
         raise TypeError("'table' param must be an instance of one of the tables Enum.")
 
