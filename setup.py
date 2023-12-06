@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="lox_services",
-    version="1.2.0",
+    version="1.2.1",
     author="Lox Solution",
     author_email="natasa.zekic@loxsolution.com",
     description="A package with Lox services",
