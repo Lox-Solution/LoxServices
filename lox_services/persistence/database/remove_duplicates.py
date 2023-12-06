@@ -376,7 +376,7 @@ def remove_duplicate_package_information(dataframe: pd.DataFrame) -> pd.DataFram
             distinct carrier || company || tracking_number AS existing_entry
 
         FROM CarrierData.PackageInformation
-        WhERE tracking_number IN UNNEST(@tracking_numbers)
+        WHERE tracking_number IN UNNEST(@tracking_numbers)
     """
     already_saved_entries = select(
         sql_query,
