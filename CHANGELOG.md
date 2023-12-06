@@ -48,3 +48,4 @@
 1.0.5 Hotfix allowing Colissimo specific translation
 1.0.6 Hotfix allowing seleniumwire to run
 1.1.0 Remove country code validation
+1.2.0 Add RecordedActivity dataset
