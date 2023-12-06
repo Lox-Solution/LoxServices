@@ -370,19 +370,26 @@ def remove_duplicate_currency_conversion(dataframe: pd.DataFrame) -> pd.DataFram
 
 def remove_duplicate_package_information(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes already saved package information dataframe"""
+    tns = dataframe["tracking_number"].unique().to_list()
     sql_query = """
         SELECT
             distinct carrier || company || tracking_number AS existing_entry
 
         FROM CarrierData.PackageInformation
+        WHERE tracking_number IN UNNEST(@tracking_numbers)
     """
-    already_saved_entries = select(sql_query, False)["existing_entry"].to_list()
+    already_saved_entries = select(
+        sql_query,
+        False,
+        parameters=(("tracking_numbers", BQParameterType.STRING, tns),),
+    )["existing_entry"].to_list()
     if already_saved_entries:
+        dataframe["concat_values"] = (
+            dataframe["carrier"].astype(str)
+            + dataframe["company"].astype(str)
+            + dataframe["tracking_number"].astype(str)
+        )
         dataframe = dataframe.loc[
-            ~(
-                dataframe["carrier"]
-                + dataframe["company"]
-                + dataframe["tracking_number"]
-            ).isin(already_saved_entries)
-        ]
+            ~dataframe["concat_values"].isin(already_saved_entries)
+        ].drop(columns=["concat_values"])
     return dataframe
