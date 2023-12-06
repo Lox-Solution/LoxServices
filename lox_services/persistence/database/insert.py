@@ -56,13 +56,14 @@ def add_metadata_columns(dataframe: pd.DataFrame, write_method: str) -> pd.DataF
     """
     current_datetime = datetime.now()
     for metadata_columns in ["insert_datetime", "update_datetime"]:
-        # If the insertion metod is load_table_from_dataframe, the colum must be a datetime
-        if write_method == "load_table_from_dataframe":
-            dataframe[metadata_columns] = current_datetime
-        else:
-            dataframe[metadata_columns] = current_datetime.strftime(
-                "%Y-%m-%dT%H:%M:%S.%f"
-            )
+        if metadata_columns not in dataframe.columns:
+            # If the insertion metod is load_table_from_dataframe, the colum must be a datetime
+            if write_method == "load_table_from_dataframe":
+                dataframe[metadata_columns] = current_datetime
+            else:
+                dataframe[metadata_columns] = current_datetime.strftime(
+                    "%Y-%m-%dT%H:%M:%S.%f"
+                )
 
     return dataframe
 

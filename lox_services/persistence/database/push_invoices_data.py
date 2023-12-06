@@ -89,6 +89,27 @@ def translate_country_codes(
     return df
 
 
+def translate_country_codes(
+    df: pd.DataFrame, country_code_col: Union[str, Sequence[str]]
+) -> pd.DataFrame:
+    # Carrier-specific translations
+    carrier_translations = {
+        "Colissimo": {"HO": "HU"}
+        # Add other carriers and translations as needed
+    }
+
+    if isinstance(country_code_col, str):
+        country_code_col = [country_code_col]
+
+    for col in country_code_col:
+        if col in df.columns:
+            for carrier, translations in carrier_translations.items():
+                mask = (df["carrier"] == carrier) & (df[col].isin(translations.keys()))
+                df.loc[mask, col] = df.loc[mask, col].map(translations)
+
+    return df
+
+
 def push_run_to_database(
     run_output_folder: str, carrier: str, company: str, account_number_input: str = ""
 ) -> dict:
