@@ -46,4 +46,11 @@ def client_invoice_data_quality_check(dataframe: pd.DataFrame) -> pd.DataFrame:
     dataframe = dataframe.loc[~(dataframe["quantity"] < 0)]
     dataframe.loc[dataframe["quantity"] == 0, "quantity"] = 1
     dataframe.loc[dataframe["net_amount"] == 0, "net_amount"] = 1
+    
+    # If the original currency and amount are not set, set them to EUR
+    if "original_currency_code" not in dataframe.columns:
+        dataframe["original_currency_code"] = "EUR"
+    if "original_net_amount" not in dataframe.columns:
+        dataframe["original_net_amount"] = dataframe["net_amount"]
+    
     return dataframe
