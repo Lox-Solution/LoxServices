@@ -397,6 +397,11 @@ class TestUtils(unittest.TestCase):
 
             wait = WebDriverWait(driver, 15)
 
+            wait_until_page_loaded(driver, 15)
+
+            if len(driver.find_elements(DEFAULT_SELECTOR_TYPE, POPUP_BUTTON)) > 0:
+                driver.find_element(DEFAULT_SELECTOR_TYPE, POPUP_BUTTON).click()
+
             safe_send_keys(
                 driver,
                 DEFAULT_RIGHT_CSS_SELECTOR,
