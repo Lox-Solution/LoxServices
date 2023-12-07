@@ -76,6 +76,15 @@ class TestUtils(unittest.TestCase):
         )
         time.sleep(0.5)
 
+    def artoftesting_clear_cookie_banner(self, driver):
+        driver.maximize_window()
+        if len(driver.find_elements(DEFAULT_SELECTOR_TYPE, POPUP_BUTTON)) > 0:
+            driver.find_element(DEFAULT_SELECTOR_TYPE, POPUP_BUTTON).click()
+
+        # remove google ads
+        if len(driver.find_elements(DEFAULT_SELECTOR_TYPE, "html > ins")) > 0:
+            driver.execute_script('document.querySelector("html > ins").remove()')
+
     def test_get_value_or_empty_string(self):
         # Set the environment variable before calling the decorator
 
@@ -93,6 +102,8 @@ class TestUtils(unittest.TestCase):
                 size_width=960,
             )
             driver.get("https://artoftesting.com/samplesiteforselenium")
+            self.artoftesting_clear_cookie_banner(driver)
+
             wait_until_page_loaded(driver)
 
             output_text = get_value_or_empty_string(driver, By.CSS_SELECTOR, "#idOfDiv")
@@ -124,6 +135,7 @@ class TestUtils(unittest.TestCase):
                 size_width=960,
             )
             driver.get("https://artoftesting.com/samplesiteforselenium")
+            self.artoftesting_clear_cookie_banner(driver)
 
             wait_until_page_loaded(driver=driver)
             self.assertTrue(True)
@@ -172,6 +184,7 @@ class TestUtils(unittest.TestCase):
                 size_width=960,
             )
             driver.get("https://artoftesting.com/samplesiteforselenium")
+            self.artoftesting_clear_cookie_banner(driver)
 
             wait = WebDriverWait(driver, 15)
 
@@ -230,6 +243,7 @@ class TestUtils(unittest.TestCase):
                 size_width=960,
             )
             driver.get("https://artoftesting.com/samplesiteforselenium")
+            self.artoftesting_clear_cookie_banner(driver)
 
             element = find(driver, DEFAULT_RIGHT_CSS_SELECTOR, DEFAULT_SELECTOR_TYPE)
             self.assertIsInstance(element, WebElement)
@@ -258,6 +272,7 @@ class TestUtils(unittest.TestCase):
                 size_width=960,
             )
             driver.get("https://artoftesting.com/samplesiteforselenium")
+            self.artoftesting_clear_cookie_banner(driver)
 
             elements = safe_find_elements(
                 driver=driver,
@@ -292,6 +307,7 @@ class TestUtils(unittest.TestCase):
                 size_width=960,
             )
             driver.get("https://artoftesting.com/samplesiteforselenium")
+            self.artoftesting_clear_cookie_banner(driver)
 
             wait = WebDriverWait(driver, 15)
 
@@ -365,6 +381,7 @@ class TestUtils(unittest.TestCase):
                 size_width=960,
             )
             driver.get("https://artoftesting.com/samplesiteforselenium")
+            self.artoftesting_clear_cookie_banner(driver)
 
             wait = WebDriverWait(driver, 15)
 
@@ -394,13 +411,11 @@ class TestUtils(unittest.TestCase):
                 size_width=960,
             )
             driver.get("https://artoftesting.com/samplesiteforselenium")
+            self.artoftesting_clear_cookie_banner(driver)
 
             wait = WebDriverWait(driver, 15)
 
             wait_until_page_loaded(driver, 15)
-
-            if len(driver.find_elements(DEFAULT_SELECTOR_TYPE, POPUP_BUTTON)) > 0:
-                driver.find_element(DEFAULT_SELECTOR_TYPE, POPUP_BUTTON).click()
 
             safe_send_keys(
                 driver,
@@ -513,6 +528,8 @@ class TestUtils(unittest.TestCase):
             )
             driver.get("https://artoftesting.com/samplesiteforselenium")
 
+            self.artoftesting_clear_cookie_banner(driver)
+
             # Test case when the element exists
             safe_send_keys(
                 driver,
@@ -584,7 +601,7 @@ class TestUtils(unittest.TestCase):
                 size_width=960,
             )
             driver.get("https://artoftesting.com/samplesiteforselenium")
-
+            self.artoftesting_clear_cookie_banner(driver)
             driver.execute_script("localStorage.setItem('item1', 'value1');")
             driver.execute_script("localStorage.setItem('item2', 'value2');")
             # Test if the we managed to add items to the local storage
@@ -610,6 +627,8 @@ class TestUtils(unittest.TestCase):
                 size_width=960,
             )
             driver.get("https://artoftesting.com/samplesiteforselenium")
+            self.artoftesting_clear_cookie_banner(driver)
+
             # Test case for clearing cookies
             driver.add_cookie({"name": "cookie1", "value": "value1"})
             driver.add_cookie({"name": "cookie2", "value": "value2"})
@@ -657,6 +676,7 @@ class TestUtils(unittest.TestCase):
             )
 
             driver.get("https://artoftesting.com/samplesiteforselenium")
+            self.artoftesting_clear_cookie_banner(driver)
 
             wait = WebDriverWait(driver, 15)
 
