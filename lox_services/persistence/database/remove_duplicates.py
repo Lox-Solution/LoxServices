@@ -370,7 +370,7 @@ def remove_duplicate_currency_conversion(dataframe: pd.DataFrame) -> pd.DataFram
 
 def remove_duplicate_package_information(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Removes already saved package information dataframe"""
-    tns = dataframe["tracking_number"].unique().to_list()
+    tns = dataframe["tracking_number"].unique().tolist()
     sql_query = """
         SELECT
             distinct carrier || company || tracking_number AS existing_entry
@@ -380,9 +380,8 @@ def remove_duplicate_package_information(dataframe: pd.DataFrame) -> pd.DataFram
     """
     already_saved_entries = select(
         sql_query,
-        False,
         parameters=(("tracking_numbers", BQParameterType.STRING, tns),),
-    )["existing_entry"].to_list()
+    )["existing_entry"].tolist()
     if already_saved_entries:
         dataframe["concat_values"] = (
             dataframe["carrier"].astype(str)
