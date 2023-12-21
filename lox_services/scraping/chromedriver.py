@@ -156,10 +156,17 @@ def init_chromedriver(
             cookies,
         )
 
-    driver = ChromeWithPrefs(
-        version_main=version,
-        options=get_chrome_options(download_directory),
-    )
+        driver = ChromeWithPrefs(
+            version_main=version,
+            options=get_chrome_options(download_directory),
+            user_data_dir=folder_path,
+            user_profile=profile_name,
+        )
+    else:
+        driver = ChromeWithPrefs(
+            version_main=version,
+            options=get_chrome_options(download_directory),
+        )
     driver.set_window_size(size_length, size_width)
 
     return driver
