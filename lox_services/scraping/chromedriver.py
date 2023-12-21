@@ -2,7 +2,6 @@ from datetime import datetime
 import os
 import json
 import shutil
-import time
 import tempfile
 from functools import reduce
 
@@ -26,46 +25,66 @@ from lox_services.utils.chrome_version import get_chrome_version
 class ChromeWithPrefs(undetected_webdriver.Chrome):
     """Creates a ChromeDriver instance with the specified options."""
 
-    def __init__(self, *args, options=None, **kwargs):
+    def __init__(
+        self, *args, options=None, user_data_dir=None, user_profile=None, **kwargs
+    ):
+        options.binary_location = "/opt/google/chrome/google-chrome"
         if options:
-            self._handle_prefs(options)
+            self._handle_prefs(options, user_data_dir, user_profile)
 
         super().__init__(*args, options=options, **kwargs)
-
-        # remove the user_data_dir when quitting
-        self.keep_user_data_dir = False
+        if user_data_dir:
+            self.keep_user_data_dir = True
+        else:
+            self.keep_user_data_dir = False
 
     @staticmethod
-    def _handle_prefs(options):
-        if prefs := options.experimental_options.get("prefs"):
-            # turn a (dotted key, value) into a proper nested dict
-            def undot_key(key, value):
-                if "." in key:
-                    key, rest = key.split(".", 1)
-                    value = undot_key(rest, value)
-                return {key: value}
+    def _handle_prefs(options, user_data_dir, user_profile):
+        # turn a (dotted key, value) into a proper nested dict
+        prefs = options.experimental_options.get("prefs")
 
-            # undot prefs dict keys
-            undot_prefs = reduce(
-                lambda d1, d2: {**d1, **d2},  # merge dicts
-                (undot_key(key, value) for key, value in prefs.items()),
-            )
+        def undot_key(key, value):
+            if "." in key:
+                key, rest = key.split(".", 1)
+                value = undot_key(rest, value)
+            return {key: value}
 
-            # create an user_data_dir and add its path to the options
+        # undot prefs dict keys
+        undot_prefs = reduce(
+            lambda d1, d2: {**d1, **d2},  # merge dicts
+            (undot_key(key, value) for key, value in prefs.items()),
+        )
+        print("########")
+        print(user_data_dir, user_profile)
+        print("########")
+
+        # Set the user data directory to the provided path or create a temporary directory
+        if user_data_dir is None:
             user_data_dir = os.path.normpath(tempfile.mkdtemp())
-            options.add_argument(f"--user-data-dir={user_data_dir}")
+            profile_dir = os.path.join(user_data_dir, "Default")
+        else:
+            # Combine user_data_dir and user_profile to get the full profile path
+            profile_dir = os.path.join(user_data_dir, user_profile)
 
-            # create the preferences json file in its default directory
-            default_dir = os.path.join(user_data_dir, "Default")
-            os.mkdir(default_dir)
+        print(profile_dir)
+        print(os.path.exists(profile_dir))
+        # Ensure the profile directory exists
+        if not os.path.exists(profile_dir):
+            os.makedirs(profile_dir)
+            print(profile_dir)
 
-            prefs_file = os.path.join(default_dir, "Preferences")
-            with open(prefs_file, encoding="latin1", mode="w") as f:
-                json.dump(undot_prefs, f)
+        options.add_argument(f"--user-data-dir={user_data_dir}")
+        if user_profile:
+            options.add_argument(f"--profile-directory={user_profile}")
 
-            # pylint: disable=protected-access
-            # remove the experimental_options to avoid an error
-            del options._experimental_options["prefs"]
+        # Set the path for the preferences file
+        prefs_file = os.path.join(profile_dir, "Preferences")
+        with open(prefs_file, encoding="latin1", mode="w") as f:
+            json.dump(undot_prefs, f)
+
+        # pylint: disable=protected-access
+        # remove the experimental_options to avoid an error
+        del options._experimental_options["prefs"]
 
     def __enter__(self):
         pass
