@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import json
+import shutil
 import time
 import tempfile
 from functools import reduce
@@ -13,6 +14,11 @@ from lox_services.config.env_variables import get_env_variable
 from lox_services.config.paths import OUTPUT_FOLDER
 from lox_services.persistence.storage.constants import SELENIUM_CRASHES_BUCKET
 from lox_services.persistence.storage.storage import upload_file
+from lox_services.scraping.chromedriver_utils import (
+    add_cookies_from_json,
+    get_chrome_options,
+    get_chrome_profile_folder,
+)
 from lox_services.utils.general_python import safe_mkdir
 from lox_services.utils.chrome_version import get_chrome_version
 
@@ -87,44 +93,54 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
 
 
 def init_chromedriver(
-    download_directory: str, size_length: int, size_width: int, version: int
+    download_directory: str,
+    size_length: int,
+    size_width: int,
+    version: int,
+    cookies: dict,
 ) -> webdriver.Chrome:
     """Generates default chrome options for the given download directory.
     ## Arguments
         - `download_folder`: Folder where we want to download the invoices
         - `size_length`: Length of the chrome window
         - `size_width`: Width of the chrome window
+        - `version`: Version of the chrome driver to use
+        - `cookies`: Cookies to add to the driver
 
     ## Returns
     - The well setup driver
     """
-    prefs = {
-        "download.default_directory": download_directory,
-        "safebrowsing.enabled": True,
-        "profile.default_content_setting_values.automatic_downloads": 1,
-        "profile.default_content_settings.popups": 0,
-    }
-    options = webdriver.ChromeOptions()
-    options.add_experimental_option("prefs", prefs)
-    try:
-        options.binary_location = get_env_variable(
-            "CHROME_BINARY_LOCATION"
-        )  # check if a binary location is specified in .env
-    except ValueError:
-        pass
-    options.add_argument("--no-first-run --no-service-autorun --password-store=basic")
-    options.add_argument("--disable-popup-blocking")
-    options.add_argument("--incognito")
+    shutdown_current_instances()
 
-    # Remove the popup that ask to download the file
-    # https://stackoverflow.com/questions/77093248/chromedriver-version-117-forces-save-as-dialog-how-to-bypass-selenium-jav
-    options.add_argument("--disable-features=DownloadBubble,DownloadBubbleV2")
+    folder_path = get_chrome_profile_folder()
+    profile_name = "Lox"
 
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.headless = False
+    if cookies:
+        profile_folder_path = os.path.join(folder_path, profile_name)
 
-    driver = ChromeWithPrefs(version_main=version, options=options)
+        # Delete the profile if already existing
+        if os.path.exists(profile_folder_path):
+            shutil.rmtree(profile_folder_path)
+
+        # Create a new profile
+        driver = ChromeWithPrefs(
+            version_main=version,
+            options=get_chrome_options(download_directory),
+            user_data_dir=folder_path,
+            user_profile=profile_name,
+        )
+        driver.get("https://www.github.com")
+        shutdown_current_instances()
+        # Add cookies to newly created profile
+        add_cookies_from_json(
+            profile_folder_path,
+            cookies,
+        )
+
+    driver = ChromeWithPrefs(
+        version_main=version,
+        options=get_chrome_options(download_directory),
+    )
     driver.set_window_size(size_length, size_width)
 
     return driver
@@ -143,12 +159,15 @@ def run_chromedriver(
     size_length: int = 960,
     size_width: int = 960,
     version: int = get_chrome_version(),
+    cookies: dict = None,
 ):
     """Creates an undetected chromedriver with the wanted download folder.
     ## Arguments
     - `download_folder`: Folder where we want to download the invoices
     - `size_length`: Length of the chrome window
     - `size_width`: Width of the chrome window
+    - `version`: Version of the chrome driver to use
+    - `cookies`: Cookies to add to the driver
 
     ## Return
     - A well setup chrome driver
@@ -160,7 +179,9 @@ def run_chromedriver(
 
     while tries < 3:
         try:
-            return init_chromedriver(download_folder, size_length, size_width, version)
+            return init_chromedriver(
+                download_folder, size_length, size_width, version, cookies
+            )
         except Exception as e:
             last_exception = e
             tries = tries + 1
