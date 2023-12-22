@@ -4,11 +4,9 @@ import json
 import shutil
 import tempfile
 from functools import reduce
-
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 import undetected_chromedriver as undetected_webdriver
-
 from lox_services.config.env_variables import get_env_variable
 from lox_services.config.paths import OUTPUT_FOLDER
 from lox_services.persistence.storage.constants import SELENIUM_CRASHES_BUCKET
@@ -32,7 +30,6 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
         options.binary_location = "/opt/google/chrome/google-chrome"
         if options:
             self._handle_prefs(options, user_data_dir, user_profile)
-
         super().__init__(*args, options=options, **kwargs)
         if user_data_dir:
             self.keep_user_data_dir = True
@@ -58,7 +55,6 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
         print("########")
         print(user_data_dir, user_profile)
         print("########")
-
         # Set the user data directory to the provided path or create a temporary directory
         if user_data_dir is None:
             user_data_dir = os.path.normpath(tempfile.mkdtemp())
@@ -66,23 +62,20 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
         else:
             # Combine user_data_dir and user_profile to get the full profile path
             profile_dir = os.path.join(user_data_dir, user_profile)
-
         print(profile_dir)
         print(os.path.exists(profile_dir))
         # Ensure the profile directory exists
         if not os.path.exists(profile_dir):
             os.makedirs(profile_dir)
             print(profile_dir)
-
         options.add_argument(f"--user-data-dir={user_data_dir}")
         if user_profile:
+            print(user_profile)
             options.add_argument(f"--profile-directory={user_profile}")
-
         # Set the path for the preferences file
         prefs_file = os.path.join(profile_dir, "Preferences")
         with open(prefs_file, encoding="latin1", mode="w") as f:
             json.dump(undot_prefs, f)
-
         # pylint: disable=protected-access
         # remove the experimental_options to avoid an error
         del options._experimental_options["prefs"]
@@ -131,17 +124,13 @@ def init_chromedriver(
     ## Returns
     - The well setup driver
     """
-
     folder_path = get_chrome_profile_folder()
-    profile_name = "Lox"
-
     if cookies:
         profile_folder_path = os.path.join(folder_path, profile_name)
-
+        print(profile_folder_path)
         # Delete the profile if already existing
         if os.path.exists(profile_folder_path):
             shutil.rmtree(profile_folder_path)
-
         # Create a new profile
         driver = ChromeWithPrefs(
             version_main=version,
@@ -156,7 +145,6 @@ def init_chromedriver(
             profile_folder_path,
             cookies,
         )
-
         driver = ChromeWithPrefs(
             version_main=version,
             options=get_chrome_options(download_directory),
@@ -169,7 +157,6 @@ def init_chromedriver(
             options=get_chrome_options(download_directory),
         )
     driver.set_window_size(size_length, size_width)
-
     return driver
 
 
@@ -195,13 +182,11 @@ def run_chromedriver(
     - `size_width`: Width of the chrome window
     - `version`: Version of the chrome driver to use
     - `cookies`: Cookies to add to the driver
-
     ## Return
     - A well setup chrome driver
     """
     if get_env_variable("ENVIRONMENT") == "production":
         shutdown_current_instances()
-
     return init_chromedriver(
         download_folder, size_length, size_width, version, cookies, "Lox"
     )
@@ -213,11 +198,9 @@ def chromedriver_return_new_cookies(
     size_width: int = 960,
     version: int = get_chrome_version(),
     cookies: dict = None,
-    website_domain: str = None,
+    profile_name: str = None,
 ):
-    profile_name = "RefreshCookies"
-
-    init_chromedriver(
+    return init_chromedriver(
         download_folder,
         size_length,
         size_width,
@@ -225,5 +208,3 @@ def chromedriver_return_new_cookies(
         cookies,
         profile_name,
     )
-
-    return export_cookies_to_json(profile_name, website_domain)
