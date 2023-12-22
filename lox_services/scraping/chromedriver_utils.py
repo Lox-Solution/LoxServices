@@ -1,10 +1,69 @@
 import base64
+import json
 import os
 import platform
 import sqlite3
 from typing import Any, Dict, List
 
 from selenium import webdriver
+
+
+def export_cookies_to_json(profile_name: str, website_domain: str) -> str:
+    """
+    Exports cookies from a specified domain in a user's browser profile as a JSON string.
+
+    This function accesses the SQLite database containing the cookies in the user's browser profile,
+    filters the cookies for a specified domain, and then returns these cookies as a JSON string.
+
+    Args:
+    - profile_name (str): The name of the user's browser profile.
+    - website_domain (str): The domain of the website for which cookies are to be exported.
+
+    Returns:
+    - str: A JSON string representation of the cookies.
+
+    Note:
+    - The 'encrypted_value' field in the JSON is base64 encoded and remains encrypted.
+    """
+
+    src_cookies_db = os.path.join(get_chrome_profile_folder(), profile_name, "Cookies")
+    # Connect to the source cookies database
+    conn_src = sqlite3.connect(src_cookies_db)
+    cursor_src = conn_src.cursor()
+    cursor_src.execute(
+        f"SELECT creation_utc, host_key, name, value, path, expires_utc, is_secure, is_httponly, last_access_utc, has_expires, is_persistent, priority, encrypted_value FROM cookies WHERE host_key LIKE '%{website_domain}%'"
+    )
+    cookies = cursor_src.fetchall()
+
+    # Convert cookies to a list of dictionaries
+    cookies_list: List[Dict[str, any]] = []
+    for cookie in cookies:
+        cookies_list.append(
+            {
+                "creation_utc": cookie[0],
+                "host_key": cookie[1],
+                "name": cookie[2],
+                "value": cookie[3],
+                "path": cookie[4],
+                "expires_utc": cookie[5],
+                "is_secure": cookie[6],
+                "is_httponly": cookie[7],
+                "last_access_utc": cookie[8],
+                "has_expires": cookie[9],
+                "is_persistent": cookie[10],
+                "priority": cookie[11],
+                "encrypted_value": base64.b64encode(
+                    cookie[12]
+                ).decode(),  # Note: This will be in encrypted form
+            }
+        )
+
+    # Close connection
+    cursor_src.close()
+    conn_src.close()
+
+    # Return the cookies as a JSON string
+    return json.dumps(cookies_list, indent=4)
 
 
 def add_cookies_from_json(dest: str, cookies: List[Dict[str, Any]]) -> None:

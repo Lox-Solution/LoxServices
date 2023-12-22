@@ -15,6 +15,7 @@ from lox_services.persistence.storage.constants import SELENIUM_CRASHES_BUCKET
 from lox_services.persistence.storage.storage import upload_file
 from lox_services.scraping.chromedriver_utils import (
     add_cookies_from_json,
+    export_cookies_to_json,
     get_chrome_options,
     get_chrome_profile_folder,
 )
@@ -117,6 +118,7 @@ def init_chromedriver(
     size_width: int,
     version: int,
     cookies: dict,
+    profile_name: str,
 ) -> webdriver.Chrome:
     """Generates default chrome options for the given download directory.
     ## Arguments
@@ -125,11 +127,10 @@ def init_chromedriver(
         - `size_width`: Width of the chrome window
         - `version`: Version of the chrome driver to use
         - `cookies`: Cookies to add to the driver
-
+        - `profile_name`: Name of the profile to use
     ## Returns
     - The well setup driver
     """
-    shutdown_current_instances()
 
     folder_path = get_chrome_profile_folder()
     profile_name = "Lox"
@@ -149,7 +150,7 @@ def init_chromedriver(
             user_profile=profile_name,
         )
         driver.get("https://www.github.com")
-        shutdown_current_instances()
+        driver.close()
         # Add cookies to newly created profile
         add_cookies_from_json(
             profile_folder_path,
@@ -201,4 +202,28 @@ def run_chromedriver(
     if get_env_variable("ENVIRONMENT") == "production":
         shutdown_current_instances()
 
-    return init_chromedriver(download_folder, size_length, size_width, version, cookies)
+    return init_chromedriver(
+        download_folder, size_length, size_width, version, cookies, "Lox"
+    )
+
+
+def chromedriver_return_new_cookies(
+    download_folder: str = OUTPUT_FOLDER,
+    size_length: int = 960,
+    size_width: int = 960,
+    version: int = get_chrome_version(),
+    cookies: dict = None,
+    website_domain: str = None,
+):
+    profile_name = "RefreshCookies"
+
+    init_chromedriver(
+        download_folder,
+        size_length,
+        size_width,
+        version,
+        cookies,
+        profile_name,
+    )
+
+    return export_cookies_to_json(profile_name, website_domain)
