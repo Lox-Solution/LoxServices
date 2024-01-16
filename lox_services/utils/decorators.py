@@ -6,6 +6,7 @@ from pprint import pprint
 from time import perf_counter
 import time
 from typing import Callable, Tuple, Type
+from functools import wraps
 
 from pyvirtualdisplay import Display
 
@@ -96,6 +97,7 @@ def DataUsage(function: Callable):
 def VirtualDisplay(function: Callable):
     """Uses a virtual display to run the decorated function when ENVIRONMENT is set to production."""
 
+    @wraps(function)
     def wrapper(*args, **kwargs):
         is_production = get_env_variable("ENVIRONMENT") == "production"
         if is_production:
@@ -104,7 +106,7 @@ def VirtualDisplay(function: Callable):
 
         result = function(*args, **kwargs)
 
-        if is_production:
+        if is_production and display:
             display.stop()
 
         return result
