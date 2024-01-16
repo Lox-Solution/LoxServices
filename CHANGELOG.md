@@ -51,3 +51,4 @@
 1.2.0 Add RecordedActivity dataset
 1.2.1 Optimize Query to remove duplicates on package information, add default original currency columns
 1.2.2 fix package information remove duplicates
+1.2.3 Make sure virtual display wraps all functions
