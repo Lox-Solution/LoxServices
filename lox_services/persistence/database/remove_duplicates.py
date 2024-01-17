@@ -72,6 +72,12 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame) -> pd.DataFrame:
     company = dataframe.iloc[0]["company"]
     dataframe["reason_refund"] = dataframe.reason_refund.astype(str)
     reason_refunds = dataframe["reason_refund"].unique().tolist()
+    reason_refunds = list(
+        set(
+            dataframe["reason_refund"].unique().tolist()
+            + ["Damaged", "Lost", "Delivery Dispute"]
+        )
+    )
 
     dataframe["tracking_number"] = dataframe.tracking_number.astype(str)
     tracking_numbers = dataframe["tracking_number"].tolist()
