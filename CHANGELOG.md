@@ -52,3 +52,4 @@
 1.2.1 Optimize Query to remove duplicates on package information, add default original currency columns
 1.2.2 fix package information remove duplicates
 1.2.3 Make sure virtual display wraps all functions
+1.2.4 Include all reason refunds in check duplicates
