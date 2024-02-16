@@ -1,4 +1,5 @@
 """Contains all datasets of the database"""
+
 from enum import Enum
 from typing import Union
 
@@ -47,9 +48,11 @@ class Mapping_dataset(Enum):
     ClaimStatuses = "ClaimStatuses"
     StatusMapping = "StatusMapping"
 
+
 class RecordedActivity_dataset(Enum):
     "Class that represents the classes present in RecordedActivity dataset"
     ClientDataRequests = "ClientDataRequests"
+
 
 class TestEnvironment_dataset(Enum):
     "Class that represents the classes present in TestEnvironment dataset"
@@ -74,6 +77,7 @@ class Utils_dataset(Enum):
 class CarrierData_dataset(Enum):
     "Class that represents the classes present in CarrierData dataset"
     PackageInformation = "PackageInformation"
+    PDFInformation = "PDFInformation"
 
 
 DatasetTypeAlias = Union[
