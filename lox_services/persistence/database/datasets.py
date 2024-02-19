@@ -1,4 +1,5 @@
 """Contains all datasets of the database"""
+
 from enum import Enum
 from typing import Union
 
@@ -27,6 +28,7 @@ class LoxData_dataset(Enum):
     Invoicing = "Invoicing"
     InvoicesDetails = "InvoicesDetails"
     Targets = "Targets"
+    ExactInvoices = "ExactInvoices"
 
 
 class UserData_dataset(Enum):
@@ -47,9 +49,11 @@ class Mapping_dataset(Enum):
     ClaimStatuses = "ClaimStatuses"
     StatusMapping = "StatusMapping"
 
+
 class RecordedActivity_dataset(Enum):
     "Class that represents the classes present in RecordedActivity dataset"
     ClientDataRequests = "ClientDataRequests"
+
 
 class TestEnvironment_dataset(Enum):
     "Class that represents the classes present in TestEnvironment dataset"
