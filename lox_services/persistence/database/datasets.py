@@ -28,6 +28,7 @@ class LoxData_dataset(Enum):
     Invoicing = "Invoicing"
     InvoicesDetails = "InvoicesDetails"
     Targets = "Targets"
+    ExactInvoices = "ExactInvoices"
 
 
 class UserData_dataset(Enum):
