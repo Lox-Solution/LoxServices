@@ -74,6 +74,7 @@ class Utils_dataset(Enum):
 class CarrierData_dataset(Enum):
     "Class that represents the classes present in CarrierData dataset"
     PackageInformation = "PackageInformation"
+    PDFInformation = "PDFInformation"
 
 
 DatasetTypeAlias = Union[
