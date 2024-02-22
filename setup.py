@@ -27,7 +27,7 @@ setup(
         "weasyprint == 52.5",
         "requests == 2.31.0",
         "selenium == 4.12.0",
-        "undetected-chromedriver == 3.5.3",
+        "undetected-chromedriver == 3.5.5",
         "selenium-wire == 5.1.0",
         "xvfbwrapper == 0.2.9",
         "numpy == 1.26.0",
