@@ -103,22 +103,25 @@ def init_chromedriver(
         "safebrowsing.enabled": True,
         "profile.default_content_setting_values.automatic_downloads": 1,
         "profile.default_content_settings.popups": 0,
+        "download.prompt_for_download": False,
+        "download.directory_upgrade": True,
     }
     options = webdriver.ChromeOptions()
     options.add_experimental_option("prefs", prefs)
+
     try:
         options.binary_location = get_env_variable(
             "CHROME_BINARY_LOCATION"
         )  # check if a binary location is specified in .env
     except ValueError:
         pass
+
     options.add_argument("--no-first-run --no-service-autorun --password-store=basic")
     options.add_argument("--disable-popup-blocking")
     options.add_argument("--incognito")
 
-    # Remove the popup that ask to download the file
-    # https://stackoverflow.com/questions/77093248/chromedriver-version-117-forces-save-as-dialog-how-to-bypass-selenium-jav
-    options.add_argument("--disable-features=DownloadBubble,DownloadBubbleV2")
+    # Disable download popup blocking feature
+    options.add_argument("--disable-features=DownloadPopupBlocking")
 
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -126,6 +129,17 @@ def init_chromedriver(
 
     driver = ChromeWithPrefs(version_main=version, options=options)
     driver.set_window_size(size_length, size_width)
+
+    # Handle download dialog
+    driver.command_executor._commands["send_command"] = (
+        "POST",
+        "/session/$sessionId/chromium/send_command",
+    )
+    params = {
+        "cmd": "Page.setDownloadBehavior",
+        "params": {"behavior": "allow", "downloadPath": download_directory},
+    }
+    driver.execute("send_command", params)
 
     return driver
 
