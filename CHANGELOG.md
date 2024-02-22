@@ -54,3 +54,4 @@
 1.2.3 Make sure virtual display wraps all functions
 1.2.4 Include all reason refunds in check duplicates
 1.2.5 Add new table (pdf) into dataset
+1.2.6 Fix download folder chromedriver
