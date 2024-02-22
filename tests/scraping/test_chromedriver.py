@@ -60,7 +60,7 @@ class TestChromeDriver(unittest.TestCase):
             # Download a very small file
             wait_until_clickable_and_click(
                 wait=wait,
-                selector="#vue > table > tbody > tr:nth-child(1) > td:nth-child(1) > a",
+                selector="#vue > div:nth-child(6) > a:nth-child(1)",
                 timeout=15,
                 by=By.CSS_SELECTOR,
             )
