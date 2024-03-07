@@ -7,7 +7,7 @@ setup(
     name="lox_services",
     version="1.2.6",
     author="Lox Solution",
-    author_email="natasa.zekic@loxsolution.com",
+    author_email="melvil.donnart@loxsolution.com",
     description="A package with Lox services",
     long_description=long_description,
     long_description_content_type="text/markdown",
