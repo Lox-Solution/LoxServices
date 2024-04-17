@@ -157,6 +157,32 @@ class BrightDataProxyManager:
 
     ### END PRIVATE ###
 
+    def get_one_proxy(self, country: str = "US"):
+        """Fetches a single proxy IP and returns the necessary proxy settings.
+
+        Args:
+            country (str): The country code to filter the proxy IPs.
+
+        Returns:
+            dict: A dictionary containing http and https proxies.
+
+        Raises:
+            Exception: If no proxy IP is available.
+        """
+        proxy_list = self._get_ip_list(country=country)
+        if not proxy_list:
+            raise Exception(
+                "No proxy IP available. Check your proxy manager configuration."
+            )
+
+        proxy_ip = proxy_list[0]
+        proxies = {
+            "http": f"http://{self.base_url % proxy_ip}",
+            "https": f"https://{self.base_url % proxy_ip}",
+        }
+        print(f"Using proxy IP: {proxy_ip}")
+        return proxies
+
     @Perf
     @DataUsage
     def request_with_multithreading_proxies(
