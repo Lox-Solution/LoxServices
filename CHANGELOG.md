@@ -55,3 +55,4 @@
 1.2.4 Include all reason refunds in check duplicates
 1.2.5 Add new table (pdf) into dataset
 1.2.6 Fix download folder chromedriver
+1.2.7 New functions on Brightdata
