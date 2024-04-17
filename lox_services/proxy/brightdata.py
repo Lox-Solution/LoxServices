@@ -25,7 +25,6 @@ class BrightDataProxyManager:
 
     ### PRIVATE ###
 
-    @staticmethod
     def _get_ip_list(self, country: str = None):
         if country:
             url = f"https://luminati.io/api/zone/route_ips?zone={self.zones[0]}&country={country}"
@@ -112,7 +111,7 @@ class BrightDataProxyManager:
                 result += AVAILABLE_IPS_PER_COUNTRY.get(country)
 
             else:
-                ip_list = self._get_ip_list(self, country)
+                ip_list = self._get_ip_list(country)
                 AVAILABLE_IPS_PER_COUNTRY[country] = ip_list
                 result += ip_list
 
@@ -121,7 +120,7 @@ class BrightDataProxyManager:
 
     def _get_all_available_ips(self):
         """Gets all available IPs. Limited to 20k."""
-        ip_list = self._get_ip_list(self)
+        ip_list = self._get_ip_list()
         print_success(f"{len(ip_list)} IPs available.")
         return ip_list
 
@@ -157,6 +156,32 @@ class BrightDataProxyManager:
         return request_options
 
     ### END PRIVATE ###
+
+    def get_one_proxy(self, country: str = "US"):
+        """Fetches a single proxy IP and returns the necessary proxy settings.
+
+        Args:
+            country (str): The country code to filter the proxy IPs.
+
+        Returns:
+            dict: A dictionary containing http and https proxies.
+
+        Raises:
+            Exception: If no proxy IP is available.
+        """
+        proxy_list = self._get_ip_list(country=country)
+        if not proxy_list:
+            raise Exception(
+                "No proxy IP available. Check your proxy manager configuration."
+            )
+
+        proxy_ip = proxy_list[0]
+        proxies = {
+            "http": f"http://{self.base_url % proxy_ip}",
+            "https": f"https://{self.base_url % proxy_ip}",
+        }
+        print(f"Using proxy IP: {proxy_ip}")
+        return proxies
 
     @Perf
     @DataUsage
