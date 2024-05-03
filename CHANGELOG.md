@@ -56,3 +56,4 @@
 1.2.5 Add new table (pdf) into dataset
 1.2.6 Fix download folder chromedriver
 1.2.7 New functions on Brightdata
+1.2.8 Add UploadedFiles in dataset
