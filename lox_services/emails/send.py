@@ -4,14 +4,16 @@ All send email functions
 
 import os
 import smtplib
-from email import encoders
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from enum import Enum
-from typing import List
 import lxml.html
 import pandas as pd
+from enum import Enum
+from typing import Dict, List
+
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 from lox_services.config.env_variables import get_env_variable
 from lox_services.emails.utils import (
@@ -36,6 +38,26 @@ class ContentTypes(Enum):
 
     HTML = "html"
     STRING = "string"
+
+
+def attach_images(msg: MIMEMultipart, images: Dict[str, str]) -> None:
+    """
+    Attaches images to an email message.
+
+    Args:
+        msg (MIMEMultipart): The email message to which images will be attached.
+        images (Dict[str, str]): A dictionary where the key is the Content-ID of the image, and the value is the path to the image file.
+
+    Example:
+        >>> msg = MIMEMultipart()
+        >>> images = {"image1": "/path/to/image1.png", "image2": "/path/to/image2.png"}
+        >>> attach_images(msg, images)
+    """
+    for cid, path in images.items():
+        with open(path, "rb") as img_file:
+            msg_image = MIMEImage(img_file.read())
+            msg_image.add_header("Content-ID", f"<{cid}>")
+            msg.attach(msg_image)
 
 
 def send_email(
@@ -134,6 +156,7 @@ def send_emails_from_loxsolution_account(
     subject: str,
     content: str,
     attachments: List[str] = [],
+    images: Dict[str, str] = {},
 ):
     """Uses Oauth2 tokens to send the email from Loxteam account.
     ## Arguments
@@ -144,6 +167,7 @@ def send_emails_from_loxsolution_account(
     - `attachments`: List of the locals absolutes paths of files to send to the receiver.
     - `cc_email_addresses`: List of the emails added to copy of this email
     - `bcc_email_addresses`: List of the emails added to hidden copy of this email
+    - `images`: Dictionary of the images to attach to the email. The key is the cid and the value is the path of the image.
 
     ## Example
         >>> send_email_from_loxsolution_account(
@@ -202,6 +226,14 @@ def send_emails_from_loxsolution_account(
     msg_alternative.attach(part_text)
     msg_alternative.attach(part_html)
 
+    # Attach images
+    for cid, path in images.items():
+        with open(path, "rb") as img_file:
+            msg_image = MIMEImage(img_file.read())
+            msg_image.add_header("Content-ID", f"<{cid}>")
+            msg.attach(msg_image)
+
+    # Attach other attachments
     for attachment_path in attachments:
         if pd.isna(attachment_path):
             continue
