@@ -74,6 +74,7 @@ class Utils_dataset(Enum):
     "Class that represents the classes present in Utils dataset"
     CurrencyConversion = "CurrencyConversion"
     TempRefunds = "TempRefunds"
+    EmailsSent = "EmailsSent"
 
 
 class CarrierData_dataset(Enum):
