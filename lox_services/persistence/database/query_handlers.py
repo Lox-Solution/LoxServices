@@ -1,4 +1,5 @@
 """All functions to query the database."""
+
 import os
 import re
 import time
@@ -29,7 +30,6 @@ def raw_query(
     parameters: Optional[Sequence[Tuple[str, BQParameterType, Any]]] = None,
     print_query: bool = True,
 ) -> QueryJob:
-
     """Excecutes a query with Google BigQuery, without any checks.
     Adds some metadata at the beginning of the query.
     ## Arguments
@@ -74,15 +74,17 @@ def raw_query(
     if parameters:
         parameters = QueryJobConfig(
             query_parameters=[
-                ArrayQueryParameter(
-                    parameter[0], parameter[1].value, parameter[2]
-                )  # NOQA
-                if (
-                    isinstance(parameter[2], Sequence)
-                    and not isinstance(parameter[2], str)
-                )
-                else ScalarQueryParameter(
-                    parameter[0], parameter[1].value, parameter[2]
+                (
+                    ArrayQueryParameter(
+                        parameter[0], parameter[1].value, parameter[2]
+                    )  # NOQA
+                    if (
+                        isinstance(parameter[2], Sequence)
+                        and not isinstance(parameter[2], str)
+                    )
+                    else ScalarQueryParameter(
+                        parameter[0], parameter[1].value, parameter[2]
+                    )
                 )
                 for parameter in parameters
             ]
@@ -115,8 +117,12 @@ def select(
     ## Return
     The result of the select query as a dataframe.
     """
-    if not (query.lstrip().startswith("SELECT") or query.lstrip().startswith("WITH")):
-        raise BadQueryTypeException("SELECT or WITH")
+    if not (
+        query.lstrip().startswith("SELECT")
+        or query.lstrip().startswith("WITH")
+        or query.lstrip().startswith("CALL")
+    ):
+        raise BadQueryTypeException("SELECT or WITH or CALL")
 
     result = raw_query(query, print_query=print_query, parameters=parameters).result()
     if as_iterator:
