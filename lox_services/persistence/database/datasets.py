@@ -43,6 +43,7 @@ class UserData_dataset(Enum):
     ClientApiAccess = "ClientApiAccess"
     NestedAccountNumbers = "NestedAccountNumbers"
     UploadedFiles = "UploadedFiles"
+    UserActions = "UserActions"
 
 
 class Mapping_dataset(Enum):
