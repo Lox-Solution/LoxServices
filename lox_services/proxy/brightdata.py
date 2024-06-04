@@ -175,7 +175,7 @@ class BrightDataProxyManager:
                 "No proxy IP available. Check your proxy manager configuration."
             )
 
-        proxy_ip = proxy_list[0]
+        proxy_ip = random.choice(proxy_list)
         proxies = {
             "http": f"http://{self.base_url % proxy_ip}",
             "https": f"https://{self.base_url % proxy_ip}",
