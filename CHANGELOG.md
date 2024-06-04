@@ -59,3 +59,4 @@
 1.2.8 Add UploadedFiles in dataset
 1.2.9 Add possibility to have cid images inside emails
 1.2.10 Add the possibility to query table functions from SQL
+1.2.11 Allow the use of proxy on chromedriver
