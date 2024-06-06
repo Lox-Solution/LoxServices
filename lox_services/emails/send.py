@@ -151,6 +151,7 @@ def send_emails_from_loxsolution_account(
     *,
     sender_email_address: str = LOX_TEAM_EMAIL,
     receiver_email_addresses: List[str],
+    reply_to_email_address: str = None,
     cc_email_addresses: List[str] = [],
     bcc_email_addresses: List[str] = [],
     subject: str,
@@ -162,6 +163,7 @@ def send_emails_from_loxsolution_account(
     ## Arguments
     - `sender_email_adress`: The email of the sender. We must have the refresh token stored in the env variables.
     - `receiver_email_addresses`: Email address of the receiver.
+    - `reply_to_email_address`: Email address to reply to.
     - `subject`: Subject of the email.
     - `content`: Message content of the email. Can be a string representing HTML.
     - `attachments`: List of the locals absolutes paths of files to send to the receiver.
@@ -201,6 +203,9 @@ def send_emails_from_loxsolution_account(
     msg["Subject"] = subject
     msg["From"] = sender_email_address
     msg["To"] = ", ".join(receiver_email_addresses)
+    if reply_to_email_address:
+        msg["Reply-To"] = reply_to_email_address
+
     # CC
     cc_email_addresses = list(
         filter(lambda element: element is not None, cc_email_addresses)
