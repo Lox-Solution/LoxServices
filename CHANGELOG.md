@@ -61,3 +61,4 @@
 1.2.10 Add the possibility to query table functions from SQL
 1.2.11 Add UserActions in dataset
 1.2.12 Allow the use of proxy on chromedriver
+1.2.13 Allow Reply-To on emails sent
