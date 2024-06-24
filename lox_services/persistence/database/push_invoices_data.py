@@ -1,4 +1,5 @@
 """All functions to save invoice data into the database"""
+
 import os
 from enum import Enum
 from typing import Mapping, List, Sequence, Tuple, Union
@@ -148,6 +149,7 @@ def push_run_to_database(
                 dtype={
                     "postal_code_receiver": "string[pyarrow]",
                     "postal_code_sender": "string[pyarrow]",
+                    "account_number": "str",
                 },
             )
             .pipe(
