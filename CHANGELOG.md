@@ -63,3 +63,4 @@
 1.2.12 Allow the use of proxy on chromedriver
 1.2.13 Allow Reply-To on emails sent
 1.2.14 Read account_number as str
+1.2.15 Add new table
