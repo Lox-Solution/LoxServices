@@ -44,6 +44,7 @@ class UserData_dataset(Enum):
     NestedAccountNumbers = "NestedAccountNumbers"
     UploadedFiles = "UploadedFiles"
     UserActions = "UserActions"
+    UserRoles = "UserRoles"
 
 
 class Mapping_dataset(Enum):
