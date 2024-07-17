@@ -3,7 +3,10 @@ import os
 import json
 import time
 import tempfile
+import shutil
+
 from functools import reduce
+from urllib.parse import urlparse
 
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
@@ -15,6 +18,88 @@ from lox_services.persistence.storage.constants import SELENIUM_CRASHES_BUCKET
 from lox_services.persistence.storage.storage import upload_file
 from lox_services.utils.general_python import safe_mkdir
 from lox_services.utils.chrome_version import get_chrome_version
+
+
+def convert_proxy(proxy_url):
+    parsed = urlparse(proxy_url)
+
+    host = parsed.hostname
+    port = parsed.port
+    username = parsed.username
+    password = parsed.password
+
+    return (host, port, username, password)
+
+
+class ProxyExtension:
+    manifest_json = """
+    {
+        "version": "1.0.0",
+        "manifest_version": 2,
+        "name": "Chrome Proxy",
+        "permissions": [
+            "proxy",
+            "tabs",
+            "unlimitedStorage",
+            "storage",
+            "<all_urls>",
+            "webRequest",
+            "webRequestBlocking"
+        ],
+        "background": {"scripts": ["background.js"]},
+        "minimum_chrome_version": "76.0.0"
+    }
+    """
+
+    background_js = """
+    var config = {
+        mode: "fixed_servers",
+        rules: {
+            singleProxy: {
+                scheme: "http",
+                host: "%s",
+                port: %d
+            },
+            bypassList: ["localhost"]
+        }
+    };
+
+    chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
+
+    function callbackFn(details) {
+        return {
+            authCredentials: {
+                username: "%s",
+                password: "%s"
+            }
+        };
+    }
+
+    chrome.webRequest.onAuthRequired.addListener(
+        callbackFn,
+        { urls: ["<all_urls>"] },
+        ['blocking']
+    );
+    """
+
+    def __init__(self, host, port, user, password):
+        self._dir = os.path.normpath(tempfile.mkdtemp())
+
+        manifest_file = os.path.join(self._dir, "manifest.json")
+        with open(manifest_file, mode="w") as f:
+            f.write(self.manifest_json)
+
+        background_js = self.background_js % (host, port, user, password)
+        background_file = os.path.join(self._dir, "background.js")
+        with open(background_file, mode="w") as f:
+            f.write(background_js)
+
+    @property
+    def directory(self):
+        return self._dir
+
+    def __del__(self):
+        shutil.rmtree(self._dir)
 
 
 class ChromeWithPrefs(undetected_webdriver.Chrome):
@@ -87,7 +172,11 @@ class ChromeWithPrefs(undetected_webdriver.Chrome):
 
 
 def init_chromedriver(
-    download_directory: str, size_length: int, size_width: int, version: int
+    download_directory: str,
+    size_length: int,
+    size_width: int,
+    version: int,
+    proxy: str = None,
 ) -> webdriver.Chrome:
     """Generates default chrome options for the given download directory.
     ## Arguments
@@ -118,7 +207,6 @@ def init_chromedriver(
 
     options.add_argument("--no-first-run --no-service-autorun --password-store=basic")
     options.add_argument("--disable-popup-blocking")
-    options.add_argument("--incognito")
 
     # Disable download popup blocking feature
     options.add_argument("--disable-features=DownloadPopupBlocking")
@@ -126,6 +214,13 @@ def init_chromedriver(
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.headless = False
+
+    if proxy:
+        proxy = convert_proxy(
+            proxy_url=proxy
+        )  # your proxy with auth, this one is obviously fake
+        proxy_extension = ProxyExtension(*proxy)
+        options.add_argument(f"--load-extension={proxy_extension.directory}")
 
     driver = ChromeWithPrefs(version_main=version, options=options)
     driver.set_window_size(size_length, size_width)
@@ -157,12 +252,15 @@ def run_chromedriver(
     size_length: int = 960,
     size_width: int = 960,
     version: int = get_chrome_version(),
+    proxy: str = None,
 ):
     """Creates an undetected chromedriver with the wanted download folder.
     ## Arguments
     - `download_folder`: Folder where we want to download the invoices
     - `size_length`: Length of the chrome window
     - `size_width`: Width of the chrome window
+    - `version`: Version of the chrome driver
+    - `proxy`: Proxy to use
 
     ## Return
     - A well setup chrome driver
@@ -174,7 +272,9 @@ def run_chromedriver(
 
     while tries < 3:
         try:
-            return init_chromedriver(download_folder, size_length, size_width, version)
+            return init_chromedriver(
+                download_folder, size_length, size_width, version, proxy
+            )
         except Exception as e:
             last_exception = e
             tries = tries + 1

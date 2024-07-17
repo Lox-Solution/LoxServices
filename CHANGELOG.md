@@ -59,3 +59,8 @@
 1.2.8 Add UploadedFiles in dataset
 1.2.9 Add possibility to have cid images inside emails
 1.2.10 Add the possibility to query table functions from SQL
+1.2.11 Add UserActions in dataset
+1.2.12 Allow the use of proxy on chromedriver
+1.2.13 Allow Reply-To on emails sent
+1.2.14 Read account_number as str
+1.2.15 Add new table
