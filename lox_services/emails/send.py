@@ -158,70 +158,72 @@ def send_emails_from_loxsolution_account(
     content: str,
     attachments: List[str] = [],
     images: Dict[str, str] = {},
+    in_reply_to: str = None,  # New parameter for In-Reply-To header
+    references: str = None,  # New parameter for References header
 ):
-    """Uses Oauth2 tokens to send the email from Loxteam account.
-    ## Arguments
-    - `sender_email_adress`: The email of the sender. We must have the refresh token stored in the env variables.
-    - `receiver_email_addresses`: Email address of the receiver.
-    - `reply_to_email_address`: Email address to reply to.
-    - `subject`: Subject of the email.
-    - `content`: Message content of the email. Can be a string representing HTML.
-    - `attachments`: List of the locals absolutes paths of files to send to the receiver.
-    - `cc_email_addresses`: List of the emails added to copy of this email
-    - `bcc_email_addresses`: List of the emails added to hidden copy of this email
-    - `images`: Dictionary of the images to attach to the email. The key is the cid and the value is the path of the image.
+    """
+    Uses OAuth2 tokens to send the email from Loxteam account, and allows replying to emails.
 
-    ## Example
-        >>> send_email_from_loxsolution_account(
-            ["alexandre.girbal@loxsolution.com"],
-            "Dummy subject",
-            "Dummy content",
-            ["/home/alexandre/Downloads/vue.JPG", "absolute_path/dummy.pdf"]
-        )
+    Args:
+        sender_email_address (str): The email address of the sender.
+        receiver_email_addresses (List[str]): Email addresses of the recipients.
+        reply_to_email_address (str, optional): The Reply-To address.
+        cc_email_addresses (List[str], optional): CC email addresses.
+        bcc_email_addresses (List[str], optional): BCC email addresses.
+        subject (str): The subject of the email.
+        content (str): The body content of the email.
+        attachments (List[str], optional): List of file paths to attach.
+        images (Dict[str, str], optional): Dictionary of images to embed (cid: file_path).
+        in_reply_to (str, optional): Message-ID of the original email for threading (In-Reply-To header).
+        references (str, optional): Message-ID for threading references (References header).
 
-    ## Returns
-    - Nothing if no exception is raised.
-    - Raises an exception otherwise.
+    Raises:
+        ValueError: If the sender email address is invalid.
     """
     if sender_email_address not in LOX_ACCOUNTS:
         raise ValueError(
             "Sender's email address is invalid. Valid emails at the moment are team and finance emails."
         )
+
     print(
         f"{sender_email_address} is sending an email to {receiver_email_addresses} ..."
     )
     print(
         f"Subject: {subject}\nccs: {cc_email_addresses}\nbccs: {bcc_email_addresses} ..."
     )
+
+    # Refresh OAuth2 access token
     refresh_key = REFRESH_KEYS_LOX_ACCOUNTS[sender_email_address]
     access_token = refresh_authorization(get_env_variable(refresh_key))
     auth_string = generate_oauth2_string(
         sender_email_address, access_token, as_base64=True
     )
 
+    # Create email message (MIMEMultipart)
     msg = MIMEMultipart("related")
     msg["Subject"] = subject
     msg["From"] = sender_email_address
     msg["To"] = ", ".join(receiver_email_addresses)
+
     if reply_to_email_address:
         msg["Reply-To"] = reply_to_email_address
 
-    # CC
-    cc_email_addresses = list(
-        filter(lambda element: element is not None, cc_email_addresses)
-    )
-    if len(cc_email_addresses) > 0:
+    # Add CC and BCC headers
+    if cc_email_addresses:
         msg["Cc"] = ", ".join(cc_email_addresses)
-    # BCC
-    bcc_email_addresses = list(
-        filter(lambda element: element is not None, bcc_email_addresses)
-    )
-    if len(bcc_email_addresses) > 0:
+    if bcc_email_addresses:
         msg["Bcc"] = ", ".join(bcc_email_addresses)
 
-    msg.preamble = "This is a multi-part message in MIME format."
+    # Add reply headers for threading
+    if in_reply_to:
+        msg["In-Reply-To"] = in_reply_to
+    if references:
+        msg["References"] = references
+
+    # Attach content
     msg_alternative = MIMEMultipart("alternative")
     msg.attach(msg_alternative)
+
     part_text = MIMEText(
         lxml.html.fromstring(content).text_content().encode("utf-8"),
         "plain",
@@ -238,7 +240,7 @@ def send_emails_from_loxsolution_account(
             msg_image.add_header("Content-ID", f"<{cid}>")
             msg.attach(msg_image)
 
-    # Attach other attachments
+    # Attach files
     for attachment_path in attachments:
         if pd.isna(attachment_path):
             continue
@@ -252,6 +254,7 @@ def send_emails_from_loxsolution_account(
         part.add_header("Content-Disposition", f"attachment; filename= {filename}")
         msg_alternative.attach(part)
 
+    # Send email via SMTP using OAuth2
     server = smtplib.SMTP("smtp.gmail.com:587")
     server.ehlo(get_google_client_id())
     server.starttls()

@@ -1,4 +1,5 @@
 """All functions related to email fetching."""
+
 import email
 import imaplib
 import os
@@ -134,3 +135,47 @@ def download_attachments(email_message: Message, download_folder: str) -> List[s
             print_success(f"File downloaded successfully: {file_name}")
 
     return files_names
+
+
+def get_email_with_datetime_and_subject(
+    datetime_original_message: datetime, email_from: str, subject: str
+) -> tuple:
+    """
+    Find an email that matches a specific datetime, sender, and subject.
+
+    Args:
+        datetime_original_message (datetime): The datetime of the original message to match.
+        email_from (str): The sender's email address to match.
+        subject (str): The subject of the email to match.
+
+    Returns:
+        tuple: A tuple containing:
+            - email (Message): The email message object that matches the criteria.
+            - message_id (str): The Message-ID of the email for threading.
+            - receiver (List[str]): The list of receiver email addresses.
+        If no email is found, returns (None, None, None).
+    """
+    emails = get_emails(
+        "INBOX",
+        365,
+        search={
+            "FROM": email_from,
+            "subject": subject,
+        },
+    )
+
+    for email in emails:
+        df_datetime = datetime_original_message
+        email_datetime = datetime.strptime(email["Date"], "%a, %d %b %Y %H:%M:%S %z")
+
+        # Remove the timezone information from the email datetime
+        email_datetime_naive = email_datetime.replace(tzinfo=None)
+
+        if email_datetime_naive == df_datetime:
+            message_id = email["Message-ID"]  # Get Message-ID for threading
+            receiver = [
+                email["From"]
+            ]  # Get the sender email as the receiver for the reply
+            return email, message_id, receiver
+
+    return None, None, None
