@@ -1,6 +1,7 @@
 """All functions related to email fetching."""
 
 import email
+from email.utils import parseaddr
 import imaplib
 import os
 from datetime import datetime, timedelta
@@ -139,21 +140,17 @@ def download_attachments(email_message: Message, download_folder: str) -> List[s
 
 def get_email_with_datetime_and_subject(
     datetime_original_message: datetime, email_from: str, subject: str
-) -> tuple:
+) -> Message:
     """
-    Find an email that matches a specific datetime, sender, and subject.
+    Find an email by matching the date and subject.
 
     Args:
-        datetime_original_message (datetime): The datetime of the original message to match.
-        email_from (str): The sender's email address to match.
-        subject (str): The subject of the email to match.
+        datetime_original_message (datetime): The datetime of the original message.
+        email_from (str): The email address of the sender.
+        subject (str): The subject of the email to search for.
 
     Returns:
-        tuple: A tuple containing:
-            - email (Message): The email message object that matches the criteria.
-            - message_id (str): The Message-ID of the email for threading.
-            - receiver (List[str]): The list of receiver email addresses.
-        If no email is found, returns (None, None, None).
+        Tuple: The email, message_id for threading, and the receiver's email address.
     """
     emails = get_emails(
         "INBOX",
@@ -173,9 +170,10 @@ def get_email_with_datetime_and_subject(
 
         if email_datetime_naive == df_datetime:
             message_id = email["Message-ID"]  # Get Message-ID for threading
-            receiver = [
-                email["From"]
-            ]  # Get the sender email as the receiver for the reply
-            return email, message_id, receiver
 
+            # Extract the email address from the "From" or "Reply-To" field
+            full_address = email.get("Reply-To", email["From"])
+            _, receiver_email = parseaddr(full_address)
+
+            return email, message_id, [receiver_email]
     return None, None, None

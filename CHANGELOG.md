@@ -65,3 +65,4 @@
 1.2.14 Read account_number as str
 1.2.15 Add new table
 1.2.16 Add email functions
+1.2.17 Improve email getter
