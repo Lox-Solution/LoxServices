@@ -64,3 +64,6 @@
 1.2.13 Allow Reply-To on emails sent
 1.2.14 Read account_number as str
 1.2.15 Add new table
+1.2.16 Retrieve last email thread
+1.2.17 Improve email retrieval
+1.2.18 Handle retrieve brightdata and return list of cc addresses in email retrieval
