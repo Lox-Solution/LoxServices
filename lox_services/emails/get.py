@@ -1,13 +1,13 @@
 """All functions related to email fetching."""
 
 import email
-from email.utils import parseaddr
+from email.utils import parseaddr, getaddresses
 import imaplib
 import os
 from datetime import datetime, timedelta
 from email import policy
 from email.message import Message
-from typing import List, TypedDict
+from typing import List, TypedDict, Tuple, Optional
 from lox_services.config.env_variables import get_env_variable
 from lox_services.emails.utils import generate_oauth2_string, refresh_authorization
 from lox_services.utils.general_python import print_info, print_success, safe_mkdir
@@ -51,8 +51,6 @@ def get_emails(
     if labeled_status != "OK":
         raise ValueError("Invalid label value.")
 
-    print_info(f"There are {int(labeled_emails[0])} emails matching this label.")
-
     # Generating search criterias
     search_criterias = ""
 
@@ -71,9 +69,6 @@ def get_emails(
         return
 
     emails_numbers_bytes = emails_bytes[0].split()
-    print_info(
-        f"There are {len(emails_numbers_bytes)} emails found for this label in the last {days} days."
-    )
 
     emails: List[Message] = []
     for index_byte in emails_numbers_bytes:
@@ -89,7 +84,6 @@ def get_emails(
         )  # policy.default is very important, it's decoding "encoded-word" subjects https://stackoverflow.com/questions/12903893/python-imap-utf-8q-in-subject-string
         subject = str(email_content["Subject"])
         date = datetime.strptime(email_content["Date"], "%a, %d %b %Y %X %z")
-        print_info(f"Email ({date.date()} {date.strftime('%X')}): {subject}\n")
         emails.append(email_content)
 
     return emails
@@ -139,26 +133,29 @@ def download_attachments(email_message: Message, download_folder: str) -> List[s
 
 
 def get_email_with_datetime_and_subject(
-    datetime_original_message: datetime, email_from: str, subject: str
-) -> Message:
+    datetime_original_message: datetime, email_from: str, subject: Optional[str] = None
+) -> Tuple[Optional[dict], Optional[str], Optional[List[str]], Optional[List[str]]]:
     """
     Find an email by matching the date and subject.
 
     Args:
         datetime_original_message (datetime): The datetime of the original message.
         email_from (str): The email address of the sender.
-        subject (str): The subject of the email to search for.
+        subject (Optional[str]): The subject of the email to search for. Defaults to None.
 
     Returns:
-        Tuple: The email, message_id for threading, and the receiver's email address.
+        Tuple: The email, message_id for threading, the receiver's email address, and the list of Cc email addresses.
     """
+    search_criteria = {
+        "FROM": email_from,
+    }
+    if subject:
+        search_criteria["subject"] = subject
+
     emails = get_emails(
         "INBOX",
         365,
-        search={
-            "FROM": email_from,
-            "subject": subject,
-        },
+        search=search_criteria,
     )
 
     for email in emails:
@@ -175,5 +172,9 @@ def get_email_with_datetime_and_subject(
             full_address = email.get("Reply-To", email["From"])
             _, receiver_email = parseaddr(full_address)
 
-            return email, message_id, [receiver_email]
-    return None, None, None
+            # Extract email addresses from the "Cc" field
+            cc_addresses = email.get("Cc", "")
+            cc_emails = [addr for _, addr in getaddresses([cc_addresses])]
+
+            return email, message_id, [receiver_email], cc_emails
+    return None, None, None, []

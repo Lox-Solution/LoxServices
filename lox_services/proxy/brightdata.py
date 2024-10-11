@@ -63,7 +63,7 @@ class BrightDataProxyManager:
         result = requests.Response
         result.status_code = 300
 
-        while result.status_code >= 300:
+        while result.status_code >= 300 and tries < retries:
             try:
                 result = request_method(**options)
 
