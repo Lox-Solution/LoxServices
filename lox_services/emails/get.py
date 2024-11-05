@@ -137,6 +137,7 @@ def get_email_with_datetime_and_subject(
     email_from: Optional[str] = None,
     subject: Optional[str] = None,
     label: Optional[str] = "INBOX",
+    fallback: bool = False,
 ) -> Tuple[
     Optional[dict],
     Optional[str],
@@ -145,7 +146,7 @@ def get_email_with_datetime_and_subject(
     Optional[List[str]],
 ]:
     """
-    Find an email that matches a specific datetime, sender, and subject.
+    Find an email by matching the date and subject.
 
     Args:
         datetime_original_message (datetime): The datetime of the original message.
@@ -182,10 +183,6 @@ def get_email_with_datetime_and_subject(
 
         if email_datetime_naive == df_datetime:
             message_id = email["Message-ID"]  # Get Message-ID for threading
-            receiver = [
-                email["From"]
-            ]  # Get the sender email as the receiver for the reply
-            return email, message_id, receiver
 
             # Extract the sender's email address
             sender_email = email["From"]
@@ -199,13 +196,14 @@ def get_email_with_datetime_and_subject(
             cc_addresses = email.get("Cc", "")
             cc_emails = [addr for _, addr in getaddresses([cc_addresses])]
 
-            return email, message_id, sender_email, [receiver_email], cc_emails
+            return email, message_id, [sender_email], [receiver_email], cc_emails
         else:
             if closest_time_diff is None or time_diff < closest_time_diff:
                 closest_time_diff = time_diff
                 closest_email = email
 
-    if closest_email:
+    if fallback and closest_email:
+        print("Fallback to the closest email.")
         message_id = closest_email["Message-ID"]  # Get Message-ID for threading
 
         # Extract the sender's email address
@@ -220,6 +218,6 @@ def get_email_with_datetime_and_subject(
         cc_addresses = closest_email.get("Cc", "")
         cc_emails = [addr for _, addr in getaddresses([cc_addresses])]
 
-        return closest_email, message_id, sender_email, [receiver_email], cc_emails
+        return closest_email, message_id, [sender_email], [receiver_email], cc_emails
 
     return None, None, None, None, []
