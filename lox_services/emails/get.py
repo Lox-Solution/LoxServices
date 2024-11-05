@@ -133,8 +133,17 @@ def download_attachments(email_message: Message, download_folder: str) -> List[s
 
 
 def get_email_with_datetime_and_subject(
-    datetime_original_message: datetime, email_from: str, subject: Optional[str] = None
-) -> Tuple[Optional[dict], Optional[str], Optional[List[str]], Optional[List[str]]]:
+    datetime_original_message: datetime,
+    email_from: Optional[str] = None,
+    subject: Optional[str] = None,
+    label: Optional[str] = "INBOX",
+) -> Tuple[
+    Optional[dict],
+    Optional[str],
+    Optional[str],
+    Optional[List[str]],
+    Optional[List[str]],
+]:
     """
     Find an email that matches a specific datetime, sender, and subject.
 
@@ -144,19 +153,23 @@ def get_email_with_datetime_and_subject(
         subject (Optional[str]): The subject of the email to search for. Defaults to None.
 
     Returns:
-        Tuple: The email, message_id for threading, the receiver's email address, and the list of Cc email addresses.
+        Tuple: The email, message_id for threading, the sender's email address, the receiver's email address, and the list of Cc email addresses.
     """
-    search_criteria = {
-        "FROM": email_from,
-    }
+    search_criteria = {}
+    if email_from:
+        search_criteria["from"] = email_from
     if subject:
         search_criteria["subject"] = subject
 
     emails = get_emails(
-        "INBOX",
+        label,
         365,
         search=search_criteria,
     )
+    print(f"Found {len(emails)} emails.")
+
+    closest_email = None
+    closest_time_diff = None
 
     for email in emails:
         df_datetime = datetime_original_message
@@ -165,6 +178,8 @@ def get_email_with_datetime_and_subject(
         # Remove the timezone information from the email datetime
         email_datetime_naive = email_datetime.replace(tzinfo=None)
 
+        time_diff = abs((email_datetime_naive - df_datetime).total_seconds())
+
         if email_datetime_naive == df_datetime:
             message_id = email["Message-ID"]  # Get Message-ID for threading
             receiver = [
@@ -172,13 +187,39 @@ def get_email_with_datetime_and_subject(
             ]  # Get the sender email as the receiver for the reply
             return email, message_id, receiver
 
+            # Extract the sender's email address
+            sender_email = email["From"]
+            _, sender_email = parseaddr(sender_email)
+
             # Extract the email address from the "From" or "Reply-To" field
-            full_address = email.get("Reply-To", email["From"])
+            full_address = email.get("Reply-To", email["To"])
             _, receiver_email = parseaddr(full_address)
 
             # Extract email addresses from the "Cc" field
             cc_addresses = email.get("Cc", "")
             cc_emails = [addr for _, addr in getaddresses([cc_addresses])]
 
-            return email, message_id, [receiver_email], cc_emails
-    return None, None, None, []
+            return email, message_id, sender_email, [receiver_email], cc_emails
+        else:
+            if closest_time_diff is None or time_diff < closest_time_diff:
+                closest_time_diff = time_diff
+                closest_email = email
+
+    if closest_email:
+        message_id = closest_email["Message-ID"]  # Get Message-ID for threading
+
+        # Extract the sender's email address
+        sender_email = closest_email["From"]
+        _, sender_email = parseaddr(sender_email)
+
+        # Extract the email address from the "From" or "Reply-To" field
+        full_address = closest_email.get("Reply-To", closest_email["To"])
+        _, receiver_email = parseaddr(full_address)
+
+        # Extract email addresses from the "Cc" field
+        cc_addresses = closest_email.get("Cc", "")
+        cc_emails = [addr for _, addr in getaddresses([cc_addresses])]
+
+        return closest_email, message_id, sender_email, [receiver_email], cc_emails
+
+    return None, None, None, None, []
