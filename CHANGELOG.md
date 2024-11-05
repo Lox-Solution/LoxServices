@@ -67,3 +67,4 @@
 1.2.16 Add email functions
 1.2.17 Improve email getter
 1.2.18 Handle retrieve brightdata and return list of cc addresses in email retrieval
+1.2.19 Improve the email getter by adding new parameters
