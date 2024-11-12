@@ -77,6 +77,7 @@ class Utils_dataset(Enum):
     CurrencyConversion = "CurrencyConversion"
     TempRefunds = "TempRefunds"
     EmailsSent = "EmailsSent"
+    ApiLogs = "ApiLogs"
 
 
 class CarrierData_dataset(Enum):
