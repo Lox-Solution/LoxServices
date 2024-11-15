@@ -70,3 +70,4 @@
 1.2.19 Improve the email getter by adding new parameters
 1.2.20 Add ApiLogs table
 1.2.21 Conncetion to Google Drive
+1.2.22 Conncetion to Google Drive
