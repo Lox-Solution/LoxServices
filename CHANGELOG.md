@@ -72,3 +72,4 @@
 1.2.21 Connection to Google Drive
 1.2.22 Connection to Google Drive
 1.2.23 New chromedriver without env
+1.2.24 Change the date for email fetching to avoid latency

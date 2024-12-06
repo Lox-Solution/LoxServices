@@ -164,7 +164,7 @@ def get_email_with_datetime_and_subject(
 
     emails = get_emails(
         label,
-        365,
+        60,
         search=search_criteria,
     )
     print(f"Found {len(emails)} emails.")
