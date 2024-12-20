@@ -162,11 +162,32 @@ def get_email_with_datetime_and_subject(
     if subject:
         search_criteria["subject"] = subject
 
-    emails = get_emails(
-        label,
-        60,
-        search=search_criteria,
-    )
+    if datetime_original_message is None:
+        # Search for emails in the past 15 days
+        emails = get_emails(
+            label,
+            15,
+            search=search_criteria,
+        )
+    else:
+        # Calculate the number of days ago the original message date was
+        days_ago = (datetime.today() - datetime_original_message).days
+
+        # Ensure days_ago is non-negative (handles future dates accidentally passed)
+        if days_ago < 0:
+            raise ValueError("datetime_original_message cannot be in the future.")
+
+        specific_date = datetime_original_message.strftime("%d-%b-%Y")
+        date_search_criteria = {"ON": specific_date}
+        # Merge additional search criteria if needed
+        date_search_criteria.update(search_criteria)
+        print(f"Search criteria: {date_search_criteria}")
+        # Search emails from the calculated number of days ago
+        emails = get_emails(
+            label,
+            days_ago,
+            search=search_criteria,
+        )
     print(f"Found {len(emails)} emails.")
 
     closest_email = None
