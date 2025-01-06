@@ -74,3 +74,4 @@
 1.2.23 New chromedriver without env
 1.2.24 Change the date for email fetching to avoid latency
 1.2.25 Improve date filtering
+1.2.26 Change default chromedriver version
