@@ -22,13 +22,20 @@ class GmailSearchOperators(TypedDict):
 
 
 def get_emails(
-    mailbox: str, days: int = 1, *, search: GmailSearchOperators = {}, strict=False
+    mailbox: str,
+    days: int = 1,
+    *,
+    search: GmailSearchOperators = {},
+    strict=False,
+    search_from_current_date=True,
 ) -> List[Message]:
     """Gets the emails with the given label.
     ## Arguments
     - `mailbox`: The label to use to filter the emails.
     - `delta_days`: The number of days to look for in the past.
     - `filter`: The filter to use to filter the emails.
+    - `strict`: If True, the filter will be strict, meaning that the filter will be used as is.
+    - `search_from_current_date`: If True, the search will be done from the current date.
 
     ## Example
         >>> get_emails_with_label('Carriers/Chronopost', 30)
@@ -54,9 +61,11 @@ def get_emails(
     # Generating search criterias
     search_criterias = ""
 
-    max_date = (datetime.today() - timedelta(days)).strftime("%d-%b-%Y")
-    date_criteria = f"SENTSINCE {max_date} "
-    search_criterias += date_criteria
+    if search_from_current_date:
+        max_date = (datetime.today() - timedelta(days)).strftime("%d-%b-%Y")
+        date_criteria = f"SENTSINCE {max_date} "
+
+        search_criterias += date_criteria
 
     for key, value in search.items():
         string_value = f'"{value}"' if strict else value.replace(" ", "-")
@@ -87,6 +96,35 @@ def get_emails(
         emails.append(email_content)
 
     return emails
+
+
+def extract_email_details(
+    email: dict,
+) -> Tuple[dict, str, List[str], List[str], List[str]]:
+    """
+    Extracts relevant details from the email.
+
+    Args:
+        email (dict): The email dictionary.
+
+    Returns:
+        Tuple: The email, message_id, sender(s), receiver(s), and cc(s).
+    """
+    message_id = email.get("Message-ID", "")
+
+    # Extract sender email
+    sender_email = email.get("From", "")
+    _, sender_email = parseaddr(sender_email)
+
+    # Extract receiver email (preferring "Reply-To" if available)
+    full_address = email.get("Reply-To", email.get("To", ""))
+    _, receiver_email = parseaddr(full_address)
+
+    # Extract CC emails
+    cc_addresses = email.get("Cc", "")
+    cc_emails = [addr for _, addr in getaddresses([cc_addresses])]
+
+    return email, message_id, [sender_email], [receiver_email], cc_emails
 
 
 def download_attachments(email_message: Message, download_folder: str) -> List[str]:
@@ -133,7 +171,7 @@ def download_attachments(email_message: Message, download_folder: str) -> List[s
 
 
 def get_email_with_datetime_and_subject(
-    datetime_original_message: datetime,
+    datetime_original_message: Optional[datetime] = None,
     email_from: Optional[str] = None,
     subject: Optional[str] = None,
     label: Optional[str] = "INBOX",
@@ -141,7 +179,7 @@ def get_email_with_datetime_and_subject(
 ) -> Tuple[
     Optional[dict],
     Optional[str],
-    Optional[str],
+    Optional[List[str]],
     Optional[List[str]],
     Optional[List[str]],
 ]:
@@ -149,96 +187,72 @@ def get_email_with_datetime_and_subject(
     Find an email by matching the date and subject.
 
     Args:
-        datetime_original_message (datetime): The datetime of the original message.
+        datetime_original_message (Optional[datetime]): The datetime of the original message.
         email_from (str): The email address of the sender.
-        subject (Optional[str]): The subject of the email to search for. Defaults to None.
+        subject (Optional[str]): The subject of the email to search for.
+        label (Optional[str]): The mailbox label to search in. Defaults to "INBOX".
+        fallback (bool): If True, finds the closest email if an exact match is not found.
 
     Returns:
-        Tuple: The email, message_id for threading, the sender's email address, the receiver's email address, and the list of Cc email addresses.
+        Tuple: The email, message_id for threading, sender's email(s), receiver's email(s), and CC email(s).
     """
+
     search_criteria = {}
-    if email_from:
-        search_criteria["from"] = email_from
-    if subject:
-        search_criteria["subject"] = subject
 
-    if datetime_original_message is None:
-        # Search for emails in the past 15 days
-        emails = get_emails(
-            label,
-            15,
-            search=search_criteria,
-        )
+    # If a specific date is provided, search for that exact day
+    if datetime_original_message:
+        search_criteria["ON"] = datetime_original_message.strftime("%d-%b-%Y")
+        days_to_search = 1  # Search only that day
+        search_from_current_date = False
     else:
-        # Calculate the number of days ago the original message date was
-        days_ago = (datetime.today() - datetime_original_message).days
+        days_to_search = 15
+        search_from_current_date = True
 
-        # Ensure days_ago is non-negative (handles future dates accidentally passed)
-        if days_ago < 0:
-            raise ValueError("datetime_original_message cannot be in the future.")
+    # Add optional sender and subject filters
+    if email_from:
+        search_criteria["FROM"] = email_from
+    if subject:
+        search_criteria["SUBJECT"] = subject
 
-        specific_date = datetime_original_message.strftime("%d-%b-%Y")
-        date_search_criteria = {"ON": specific_date}
-        # Merge additional search criteria if needed
-        date_search_criteria.update(search_criteria)
-        print(f"Search criteria: {date_search_criteria}")
-        # Search emails from the calculated number of days ago
-        emails = get_emails(
-            label,
-            days_ago,
-            search=search_criteria,
-        )
+    print(f"Search criteria: {search_criteria}")
+
+    # Fetch emails based on the search criteria
+    emails = get_emails(
+        mailbox=label,
+        days=days_to_search,
+        search=search_criteria,
+        search_from_current_date=search_from_current_date,
+    )
+
     print(f"Found {len(emails)} emails.")
 
     closest_email = None
     closest_time_diff = None
 
     for email in emails:
-        df_datetime = datetime_original_message
-        email_datetime = datetime.strptime(email["Date"], "%a, %d %b %Y %H:%M:%S %z")
+        # Parse email date
+        email_datetime = datetime.strptime(
+            email["Date"], "%a, %d %b %Y %H:%M:%S %z"
+        ).replace(tzinfo=None)
 
-        # Remove the timezone information from the email datetime
-        email_datetime_naive = email_datetime.replace(tzinfo=None)
-
-        time_diff = abs((email_datetime_naive - df_datetime).total_seconds())
-
-        if email_datetime_naive == df_datetime:
-            message_id = email["Message-ID"]  # Get Message-ID for threading
-
-            # Extract the sender's email address
-            sender_email = email["From"]
-            _, sender_email = parseaddr(sender_email)
-
-            # Extract the email address from the "From" or "Reply-To" field
-            full_address = email.get("Reply-To", email["To"])
-            _, receiver_email = parseaddr(full_address)
-
-            # Extract email addresses from the "Cc" field
-            cc_addresses = email.get("Cc", "")
-            cc_emails = [addr for _, addr in getaddresses([cc_addresses])]
-
-            return email, message_id, [sender_email], [receiver_email], cc_emails
+        # If an exact date was provided, check for exact match
+        if datetime_original_message:
+            time_diff = abs(
+                (email_datetime - datetime_original_message).total_seconds()
+            )
+            if email_datetime == datetime_original_message:
+                return extract_email_details(email)
         else:
-            if closest_time_diff is None or time_diff < closest_time_diff:
-                closest_time_diff = time_diff
-                closest_email = email
+            time_diff = 0  # Skip time comparison for the 15-day search
 
+        # Track closest email if fallback is enabled
+        if closest_time_diff is None or time_diff < closest_time_diff:
+            closest_time_diff = time_diff
+            closest_email = email
+
+    # Return the closest email if fallback is enabled
     if fallback and closest_email:
-        print("Fallback to the closest email.")
-        message_id = closest_email["Message-ID"]  # Get Message-ID for threading
-
-        # Extract the sender's email address
-        sender_email = closest_email["From"]
-        _, sender_email = parseaddr(sender_email)
-
-        # Extract the email address from the "From" or "Reply-To" field
-        full_address = closest_email.get("Reply-To", closest_email["To"])
-        _, receiver_email = parseaddr(full_address)
-
-        # Extract email addresses from the "Cc" field
-        cc_addresses = closest_email.get("Cc", "")
-        cc_emails = [addr for _, addr in getaddresses([cc_addresses])]
-
-        return closest_email, message_id, [sender_email], [receiver_email], cc_emails
+        print("Fallback: Returning the closest matching email.")
+        return extract_email_details(closest_email)
 
     return None, None, None, None, []
