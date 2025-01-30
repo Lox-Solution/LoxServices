@@ -77,3 +77,4 @@
 1.2.26 Change default chromedriver version
 1.2.27 Improve email filtering
 1.2.28 Improve sftp function
+1.2.29 Change output folder test path
