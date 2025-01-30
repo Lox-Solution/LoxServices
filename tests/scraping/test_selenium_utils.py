@@ -36,7 +36,7 @@ from tests import OUTPUT_FOLDER
 DEFAULT_TIMEOUT = 5
 DEFAULT_WRONG_CSS_SELECTOR = ".wrong_selector"
 DEFAULT_RIGHT_CSS_SELECTOR = "#fname"
-POPUP_BUTTON = "#qc-cmp2-ui div > button:nth-child(2)"
+POPUP_BUTTON = "#qc-cmp2-ui > div > div > button:nth-child(2)"
 DEFAULT_SELECTOR_TYPE = By.CSS_SELECTOR
 DEFAULT_TEXT_TO_WRITE = "some text"
 
