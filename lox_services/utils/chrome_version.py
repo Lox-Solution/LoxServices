@@ -81,6 +81,7 @@ def get_chrome_version(fallback_version: int = 131) -> int:
             # Check the path of chrome and chromium in linux and return path for version
             install_paths = [
                 "/usr/bin/google-chrome",
+                "/usr/bin/chromium",
                 "/usr/bin/chromium-browser",
                 "/opt/google/chrome/google-chrome",
             ]

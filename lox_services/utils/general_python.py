@@ -1,6 +1,7 @@
 """
 Defines some utils functions for the project.
 """
+
 import os
 import re
 import unicodedata
@@ -37,13 +38,7 @@ def print_step(step):
     # pylint: disable=anomalous-backslash-in-string
     print(
         colorize(
-            f"""
-     _
-    | |    _____  __
-    | |   / _ \ \/ /
-    | |__| (_) >  <      STEP {step}
-    |_____\___/_/\_\\
-""",
+            f"""STEP {step}""",
             Colors.BLUE,
         )
     )
