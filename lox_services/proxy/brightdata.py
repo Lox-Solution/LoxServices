@@ -18,18 +18,18 @@ AVAILABLE_IPS_PER_COUNTRY = (
 class BrightDataProxyManager:
     """Class that handles Bright Data proxy APIs."""
 
-    def __init__(self, username, password, api_token):
+    def __init__(self, username, password, api_token, zone="data_center"):
         self.request_header = {"Authorization": f"Bearer {api_token}"}
-        self.zones = ["data_center", "isp"]
-        self.base_url = f"lum-customer-{username}-zone-{self.zones[0]}-ip-%s:{password}@zproxy.lum-superproxy.io:22225"
+        self.base_url_template = f"lum-customer-{username}-zone-{zone}-ip-%s:{password}@zproxy.lum-superproxy.io:22225"
+        self.username = username
+        self.password = password
 
     ### PRIVATE ###
 
-    def _get_ip_list(self, country: str = None):
+    def _get_ip_list(self, country: str = None, zone: str = "data_center"):
+        url = f"https://luminati.io/api/zone/route_ips?zone={zone}"
         if country:
-            url = f"https://luminati.io/api/zone/route_ips?zone={self.zones[0]}&country={country}"
-        else:
-            url = f"https://luminati.io/api/zone/route_ips?zone={self.zones[0]}"
+            url += f"&country={country}"
 
         MAX_RETRIES = 3
         WAIT_TIME = 5  # seconds
@@ -37,7 +37,6 @@ class BrightDataProxyManager:
         retry_count = 0
         while retry_count < MAX_RETRIES:
             response = requests.get(url=url, headers=self.request_header)
-
             response_status = response.status_code
 
             if 200 <= response_status < 300:
@@ -51,9 +50,6 @@ class BrightDataProxyManager:
                     error_message = "Your BrightData API token is not up to date. Create or refresh it via https://brightdata.com/cp/setting. Then add the token to your .env file."
                 print_error(error_message)
                 raise Exception(f"Bright Data returned an error: {error_message}")
-
-        if retry_count == MAX_RETRIES:
-            raise Exception("Unable to get the IP list from Bright Data - 429 error.")
 
     @staticmethod
     def _excecute_request_with_retry(
@@ -102,7 +98,9 @@ class BrightDataProxyManager:
 
         return result
 
-    def _get_available_ips_per_countries(self, countries: Sequence[str]):
+    def _get_available_ips_per_countries(
+        self, countries: Sequence[str], zone: str = "data_center"
+    ):
         """Gets all available IPs per countries. Country Alpha-2 codes are working fine as parameters."""
         result = []
         for country in set(countries):
@@ -111,7 +109,7 @@ class BrightDataProxyManager:
                 result += AVAILABLE_IPS_PER_COUNTRY.get(country)
 
             else:
-                ip_list = self._get_ip_list(country)
+                ip_list = self._get_ip_list(country, zone)
                 AVAILABLE_IPS_PER_COUNTRY[country] = ip_list
                 result += ip_list
 
@@ -134,8 +132,8 @@ class BrightDataProxyManager:
         proxies = list(
             map(
                 lambda ip: {
-                    "http": f"http://{self.base_url % ip}",
-                    "https": f"https://{self.base_url % ip}",
+                    "http": f"http://{self.base_url_template % ip}",
+                    "https": f"https://{self.base_url_template % ip}",
                 },
                 proxies,
             )
@@ -157,11 +155,12 @@ class BrightDataProxyManager:
 
     ### END PRIVATE ###
 
-    def get_one_proxy(self, country: str = "US"):
+    def get_one_proxy(self, country: str = "US", zone: str = "data_center"):
         """Fetches a single proxy IP and returns the necessary proxy settings.
 
         Args:
             country (str): The country code to filter the proxy IPs.
+            zone (str): The proxy type, either "data_center" or "residential" (default: "data_center").
 
         Returns:
             dict: A dictionary containing http and https proxies.
@@ -169,18 +168,27 @@ class BrightDataProxyManager:
         Raises:
             Exception: If no proxy IP is available.
         """
-        proxy_list = self._get_ip_list(country=country)
+        if zone not in ["data_center", "isp"]:
+            raise ValueError("Zone must be either 'data_center' or 'residential'")
+
+        proxy_list = self._get_ip_list(country=country, zone=zone)
         if not proxy_list:
             raise Exception(
                 "No proxy IP available. Check your proxy manager configuration."
             )
 
         proxy_ip = random.choice(proxy_list)
+        proxy_url = (
+            self.base_url_template.format(
+                username=self.username, zone=zone, password=self.password
+            )
+            % proxy_ip
+        )
         proxies = {
-            "http": f"http://{self.base_url % proxy_ip}",
-            "https": f"https://{self.base_url % proxy_ip}",
+            "http": f"http://{proxy_url}",
+            "https": f"https://{proxy_url}",
         }
-        print(f"Using proxy IP: {proxy_ip}")
+        print(f"Using {zone} proxy IP: {proxy_ip}")
         return proxies
 
     @Perf
@@ -263,6 +271,7 @@ class BrightDataProxyManager:
         number_of_threads: int = 25,
         max_use_per_proxy: int = 10,
         show_progress: bool = False,
+        zone: str = "data_center",
     ) -> Tuple[List[requests.Response], List[str]]:
         """Executes many requests using proxies and multithreading for multiple countries.
         ## Arguments
@@ -291,7 +300,7 @@ class BrightDataProxyManager:
         tracking_numbers_list = []
 
         number_of_threads = min(50, number_of_threads)
-        proxies = self._get_available_ips_per_countries(countries)
+        proxies = self._get_available_ips_per_countries(countries, zone)
         options_with_proxies = self._populate_proxies_into_request_options(
             request_options, proxies, max_use_per_proxy
         )
