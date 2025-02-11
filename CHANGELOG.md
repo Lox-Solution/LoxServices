@@ -80,3 +80,4 @@
 1.2.29 Change output folder test path
 1.2.30 New chromium path
 1.2.31 Allow ISP brightdata
+1.2.32 Allow duplicates UPS

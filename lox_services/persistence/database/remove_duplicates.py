@@ -105,16 +105,21 @@ def remove_duplicate_refunds(dataframe: pd.DataFrame) -> pd.DataFrame:
         dataframe["reason_refund"],
     )
     # Duplicate check
-    dataframe = dataframe.drop_duplicates(
-        subset=["tracking_number", "smart_reason_refund"], keep=False
-    )
-    # Remove rows where the tracking number and reason refund is already present in the database
-    dataframe = dataframe[
-        ~(dataframe["tracking_number"] + dataframe["smart_reason_refund"]).isin(
-            existing_data_dataframe["existing_combo"]
+    allow_duplicates = carrier == "UPS" and "claim_number" in dataframe.columns
+    if not allow_duplicates:
+        dataframe = dataframe.drop_duplicates(
+            subset=["tracking_number", "smart_reason_refund"], keep=False
         )
-    ]
-    dataframe.drop(columns=["smart_reason_refund"], inplace=True)
+        # Remove rows where the tracking number and reason refund is already present in the database
+        dataframe = dataframe[
+            ~(dataframe["tracking_number"] + dataframe["smart_reason_refund"]).isin(
+                existing_data_dataframe["existing_combo"]
+            )
+        ]
+        dataframe.drop(columns=["smart_reason_refund"], inplace=True)
+
+    else:
+        print("We allow db duplicates for UPS refunds if this comes from the platform.")
     print(
         f"{original_size - len(dataframe.index)} refund rows deleted before saving to the database."
     )
