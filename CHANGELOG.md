@@ -81,3 +81,4 @@
 1.2.30 New chromium path
 1.2.31 Allow ISP brightdata
 1.2.32 Allow duplicates UPS
+1.2.33 Remove dependency

@@ -9,8 +9,8 @@ mock == 5.1.0
 google-cloud == 0.34.0
 google-cloud-storage == 2.11.0
 google-cloud-bigquery == 3.12.0
-gspread == 5.11.3
-gspread-dataframe == 3.3.1
+gspread
+gspread-dataframe
 
 
 #PDF
@@ -19,15 +19,15 @@ weasyprint == 52.5
 pyPDF2 == 3.0.1
 
 #Web
-requests == 2.31.0
+requests
 selenium == 4.12.0 #newer versions are not compatible with chromedriver headless
 undetected-chromedriver == 3.5.5
 selenium-wire == 5.1.0
 xvfbwrapper == 0.2.9 
 
 #Other
-numpy == 1.26.0
-pandas == 2.1.1
+numpy
+pandas
 lxml == 4.9.3
 cryptography == 41.0.4
 tqdm  == 4.66.1
