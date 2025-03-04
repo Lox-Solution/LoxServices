@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 import json
-import time
+import sys
 import tempfile
 import shutil
 
@@ -18,6 +18,58 @@ from lox_services.persistence.storage.constants import SELENIUM_CRASHES_BUCKET
 from lox_services.persistence.storage.storage import upload_file
 from lox_services.utils.general_python import safe_mkdir
 from lox_services.utils.chrome_version import get_chrome_version
+
+
+def find_chrome_location():
+    """Finds and returns the Chrome or Chromium executable location across OS."""
+    locations = ["google-chrome", "chromium", "chrome"]
+
+    if sys.platform == "darwin":  # macOS
+        locations.extend(
+            [
+                "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                "/Applications/Chromium.app/Contents/MacOS/Chromium",
+            ]
+        )
+    elif sys.platform == "win32":  # Windows
+        locations.extend(
+            [
+                "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+                "C:\\Program Files\\Chromium\\Application\\chrome.exe",
+            ]
+        )
+
+    for loc in locations:
+        if not loc.startswith("/") and not loc.endswith(".exe"):
+            path = shutil.which(loc)  # Search in PATH
+        else:
+            path = loc  # Use predefined path
+
+        if path and os.path.exists(path):
+            print(f"Chrome found via system search: {path}")
+            return path  # Return first valid path found
+
+    print("No Chrome installation found via system search.")
+    return None  # No valid Chrome installation found
+
+
+def get_chrome_binary_location():
+    """Get Chrome binary location from env or fallback to system search."""
+    try:
+        chrome_location = get_env_variable("CHROME_BINARY_LOCATION")
+        if not chrome_location:  # Handle empty or null values
+            raise ValueError
+        print(f"Chrome location set via environment variable: {chrome_location}")
+    except ValueError:
+        chrome_location = find_chrome_location()
+
+    if not chrome_location:
+        raise RuntimeError(
+            "No valid Chrome binary found. Set CHROME_BINARY_LOCATION or install Chrome."
+        )
+
+    return chrome_location
 
 
 def convert_proxy(proxy_url):
@@ -198,12 +250,7 @@ def init_chromedriver(
     options = webdriver.ChromeOptions()
     options.add_experimental_option("prefs", prefs)
 
-    try:
-        options.binary_location = get_env_variable(
-            "CHROME_BINARY_LOCATION"
-        )  # check if a binary location is specified in .env
-    except ValueError:
-        pass
+    options.binary_location = get_chrome_binary_location()
 
     options.add_argument("--no-first-run --no-service-autorun --password-store=basic")
     options.add_argument("--disable-popup-blocking")
@@ -271,17 +318,4 @@ def run_chromedriver(
     if get_env_variable("ENVIRONMENT") == "production":
         shutdown_current_instances()
 
-    tries = 0
-
-    while tries < 3:
-        try:
-            return init_chromedriver(
-                download_folder, size_length, size_width, version, proxy
-            )
-        except Exception as e:
-            last_exception = e
-            tries = tries + 1
-            time.sleep(10)
-            print(f"Retry nb: {tries}")
-
-    raise last_exception
+    return init_chromedriver(download_folder, size_length, size_width, version, proxy)
