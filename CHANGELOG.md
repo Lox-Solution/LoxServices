@@ -83,3 +83,4 @@
 1.2.32 Allow duplicates UPS
 1.2.33 Remove dependency
 1.2.34 Remove dependency setup
+1.2.35 Chrome binary improvments
