@@ -84,3 +84,4 @@
 1.2.33 Remove dependency
 1.2.34 Remove dependency setup
 1.2.35 Chrome binary improvments
+1.2.36 new stealth function
