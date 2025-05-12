@@ -81,6 +81,7 @@ def get_chrome_version(fallback_version: int = 131) -> int:
             # Check the path of chrome and chromium in linux and return path for version
             install_paths = [
                 "/usr/bin/google-chrome",
+                "/usr/bin/chromedriver",
                 "/usr/bin/chromium",
                 "/usr/bin/chromium-browser",
                 "/opt/google/chrome/google-chrome",
@@ -88,6 +89,7 @@ def get_chrome_version(fallback_version: int = 131) -> int:
             for path in install_paths:
                 if os.path.exists(path):
                     install_path = path
+                    print(f"Found Chrome at {path}")
                     break
 
         elif platform_name == "mac":
@@ -96,17 +98,21 @@ def get_chrome_version(fallback_version: int = 131) -> int:
                 r"/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
             )
         elif platform_name == "windows":
-            # Windows...
-            try:
-                # Try registry key.
-                stream = os.popen(
-                    'reg query "HKLM\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Google Chrome"'
-                )
-                output = stream.read()
-                version = extract_version_registry(output)
-            except Exception as ex:
-                # Try folder path.
-                version = extract_version_folder()
+            install_paths = [
+                r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+            ]
+            for path in install_paths:
+                if os.path.exists(path):
+                    install_path = path
+                    break
+
+            if install_path:
+                try:
+                    version = extract_version_folder()
+                except Exception as e:
+                    print_info(f"Failed to extract version from folder: {e}")
+
     except Exception as ex:
         print_info(
             f"Error while getting Chrome version: {ex}, returning deault version {fallback_version}."
