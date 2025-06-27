@@ -86,3 +86,4 @@
 1.2.35 Chrome binary improvments
 1.2.36 new stealth function
 1.2.37 Improve chrome version location
+1.2.38 Allow input refresh key

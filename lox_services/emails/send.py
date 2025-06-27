@@ -160,6 +160,7 @@ def send_emails_from_loxsolution_account(
     images: Dict[str, str] = {},
     in_reply_to: str = None,  # New parameter for In-Reply-To header
     references: str = None,  # New parameter for References header
+    refresh_key: str = None,  # Optional refresh key for OAuth2 tokens
 ):
     """
     Uses OAuth2 tokens to send the email from Loxteam account, and allows replying to emails.
@@ -176,6 +177,7 @@ def send_emails_from_loxsolution_account(
         images (Dict[str, str], optional): Dictionary of images to embed (cid: file_path).
         in_reply_to (str, optional): Message-ID of the original email for threading (In-Reply-To header).
         references (str, optional): Message-ID for threading references (References header).
+        refresh_key (str, optional): Environment variable key for refreshing OAuth2 tokens.
 
     Raises:
         ValueError: If the sender email address is invalid.
@@ -193,7 +195,9 @@ def send_emails_from_loxsolution_account(
     )
 
     # Refresh OAuth2 access token
-    refresh_key = REFRESH_KEYS_LOX_ACCOUNTS[sender_email_address]
+    if not refresh_key:
+        refresh_key = REFRESH_KEYS_LOX_ACCOUNTS[sender_email_address]
+        
     access_token = refresh_authorization(get_env_variable(refresh_key))
     auth_string = generate_oauth2_string(
         sender_email_address, access_token, as_base64=True
