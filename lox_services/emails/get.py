@@ -28,6 +28,7 @@ def get_emails(
     search: GmailSearchOperators = {},
     strict=False,
     search_from_current_date=True,
+    refresh_token: Optional[str] = None,
 ) -> List[Message]:
     """Gets the emails with the given label.
     ## Arguments
@@ -36,6 +37,7 @@ def get_emails(
     - `filter`: The filter to use to filter the emails.
     - `strict`: If True, the filter will be strict, meaning that the filter will be used as is.
     - `search_from_current_date`: If True, the search will be done from the current date.
+    - refresh_token: Optional[str] = None: The refresh token to use to authenticate the user. If not provided, it will be fetched from the environment variable `LOXTEAM_REFRESH_TOKEN`.
 
     ## Example
         >>> get_emails_with_label('Carriers/Chronopost', 30)
@@ -48,7 +50,10 @@ def get_emails(
     imap_ssl_client = imaplib.IMAP4_SSL("imap.gmail.com")
     imap_ssl_client.debug = 4
 
-    access_token = refresh_authorization(get_env_variable("LOXTEAM_REFRESH_TOKEN"))
+    if not refresh_token:
+        refresh_token = get_env_variable("LOXTEAM_REFRESH_TOKEN")
+
+    access_token = refresh_authorization(refresh_token)
     auth_string = generate_oauth2_string(
         get_env_variable("LOX_TEAM_EMAIL"), access_token
     )
@@ -176,6 +181,7 @@ def get_email_with_datetime_and_subject(
     subject: Optional[str] = None,
     label: Optional[str] = "INBOX",
     fallback: bool = False,
+    refresh_token: Optional[str] = None,
 ) -> Tuple[
     Optional[dict],
     Optional[str],
@@ -222,6 +228,7 @@ def get_email_with_datetime_and_subject(
         days=days_to_search,
         search=search_criteria,
         search_from_current_date=search_from_current_date,
+        refresh_token=refresh_token,
     )
 
     print(f"Found {len(emails)} emails.")
