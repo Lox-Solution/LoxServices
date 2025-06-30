@@ -196,9 +196,9 @@ def send_emails_from_loxsolution_account(
 
     # Refresh OAuth2 access token
     if not refresh_key:
-        refresh_key = REFRESH_KEYS_LOX_ACCOUNTS[sender_email_address]
-        
-    access_token = refresh_authorization(get_env_variable(refresh_key))
+        refresh_key = get_env_variable(REFRESH_KEYS_LOX_ACCOUNTS[sender_email_address])
+
+    access_token = refresh_authorization(refresh_key)
     auth_string = generate_oauth2_string(
         sender_email_address, access_token, as_base64=True
     )
