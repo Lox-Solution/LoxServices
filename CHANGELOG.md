@@ -89,3 +89,4 @@
 1.2.38 Allow input refresh key
 1.2.39 Allow input refresh key on read
 1.2.40 Fix email sending
+1.2.41 Add new datasets

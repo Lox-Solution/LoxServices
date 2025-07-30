@@ -6,6 +6,7 @@ from typing import Union
 
 class InvoicesData_dataset(Enum):
     "Class that represents the classes present in InvoicesData dataset"
+
     ClientInvoicesData = "ClientInvoicesData"
     ContractData = "ContractData"
     Deliveries = "Deliveries"
@@ -18,12 +19,14 @@ class InvoicesData_dataset(Enum):
 
 class InvoicesDataLake_dataset(Enum):
     "Class that represents the classes present in InvoicesDataLake dataset"
+
     UPS_DataLake = "UPS_DataLake"
     DHL_DataLake = "DHL_DataLake"
 
 
 class LoxData_dataset(Enum):
     "Class that represents the classes present in LoxData dataset"
+
     DueInvoices = "DueInvoices"
     Invoicing = "Invoicing"
     InvoicesDetails = "InvoicesDetails"
@@ -33,6 +36,7 @@ class LoxData_dataset(Enum):
 
 class UserData_dataset(Enum):
     "Class that represents the classes present in UserData dataset"
+
     Users = "Users"
     UsersActivity = "UsersActivity"
     CustomerSatisfaction = "CustomerSatisfaction"
@@ -49,17 +53,20 @@ class UserData_dataset(Enum):
 
 class Mapping_dataset(Enum):
     "Class that represents the classes present in Mapping dataset"
+
     ClaimStatuses = "ClaimStatuses"
     StatusMapping = "StatusMapping"
 
 
 class RecordedActivity_dataset(Enum):
     "Class that represents the classes present in RecordedActivity dataset"
+
     ClientDataRequests = "ClientDataRequests"
 
 
 class TestEnvironment_dataset(Enum):
     "Class that represents the classes present in TestEnvironment dataset"
+
     Packages = "Packages"
     Package_charges = "Package_charges"
     Invoices = "Invoices"
@@ -74,14 +81,22 @@ class TestEnvironment_dataset(Enum):
 
 class Utils_dataset(Enum):
     "Class that represents the classes present in Utils dataset"
+
     CurrencyConversion = "CurrencyConversion"
     TempRefunds = "TempRefunds"
     EmailsSent = "EmailsSent"
     ApiLogs = "ApiLogs"
 
 
+class SubscriptionData_dataset(Enum):
+    "Class that represents the classes present in SubscriptionData dataset"
+
+    Sendcloud = "Sendcloud"
+
+
 class CarrierData_dataset(Enum):
     "Class that represents the classes present in CarrierData dataset"
+
     PackageInformation = "PackageInformation"
     PDFInformation = "PDFInformation"
 
