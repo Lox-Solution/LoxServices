@@ -86,6 +86,7 @@ class Utils_dataset(Enum):
     TempRefunds = "TempRefunds"
     EmailsSent = "EmailsSent"
     ApiLogs = "ApiLogs"
+    TrackingOnly = "TrackingOnly"
 
 
 class SubscriptionData_dataset(Enum):
