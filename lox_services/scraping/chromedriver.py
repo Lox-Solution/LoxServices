@@ -254,6 +254,10 @@ def init_chromedriver(
     options.add_argument("--no-first-run --no-service-autorun --password-store=basic")
     options.add_argument("--disable-popup-blocking")
 
+    options.add_argument(
+        "--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+    )
+
     # Disable download popup blocking feature
     options.add_argument("--disable-features=DownloadPopupBlocking")
 
