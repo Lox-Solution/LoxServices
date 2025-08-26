@@ -92,3 +92,4 @@
 1.2.41 Add new datasets
 1.2.42 Add trackingOnly
 1.2.43 Add UserAgent
+1.2.44 Change chrome version
