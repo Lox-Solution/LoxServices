@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="lox_services",
-    version="1.2.44",
+    version="1.2.45",
     author="Lox Solution",
     author_email="melvil.donnart@loxsolution.com",
     description="A package with Lox services",
@@ -16,7 +16,7 @@ setup(
     license="MIT",
     packages=find_packages(),
     include_package_data=True,
-    python_requires=">=3.7, <=3.12",
+    python_requires=">=3.7, <4",
     install_requires=[
         "google-cloud",
         "google-cloud-storage",
