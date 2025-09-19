@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import ssl
 import json
 import sys
 import tempfile
@@ -292,6 +293,169 @@ def init_chromedriver(
     return driver
 
 
+def print_debug_info(driver, options, proxy_used):
+    """
+    Prints a detailed overview of the environment, driver, and configuration settings
+    to aid in debugging issues with anti-bot detection.
+
+    Args:
+        driver (webdriver.Chrome): The active Chrome driver instance.
+        options (webdriver.ChromeOptions): The options object used to create the driver.
+        proxy_used (str): The proxy URL selected for the current session.
+    """
+    print("--- 🌍 Environment & Configuration Details ---")
+
+    # Python & OS Information
+    print("\n--- Python and Operating System ---")
+    print(f"Python Version: {sys.version}")
+    print(f"Platform: {sys.platform}")
+    print(f"OpenSSL Version: {ssl.OPENSSL_VERSION}")
+
+    # Environment Variables
+    print("\n--- Key Environment Variables ---")
+    print(f"CHROME_BINARY_LOCATION: {os.getenv('CHROME_BINARY_LOCATION')}")
+
+    print(f"PATH: {os.getenv('PATH')}")
+
+    # Chrome Driver & Browser Information
+    print("\n--- Chrome & Driver Details ---")
+
+    # Get versions from driver capabilities
+    capabilities = driver.capabilities
+    print(f"Chrome Browser Version: {capabilities.get('browserVersion')}")
+    print(f"Chrome Driver Version: {get_chrome_version()}")
+    print(f"Platform Name: {capabilities.get('platformName')}")
+
+    cores = driver.execute_script("return navigator.hardwareConcurrency;")
+    print(f"Hardware Concurrency: {cores}")
+
+    js_code = """
+    (function() {
+    const fonts = ['Arial', 'Verdana', 'Helvetica', 'Times New Roman', 'Courier', 'Georgia'];
+    const results = {};
+    const body = document.body;
+    const originalWidth = body.offsetWidth;
+    const originalHeight = body.offsetHeight;
+
+    for (const font of fonts) {
+        const span = document.createElement('span');
+        span.style.fontFamily = font;
+        span.style.fontSize = '40px';
+        span.style.position = 'absolute';
+        span.style.left = '-1000px';
+        span.innerText = 'test';
+        body.appendChild(span);
+        results[font] = {
+            width: span.offsetWidth,
+            height: span.offsetHeight
+        };
+        body.removeChild(span);
+    }
+    return results;
+    })();
+    """
+    font_details = driver.execute_script(js_code)
+    print(f"Installed Fonts (Test): {font_details}")
+
+    # User Agent
+    try:
+        user_agent = driver.execute_script("return navigator.userAgent")
+        print(f"User-Agent: {user_agent}")
+    except Exception as e:
+        print(f"Failed to get User-Agent: {e}")
+
+    # Driver Options and Arguments
+    print("\n--- Driver Options and Arguments ---")
+    try:
+        print("Arguments:", " ".join(options.arguments))
+
+        if "--headless" in options.arguments:
+            print("Headless mode: True")
+        else:
+            print("Headless mode: False")
+
+        prefs = options.experimental_options.get("prefs", {})
+        print(f"Preferences: {json.dumps(prefs, indent=4)}")
+
+    except Exception as e:
+        print(f"Failed to inspect options: {e}")
+
+    # Proxy Information
+    print(f"\n--- Proxy Details ---")
+    print(f"Proxy URL used: {proxy_used}")
+    if proxy_used:
+        host, port, user, password = convert_proxy(proxy_url=proxy_used)
+        print(f"Proxy Host: {host}")
+        print(f"Proxy Port: {port}")
+        print(f"Proxy User: {user}")
+        print(f"Proxy Password: {'***' if password else 'None'}")
+
+    # Window Size
+    try:
+        window_size = driver.get_window_size()
+        print(
+            f"Window Size: Length={window_size.get('width')}, Width={window_size.get('height')}"
+        )
+    except Exception as e:
+        print(f"Failed to get window size: {e}")
+
+    # Check for automation flags
+    print("\n--- Anti-Bot Fingerprints ---")
+    try:
+        webdriver_flag = driver.execute_script("return navigator.webdriver;")
+        print(f"navigator.webdriver: {webdriver_flag}")
+    except Exception:
+        print("Could not retrieve navigator.webdriver.")
+
+    try:
+        screen_resolution = driver.execute_script(
+            "return [window.screen.width, window.screen.height];"
+        )
+        print(f"Screen Resolution: {screen_resolution}")
+    except Exception:
+        print("Could not retrieve screen resolution.")
+
+    try:
+        plugins = driver.execute_script("return navigator.plugins;")
+        print(f"Number of Plugins: {len(plugins)}")
+    except Exception:
+        print("Could not retrieve plugins.")
+
+    try:
+        canvas_fingerprint = driver.execute_script(
+            """
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            var txt = 'BrowserLeak Test';
+            ctx.textBaseline = "top";
+            ctx.font = "14px 'Arial'";
+            ctx.textBaseline = "alphabetic";
+            ctx.fillStyle = "#f60";
+            ctx.fillRect(125,1,62,20);
+            ctx.fillStyle = "#069";
+            ctx.fillText(txt, 2, 15);
+            ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+            ctx.fillText(txt, 4, 17);
+            return canvas.toDataURL();
+        """
+        )
+        print(f"Canvas Fingerprint (Partial Hash): {hash(canvas_fingerprint)}")
+
+        vendor = driver.execute_script(
+            "return (function() {var canvas = document.createElement('canvas'); var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl'); if (gl) {var debugInfo = gl.getExtension('WEBGL_debug_renderer_info'); return debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : 'N/A';} return 'N/A';})();"
+        )
+        renderer = driver.execute_script(
+            "return (function() {var canvas = document.createElement('canvas'); var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl'); if (gl) {var debugInfo = gl.getExtension('WEBGL_debug_renderer_info'); return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'N/A';} return 'N/A';})();"
+        )
+        print(f"WebGL Vendor: {vendor}")
+        print(f"WebGL Renderer: {renderer}")
+
+    except Exception:
+        print("Could not get canvas fingerprint.")
+
+    print("\n--- 🏁 Debug Info Complete 🏁 ---")
+
+
 def shutdown_current_instances():
     """Shutdown current Chrome and Chromium processes Unix OS."""
     os.system("killall -9 'Google Chrome'")
@@ -306,6 +470,7 @@ def run_chromedriver(
     size_width: int = 960,
     version: int = get_chrome_version(),
     proxy: str = None,
+    print_info: bool = False,
 ):
     """Creates an undetected chromedriver with the wanted download folder.
     ## Arguments
@@ -322,4 +487,7 @@ def run_chromedriver(
     if get_env_variable("ENVIRONMENT") == "production":
         shutdown_current_instances()
 
-    return init_chromedriver(download_folder, size_length, size_width, version, proxy)
+    driver = init_chromedriver(download_folder, size_length, size_width, version, proxy)
+    if print_info:
+        print_debug_info(driver, driver.options, proxy)
+    return driver
