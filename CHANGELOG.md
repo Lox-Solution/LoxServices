@@ -95,3 +95,4 @@
 1.2.44 Change chrome version
 1.2.45 Up python version
 1.2.46 Allow prints
+1.2.47 Add DSF table

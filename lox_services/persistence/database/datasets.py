@@ -93,6 +93,7 @@ class SubscriptionData_dataset(Enum):
     "Class that represents the classes present in SubscriptionData dataset"
 
     Sendcloud = "Sendcloud"
+    DSF = "DSF"
 
 
 class CarrierData_dataset(Enum):
