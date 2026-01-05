@@ -5,6 +5,7 @@ import json
 import sys
 import tempfile
 import shutil
+import random
 
 from functools import reduce
 from urllib.parse import urlparse
@@ -293,6 +294,56 @@ def init_chromedriver(
     return driver
 
 
+def generate_randomized_canvas_script():
+    """Generate a randomized canvas fingerprint script to avoid detection."""
+    random_texts = ['BrowserLeak Test', 'Canvas Test', 'Fingerprint Check', 'Browser Info', 'Test Canvas']
+    random_text = random.choice(random_texts)
+    
+    # Randomize colors slightly
+    r1 = random.randint(240, 255)
+    g1 = random.randint(90, 110)
+    b1 = random.randint(0, 20)
+    color1 = f"#{r1:02x}{g1:02x}{b1:02x}"
+    
+    r2 = random.randint(0, 20)
+    g2 = random.randint(100, 110)
+    b2 = random.randint(145, 155)
+    color2 = f"#{r2:02x}{g2:02x}{b2:02x}"
+    
+    r3 = random.randint(100, 105)
+    g3 = random.randint(200, 210)
+    b3 = random.randint(0, 10)
+    alpha3 = round(random.uniform(0.65, 0.75), 2)
+    color3 = f"rgba({r3}, {g3}, {b3}, {alpha3})"
+    
+    # Randomize positions slightly
+    rect_x = random.randint(120, 130)
+    rect_y = random.randint(1, 3)
+    text1_x = random.randint(2, 4)
+    text1_y = random.randint(14, 16)
+    text2_x = random.randint(4, 6)
+    text2_y = random.randint(16, 18)
+    
+    # Randomize font size slightly
+    font_size = random.randint(13, 15)
+    
+    return f"""
+        var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
+        var txt = '{random_text}';
+        ctx.textBaseline = "top";
+        ctx.font = "{font_size}px 'Arial'";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = "{color1}";
+        ctx.fillRect({rect_x},{rect_y},62,20);
+        ctx.fillStyle = "{color2}";
+        ctx.fillText(txt, {text1_x}, {text1_y});
+        ctx.fillStyle = "{color3}";
+        ctx.fillText(txt, {text2_x}, {text2_y});
+        return canvas.toDataURL();
+    """
+
+
 def print_debug_info(driver, options, proxy_used):
     """
     Prints a detailed overview of the environment, driver, and configuration settings
@@ -422,23 +473,7 @@ def print_debug_info(driver, options, proxy_used):
         print("Could not retrieve plugins.")
 
     try:
-        canvas_fingerprint = driver.execute_script(
-            """
-            var canvas = document.createElement('canvas');
-            var ctx = canvas.getContext('2d');
-            var txt = 'BrowserLeak Test';
-            ctx.textBaseline = "top";
-            ctx.font = "14px 'Arial'";
-            ctx.textBaseline = "alphabetic";
-            ctx.fillStyle = "#f60";
-            ctx.fillRect(125,1,62,20);
-            ctx.fillStyle = "#069";
-            ctx.fillText(txt, 2, 15);
-            ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
-            ctx.fillText(txt, 4, 17);
-            return canvas.toDataURL();
-        """
-        )
+        canvas_fingerprint = driver.execute_script(generate_randomized_canvas_script())
         print(f"Canvas Fingerprint (Partial Hash): {hash(canvas_fingerprint)}")
 
         vendor = driver.execute_script(

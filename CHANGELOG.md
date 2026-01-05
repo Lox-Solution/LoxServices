@@ -96,3 +96,4 @@
 1.2.45 Up python version
 1.2.46 Allow prints
 1.2.47 Add DSF table
+1.2.48 Improve canva
